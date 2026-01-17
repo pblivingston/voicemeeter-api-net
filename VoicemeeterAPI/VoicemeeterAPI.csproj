@@ -4,7 +4,7 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <PackageId>VoicemeeterAPI</PackageId>
-    <PackageVersion>0.1.0</PackageVersion>
+    <Version>0.1.0</Version>
     <Authors>PBLivingston</Authors>
     <Description>A .NET Library for the Voicemeeter Remote API built on A-tG's Dynamic Wrapper.</Description>
     <Copyright>Copyright (c) 2026 PBLivingston</Copyright>
@@ -13,13 +13,13 @@
     <RepositoryUrl>https://github.com/pblivingston/voicemeeter-api-net</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Voicemeeter vmrapi</PackageTags>
-    <PackageReleaseNotes>Pre-release. Remote Login/Logout implemented.</PackageReleaseNotes>
+    <PackageReleaseNotes>See CHANGELOG.md</PackageReleaseNotes>
     <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="" />
-    <None Include="LICENSE" Pack="true" PackagePath="" />
+    <None Include="CHANGELOG.md" Pack="true" PackagePath="" />
     <PackageReference Include="a-tg.VmrapiDynWrap" Version="1.2.4" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
