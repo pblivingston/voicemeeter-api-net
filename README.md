@@ -1,7 +1,7 @@
 # A .NET Library for the Voicemeeter Remote API built on A-tG's Dynamic Wrapper
 
 This library is meant to ease interaction with Voicemeeter. It provides:
-- Typed methods for interacting with VoicemeeterRemote via A-tG's dynamic wrapper
+- Typed methods for interacting with VoicemeeterRemote via A-tG's [dynamic wrapper](https://github.com/A-tG/Voicemeeter-Remote-API-dll-dynamic-wrapper)
 - An object model representing Voicemeeter parameters and commands
 - An object model representing Voicemeeter MacroButtons
 - Brief, informative console messages and exceptions
@@ -112,17 +112,19 @@ Optional `ms` parameter specifies for how long logout re-attempts will be made b
 
 ### References
 
-- [A-tG](https://github.com/A-tG)'s [wrapper extension](https://github.com/A-tG/voicemeeter-remote-api-extended)
+- A-tG's [wrapper extension](https://github.com/A-tG/voicemeeter-remote-api-extended)
 
-- Other .NET wrappers:
-  - [VoiceMeeter.NET](https://github.com/sidewinder94/VoiceMeeter.NET) by [sidewinder94](https://github.com/sidewinder94)
-  - [VoicemeeterRemote](https://github.com/bobhelander/VoicemeeterRemote) by [Bob Helander](https://github.com/bobhelander)
+Other .NET wrappers:
 
-- Wrappers by [Onyx and Iris](https://github.com/onyx-and-iris):
-  - [Powershell](https://github.com/onyx-and-iris/voicemeeter-api-powershell)
-  - [Python](https://github.com/onyx-and-iris/voicemeeter-api-python)
-  - [Ruby](https://github.com/onyx-and-iris/voicemeeter-rb)
-  - [Go](https://github.com/onyx-and-iris/voicemeeter)
+- [VoiceMeeter.NET](https://github.com/sidewinder94/VoiceMeeter.NET) by [sidewinder94](https://github.com/sidewinder94)
+- [VoicemeeterRemote](https://github.com/bobhelander/VoicemeeterRemote) by [Bob Helander](https://github.com/bobhelander)
+
+Wrappers by [Onyx and Iris](https://github.com/onyx-and-iris):
+
+- [Powershell](https://github.com/onyx-and-iris/voicemeeter-api-powershell)
+- [Python](https://github.com/onyx-and-iris/voicemeeter-api-python)
+- [Ruby](https://github.com/onyx-and-iris/voicemeeter-rb)
+- [Go](https://github.com/onyx-and-iris/voicemeeter)
 
 Voicemeeter Remote API documentation:
 
