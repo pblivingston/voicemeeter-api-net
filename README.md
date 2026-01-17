@@ -6,6 +6,8 @@ This library is meant to ease interaction with Voicemeeter. It provides:
 - An object model representing Voicemeeter MacroButtons
 - Brief, informative console messages and exceptions
 
+Notable changes will be documented in the [CHANGELOG](CHANGELOG.md).
+
 ## Prerequisites
 
 - [Voicemeeter](https://voicemeeter.com/) must be installed on the target machine.
@@ -95,8 +97,7 @@ Optional `ms` parameter specifies for how long logout re-attempts will be made b
 ### Voicemeeter SDK License
 
 - The Voicemeeter Remote SDK is MIT with one restriction: any created application must interact with the VoicemeeterRemote API.
-- Include the SDK license text in distributions and acknowledge this restriction.
-- The SDK license is included verbatim in this repository (LICENSE-VMR).
+- The SDK license is included verbatim in this repository (vmr-license.txt).
 
 ## Notices
 
