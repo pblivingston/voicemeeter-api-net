@@ -1,0 +1,30 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoicemeeterAPI", "VoicemeeterAPI\VoicemeeterAPI.csproj", "{B017DFB7-A237-E6C1-4767-EF22B8AD8868}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{35460613-8843-4870-84C0-07AA716547DB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B017DFB7-A237-E6C1-4767-EF22B8AD8868}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B017DFB7-A237-E6C1-4767-EF22B8AD8868}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B017DFB7-A237-E6C1-4767-EF22B8AD8868}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B017DFB7-A237-E6C1-4767-EF22B8AD8868}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35460613-8843-4870-84C0-07AA716547DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35460613-8843-4870-84C0-07AA716547DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35460613-8843-4870-84C0-07AA716547DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35460613-8843-4870-84C0-07AA716547DB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2AA51CF8-B790-40B6-8C06-E217912A0BDA}
+	EndGlobalSection
+EndGlobal
