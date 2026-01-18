@@ -41,16 +41,18 @@ Optional parameter:
 
 - `dllPath`: a custom path string to the Voicemeeter Remote DLL
 
-`Login()` must be called before any other methods, and `Logout()` should be called when finished.
-
 The following properties are available:
 
 - `LoginStatus`: Returns a `LoginResponse`. Possible values: `Ok, VoicemeeterNotRunning, LoggedOut, Unknown`.
+- `RunningKind`: Returns the currently running Voicemeeter `Kind`. Possible values: `Standard, Banana, Potato, None, Unknown`.
 
 The following methods are available (see below for details):
 
 - `Login()`: Updates `LoginStatus` on successful login.
 - `Logout()`: Updates `LoginStatus` on timeout or successful logout.
+- `GetVoicemeeterKind()`: Returns the currently running Voicemeeter `Kind`.
+
+`Login()` must be called before any other methods, and `Logout()` should be called when finished.
 
 example:
 
@@ -72,17 +74,29 @@ finally
 
 #### Login()
 
-Opens communication pipe with VoicemeeterRemote.
+Opens communication pipe with VoicemeeterRemote. Updates `LoginStatus` on successful login.
 
-If the pipe is already open, this method will throw an exception.
+Throws if the pipe is already open.
+
+If API response is "Ok", optional `ms` parameter specifies how long to wait for the running Voicemeeter instance to respond before throwing. Default is 2000ms.
 
 #### Logout()
 
-Closes communication pipe with VoicemeeterRemote.
+Closes communication pipe with VoicemeeterRemote. Updates `LoginStatus` on timeout or successful logout.
 
 Does nothing if the pipe is already closed.
 
 Optional `ms` parameter specifies for how long logout re-attempts will be made before giving up. Default is 1000ms.
+
+#### GetVoicemeeterKind()
+
+Returns the currently running Voicemeeter `Kind`. Possible values: `Standard, Banana, Potato`.
+
+Ensures `LoginStatus` is `Ok` if the call is successful.
+
+Throws if not logged in or API response is an error.
+
+Using the `RunningKind` property will reduce thrown exceptions, as it only calls `GetVoicemeeterKind()` if `LoginStatus` is `Ok`, but this will not be accurate if Voicemeeter was launched by an external process. `RunningKind` returns `None` if `LoginStatus` is `VoicemeeterNotRunning` and `Unknown` if `LoginStatus` is otherwise not `Ok`.
 
 ## Licensing
 
