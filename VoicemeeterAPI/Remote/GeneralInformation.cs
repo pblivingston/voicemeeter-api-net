@@ -18,7 +18,7 @@ namespace VoicemeeterAPI
         {
             if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
 
-            if (LoginStatus is not LoginResponse.Ok and not LoginResponse.VoicemeeterNotRunning)
+            if (LoginStatus is not LoginResponse.Ok)
                 throw new RemoteAccessException(nameof(GetVoicemeeterKind), LoginStatus);
 
             int result = _vmrApi.GetVoicemeeterType(out int kind);

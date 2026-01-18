@@ -114,15 +114,11 @@ namespace VoicemeeterAPI
         ///   Gets the currently running Voicemeeter kind.
         /// </summary>
         /// <returns>
-        ///   Currently running OS-agnostic Voicemeeter <see cref="Kind"/>.
+        ///   OS-agnostic Voicemeeter <see cref="Kind"/>.
         /// </returns>
         /// <exception cref="ObjectDisposedException"></exception>
         /// <exception cref="RemoteAccessException">
-        ///   Throws if <see cref="LoginStatus"/> indicates not logged in.
-        ///     <list type="bullet">
-        ///     <item><description><see cref="LoginResponse.LoggedOut"/></description></item>
-        ///     <item><description><see cref="LoginResponse.Unknown"/></description></item>   
-        ///     </list>
+        ///   Throws if <see cref="LoginStatus"/> is not <see cref="LoginResponse.Ok"/>.
         /// </exception>
         /// <exception cref="GetVmKindException">
         ///   Throws if the API call fails or returns an invalid kind value.
