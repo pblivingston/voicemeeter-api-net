@@ -25,7 +25,9 @@ namespace VoicemeeterAPI
         public LoginResponse LoginStatus { get; private set; } = LoginResponse.Unknown;
 
         /// <inheritdoc/>
-        public Kind RunningKind { get; private set; } = Kind.Unknown;
+        public Kind RunningKind => LoginStatus == LoginResponse.Ok ? GetVoicemeeterKind()
+            : LoginStatus == LoginResponse.VoicemeeterNotRunning ? Kind.None
+            : Kind.Unknown;
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="Remote"/> class with a new

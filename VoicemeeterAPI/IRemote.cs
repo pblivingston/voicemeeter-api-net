@@ -45,8 +45,8 @@ namespace VoicemeeterAPI
         ///   Gets the currently running OS-agnostic Voicemeeter <see cref="Kind"/>.
         /// </summary>
         /// <remarks>
-        ///   <para>Initially set to <see cref="Kind.Unknown"/> until a successful kind retrieval is made.</para>
-        ///   <para>Set to <see cref="Kind.None"/> if Voicemeeter is not running.</para>
+        ///   <para><see cref="Kind.Unknown"/> if <see cref="LoginStatus"/> indicates not logged in.</para>
+        ///   <para><see cref="Kind.None"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.VoicemeeterNotRunning"/>.</para>
         /// </remarks>
         Kind RunningKind { get; }
 
@@ -71,7 +71,7 @@ namespace VoicemeeterAPI
         ///     </list>
         /// </exception>
         /// <remarks>
-        ///   <para>Updates <see cref="LoginStatus"/> and <see cref="RunningKind"/> on successful login.</para>
+        ///   <para>Updates <see cref="LoginStatus"/> on successful login.</para>
         ///   <list type="bullet">
         ///   <item><description>A-tG: <see cref="RemoteApiWrapper.Login()"/></description></item>
         ///   <item><description>C API: long __stdcall VBVMR_Login(void);</description></item>
@@ -92,7 +92,6 @@ namespace VoicemeeterAPI
         /// <remarks>
         ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.LoggedOut"/> on successful logout.</para>
         ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.Unknown"/> if logout times out.</para>
-        ///   <para>Updates <see cref="RunningKind"/> to <see cref="Kind.Unknown"/> on logout or timeout.</para>
         ///   <para>Does nothing if <see cref="LoginStatus"/> is already <see cref="LoginResponse.LoggedOut"/>.</para>
         ///   <list type="bullet">
         ///   <item><description>A-tG: <see cref="RemoteApiWrapper.Logout()"/></description></item>
@@ -123,9 +122,6 @@ namespace VoicemeeterAPI
         /// <exception cref="GetVmKindException">
         ///   Throws if the API call fails or returns an invalid kind value.
         /// </exception>
-        /// <remarks>
-        ///   Updates <see cref="RunningKind"/> on successful retrieval.
-        /// </remarks>
         Kind GetVoicemeeterKind();
 
         #endregion
