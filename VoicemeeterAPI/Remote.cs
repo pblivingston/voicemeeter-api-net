@@ -6,6 +6,7 @@ using AtgDev.Voicemeeter;
 using AtgDev.Voicemeeter.Utils;
 using VoicemeeterAPI.Types.Responses;
 using VoicemeeterAPI.Messages;
+using VoicemeeterAPI.Types;
 
 namespace VoicemeeterAPI
 {
@@ -22,6 +23,9 @@ namespace VoicemeeterAPI
 
         /// <inheritdoc/>
         public LoginResponse LoginStatus { get; private set; } = LoginResponse.Unknown;
+
+        /// <inheritdoc/>
+        public Kind RunningKind { get; private set; } = Kind.Unknown;
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="Remote"/> class with a new

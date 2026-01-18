@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using VoicemeeterAPI.Types;
 using VoicemeeterAPI.Types.Responses;
 using VoicemeeterAPI.Messages;
 using VoicemeeterAPI.Exceptions;
@@ -32,11 +33,13 @@ namespace VoicemeeterAPI
                 case LoginResponse.Ok:
                     VmApiVmrInfo.Write("Login successful");
                     LoginStatus = result;
+                    RunningKind = GetVoicemeeterKind();
                     break;
 
                 case LoginResponse.VoicemeeterNotRunning:
                     VmApiVmrWarning.Write("Login successful but Voicemeeter is not running");
                     LoginStatus = result;
+                    RunningKind = Kind.None;
                     break;
 
                 default:
@@ -75,12 +78,14 @@ namespace VoicemeeterAPI
                 {
                     VmApiVmrInfo.Write("Logout successful");
                     LoginStatus = LoginResponse.LoggedOut;
+                    RunningKind = Kind.Unknown;
                     return;
                 }
             }
 
             VmApiVmrWarning.Write($"Logout timed out; last result: {result}");
             LoginStatus = LoginResponse.Unknown;
+            RunningKind = Kind.Unknown;
         }
 
         #endregion
