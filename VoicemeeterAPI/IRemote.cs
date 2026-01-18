@@ -45,12 +45,8 @@ namespace VoicemeeterAPI
         ///   Gets the currently running OS-agnostic Voicemeeter <see cref="Kind"/>.
         /// </summary>
         /// <remarks>
-        ///   <para>
-        ///     Initially set to <see cref="Kind.Unknown"/> until a successful kind retrieval is made.
-        ///   </para>
-        ///   <para>
-        ///     Set to <see cref="Kind.None"/> if Voicemeeter is not running.
-        ///   </para>
+        ///   <para>Initially set to <see cref="Kind.Unknown"/> until a successful kind retrieval is made.</para>
+        ///   <para>Set to <see cref="Kind.None"/> if Voicemeeter is not running.</para>
         /// </remarks>
         Kind RunningKind { get; }
 
@@ -94,21 +90,10 @@ namespace VoicemeeterAPI
         ///   Only throws on disposed instances to allow multiple logout attempts.
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.LoggedOut"/>
-        ///     on successful logout.
-        ///   </para>
-        ///   <para>
-        ///     Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.Unknown"/>
-        ///     if logout times out.
-        ///   </para>
-        ///   <para>
-        ///     Updates <see cref="RunningKind"/> to <see cref="Kind.Unknown"/>
-        ///     on logout or timeout.
-        ///   </para>
-        ///   <para>
-        ///     Does nothing if <see cref="LoginStatus"/> is already <see cref="LoginResponse.LoggedOut"/>.
-        ///   </para>
+        ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.LoggedOut"/> on successful logout.</para>
+        ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.Unknown"/> if logout times out.</para>
+        ///   <para>Updates <see cref="RunningKind"/> to <see cref="Kind.Unknown"/> on logout or timeout.</para>
+        ///   <para>Does nothing if <see cref="LoginStatus"/> is already <see cref="LoginResponse.LoggedOut"/>.</para>
         ///   <list type="bullet">
         ///   <item><description>A-tG: <see cref="RemoteApiWrapper.Logout()"/></description></item>
         ///   <item><description>C API: long __stdcall VBVMR_Logout(void);</description></item>
