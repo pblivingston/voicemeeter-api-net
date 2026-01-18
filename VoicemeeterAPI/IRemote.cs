@@ -123,6 +123,9 @@ namespace VoicemeeterAPI
         /// <exception cref="GetVmKindException">
         ///   Throws if the API call fails or returns an invalid kind value.
         /// </exception>
+        /// <remarks>
+        ///   Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.Ok"/> on successful call.
+        /// </remarks>
         Kind GetVoicemeeterKind();
 
         #endregion

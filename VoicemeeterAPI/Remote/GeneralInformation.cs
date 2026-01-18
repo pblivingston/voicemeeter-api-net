@@ -18,14 +18,16 @@ namespace VoicemeeterAPI
         {
             if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
 
-            if (LoginStatus is not LoginResponse.Ok)
+            if (LoginStatus is not LoginResponse.Ok and not LoginResponse.VoicemeeterNotRunning)
                 throw new RemoteAccessException(nameof(GetVoicemeeterKind), LoginStatus);
 
-            int result = _vmrApi.GetVoicemeeterType(out int kind);
-            if (result != (int)GetVmKindResponse.Ok || kind < (int)Kind.Standard || kind > (int)Kind.Potato)
-                throw new GetVmKindException((GetVmKindResponse)result, kind);
+            var result = (GetVmKindResponse)_vmrApi.GetVoicemeeterType(out int k);
+            var kind = (Kind)k;
+            if (result != GetVmKindResponse.Ok || kind < Kind.Standard || kind > Kind.Potato)
+                throw new GetVmKindException(result, kind);
 
-            return (Kind)kind;
+            LoginStatus = LoginResponse.Ok;
+            return kind;
         }
 
         #endregion

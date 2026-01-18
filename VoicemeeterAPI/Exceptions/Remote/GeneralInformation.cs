@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using AtgDev.Voicemeeter;
+using VoicemeeterAPI.Types;
 using VoicemeeterAPI.Types.Responses;
 
 namespace VoicemeeterAPI.Exceptions.Remote
@@ -11,10 +12,10 @@ namespace VoicemeeterAPI.Exceptions.Remote
     /// </summary>
     /// <param name="r">API response</param>
     /// <param name="k">Kind returned by the API</param>
-    internal sealed class GetVmKindException(GetVmKindResponse r, int k)
+    internal sealed class GetVmKindException(GetVmKindResponse r, Kind k)
         : RemoteException($"GetVoicemeeterKind failed - {r}; returned kind: {k}")
     {
         public GetVmKindResponse Response { get; } = r;
-        public int Kind { get; } = k;
+        public Kind Kind { get; } = k;
     }
 }
