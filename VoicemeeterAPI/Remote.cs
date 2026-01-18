@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using System;
+using AtgDev.Utils.Native;
 using AtgDev.Voicemeeter;
 using AtgDev.Voicemeeter.Utils;
 using VoicemeeterAPI.Types.Responses;
-using VoicemeeterAPI.Messages;
 using VoicemeeterAPI.Types;
 
 namespace VoicemeeterAPI
@@ -48,17 +48,13 @@ namespace VoicemeeterAPI
         }
 
         /// <summary>
-        ///   Calls <see cref="AtgDev.Utils.Native.DllWrapperBase.Dispose()"/> when the <see cref="Remote"/> instance is disposed.
+        ///   Calls <see cref="DllWrapperBase.Dispose()"/> when the <see cref="Remote"/> instance is disposed.
         /// </summary>
         public void Dispose()
         {
             if (_isDisposed) return;
 
-            VmApiVmrInfo.Write("Disposing Remote API wrapper...");
-
             _vmrApi.Dispose();
-
-            VmApiVmrInfo.Write("Disposed");
 
             _isDisposed = true;
         }
