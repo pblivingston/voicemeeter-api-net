@@ -16,7 +16,7 @@ namespace VoicemeeterAPI
         #region Login
 
         /// <inheritdoc/>
-        public void Login()
+        public void Login(int ms = 2000)
         {
             if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
 
@@ -25,22 +25,23 @@ namespace VoicemeeterAPI
 
             VmApiVmrInfo.Write("Logging in...");
 
-            var result = (LoginResponse)_vmrApi.Login();
+            LoginStatus = (LoginResponse)_vmrApi.Login();
 
-            switch (result)
+            switch (LoginStatus)
             {
                 case LoginResponse.Ok:
-                    VmApiVmrInfo.Write("Login successful");
-                    LoginStatus = result;
-                    break;
+                    if (!WaitForRunning(ms))
+                        throw new LoginException(LoginResponse.Timeout);
+
+                    VmApiVmrInfo.Write("Login successful.");
+                    return;
 
                 case LoginResponse.VoicemeeterNotRunning:
-                    VmApiVmrWarning.Write("Login successful but Voicemeeter is not running");
-                    LoginStatus = result;
-                    break;
+                    VmApiVmrWarning.Write("Login successful but Voicemeeter is not running.");
+                    return;
 
                 default:
-                    throw new LoginException(result);
+                    throw new LoginException(LoginStatus);
             }
         }
 
@@ -55,7 +56,7 @@ namespace VoicemeeterAPI
 
             if (LoginStatus is LoginResponse.LoggedOut)
             {
-                VmApiVmrInfo.Write("Already logged out");
+                VmApiVmrInfo.Write("Already logged out.");
                 return;
             }
 
@@ -73,19 +74,50 @@ namespace VoicemeeterAPI
 
                 if (result == (int)LoginResponse.Ok)
                 {
-                    VmApiVmrInfo.Write("Logout successful");
+                    VmApiVmrInfo.Write("Logout successful.");
                     LoginStatus = LoginResponse.LoggedOut;
                     return;
                 }
             }
 
-            VmApiVmrWarning.Write($"Logout timed out; last result: {result}");
+            VmApiVmrWarning.Write($"Logout timed out; last result: {result}.");
             LoginStatus = LoginResponse.Unknown;
         }
 
         #endregion
 
         #region Helpers
+
+        private bool WaitForRunning(int ms)
+        {
+            var timeout = TimeSpan.FromMilliseconds(ms);
+            var stopwatch = Stopwatch.StartNew();
+            Exception? lastException = null;
+
+            VmApiVmrInfo.Write("Checking for running Voicemeeter...");
+
+            while (stopwatch.Elapsed < timeout)
+            {
+                Thread.Sleep(100);
+
+                try
+                {
+                    VmApiVmrInfo.Write($"Voicemeeter {GetVoicemeeterKind()} is running.");
+                    lastException = null;
+                    break;
+                }
+                catch (RemoteException ex)
+                {
+                    lastException = ex;
+                    VmApiVmrWarning.Write($"Caught exception: \"{lastException.Message}\" - retrying...");
+                }
+            }
+
+            if (lastException != null)
+                return false;
+
+            return true;
+        }
 
         #endregion
     }

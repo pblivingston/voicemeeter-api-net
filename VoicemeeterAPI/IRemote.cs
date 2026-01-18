@@ -47,6 +47,7 @@ namespace VoicemeeterAPI
         /// <remarks>
         ///   <para><see cref="Kind.Unknown"/> if <see cref="LoginStatus"/> indicates not logged in.</para>
         ///   <para><see cref="Kind.None"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.VoicemeeterNotRunning"/>.</para>
+        ///   <para>Otherwise, calls <see cref="GetVoicemeeterKind()"/>.</para>
         /// </remarks>
         Kind RunningKind { get; }
 
@@ -55,6 +56,9 @@ namespace VoicemeeterAPI
         /// <summary>
         ///   Open communication pipe with VoicemeeterRemote
         /// </summary>
+        /// <param name="ms">
+        ///   Time in milliseconds to wait for the running Voicemeeter to be detected.
+        /// </param>
         /// <exception cref="ObjectDisposedException"></exception>
         /// <exception cref="RemoteAccessException">
         ///   Throws if <see cref="LoginStatus"/> indicates already logged in.
@@ -64,11 +68,12 @@ namespace VoicemeeterAPI
         ///     </list>
         /// </exception>
         /// <exception cref="LoginException">
-        ///   Throws if <see cref="LoginResponse"/> is an error.
+        ///   <para>Throws if <see cref="LoginResponse"/> is an error.</para>
         ///     <list type="bullet">
         ///     <item><description><see cref="LoginResponse.NoClient"/> (-1)</description></item>
         ///     <item><description><see cref="LoginResponse.AlreadyLoggedIn"/> (-2)</description></item>
         ///     </list>
+        ///   <para>Throws if the login process times out.</para>
         /// </exception>
         /// <remarks>
         ///   <para>Updates <see cref="LoginStatus"/> on successful login.</para>
@@ -78,7 +83,7 @@ namespace VoicemeeterAPI
         ///   </list>
         /// </remarks>
         /// <inheritdoc cref="IRemote" path="/example"/>
-        void Login();
+        void Login(int ms = 2000);
 
         /// <summary>
         ///   Close communication pipe with VoicemeeterRemote

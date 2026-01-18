@@ -16,6 +16,7 @@ namespace VoicemeeterAPI.Types.Responses
         Ok = 0,
         VoicemeeterNotRunning = 1,
         LoggedOut,
+        Timeout,
         Unknown
     }
 }
