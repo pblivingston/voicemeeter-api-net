@@ -3,8 +3,7 @@
 
 using System;
 using VoicemeeterAPI.Types;
-using VoicemeeterAPI.Exceptions;
-using VoicemeeterAPI.Exceptions.Remote;
+using VoicemeeterAPI.Messages;
 
 namespace VoicemeeterAPI
 {

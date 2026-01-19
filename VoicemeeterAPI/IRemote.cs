@@ -3,9 +3,8 @@
 
 using System;
 using AtgDev.Voicemeeter;
-using VoicemeeterAPI.Exceptions;
-using VoicemeeterAPI.Exceptions.Remote;
 using VoicemeeterAPI.Types;
+using VoicemeeterAPI.Messages;
 
 namespace VoicemeeterAPI
 {
