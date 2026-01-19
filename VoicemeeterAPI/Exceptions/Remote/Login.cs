@@ -1,7 +1,7 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using VoicemeeterAPI.Types.Responses;
+using VoicemeeterAPI.Types;
 
 namespace VoicemeeterAPI.Exceptions.Remote
 {

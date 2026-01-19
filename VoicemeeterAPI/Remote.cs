@@ -5,7 +5,6 @@ using System;
 using AtgDev.Utils.Native;
 using AtgDev.Voicemeeter;
 using AtgDev.Voicemeeter.Utils;
-using VoicemeeterAPI.Types.Responses;
 using VoicemeeterAPI.Types;
 
 namespace VoicemeeterAPI

@@ -6,7 +6,6 @@ using AtgDev.Voicemeeter;
 using VoicemeeterAPI.Exceptions;
 using VoicemeeterAPI.Exceptions.Remote;
 using VoicemeeterAPI.Types;
-using VoicemeeterAPI.Types.Responses;
 
 namespace VoicemeeterAPI
 {

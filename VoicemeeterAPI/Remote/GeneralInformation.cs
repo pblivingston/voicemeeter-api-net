@@ -3,7 +3,6 @@
 
 using System;
 using VoicemeeterAPI.Types;
-using VoicemeeterAPI.Types.Responses;
 using VoicemeeterAPI.Exceptions;
 using VoicemeeterAPI.Exceptions.Remote;
 
@@ -21,9 +20,9 @@ namespace VoicemeeterAPI
             if (LoginStatus is not LoginResponse.Ok and not LoginResponse.VoicemeeterNotRunning)
                 throw new RemoteAccessException(nameof(GetVoicemeeterKind), LoginStatus);
 
-            var result = (GetVmKindResponse)_vmrApi.GetVoicemeeterType(out int k);
+            var result = (InfoResponse)_vmrApi.GetVoicemeeterType(out int k);
             var kind = (Kind)k;
-            if (result != GetVmKindResponse.Ok || kind < Kind.Standard || kind > Kind.Potato)
+            if (result != InfoResponse.Ok || kind < Kind.Standard || kind > Kind.Potato)
                 throw new GetVmKindException(result, kind);
 
             LoginStatus = LoginResponse.Ok;

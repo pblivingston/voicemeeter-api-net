@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using System;
-using VoicemeeterAPI.Types.Responses;
+using VoicemeeterAPI.Types;
 
 namespace VoicemeeterAPI.Exceptions
 {

@@ -4,7 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
-using VoicemeeterAPI.Types.Responses;
+using VoicemeeterAPI.Types;
 using VoicemeeterAPI.Messages;
 using VoicemeeterAPI.Exceptions;
 using VoicemeeterAPI.Exceptions.Remote;

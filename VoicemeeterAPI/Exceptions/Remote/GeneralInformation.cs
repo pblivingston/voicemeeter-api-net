@@ -3,7 +3,6 @@
 
 using AtgDev.Voicemeeter;
 using VoicemeeterAPI.Types;
-using VoicemeeterAPI.Types.Responses;
 
 namespace VoicemeeterAPI.Exceptions.Remote
 {
@@ -12,10 +11,10 @@ namespace VoicemeeterAPI.Exceptions.Remote
     /// </summary>
     /// <param name="r">API response</param>
     /// <param name="k">Kind returned by the API</param>
-    internal sealed class GetVmKindException(GetVmKindResponse r, Kind k)
+    internal sealed class GetVmKindException(InfoResponse r, Kind k)
         : RemoteException($"GetVoicemeeterKind failed - {r}; returned kind: {k}")
     {
-        public GetVmKindResponse Response { get; } = r;
+        public InfoResponse Response { get; } = r;
         public Kind Kind { get; } = k;
     }
 }
