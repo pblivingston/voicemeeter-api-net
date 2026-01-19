@@ -108,7 +108,9 @@ namespace VoicemeeterAPI
         /// <inheritdoc/>
         public void RunVoicemeeter(string kind)
         {
-            var k = KindUtils.Parse(kind);
+            if (!Enum.TryParse(kind, true, out Kind k))
+                throw new ArgumentException($"Invalid Voicemeeter kind: {kind}", nameof(kind));
+
             RunVoicemeeter(k);
         }
 

@@ -8,23 +8,7 @@ namespace VoicemeeterAPI.Utils
 {
     internal static class KindUtils
     {
-        /// <summary>
-        ///   Attempts to parse the given string into a <see cref="Kind"/>.
-        /// </summary>
-        /// <param name="kind"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="ArgumentException"></exception>
-        public static Kind Parse(string kind)
-        {
-            if (string.IsNullOrWhiteSpace(kind))
-                throw new ArgumentNullException(nameof(kind));
-
-            if (!Enum.TryParse(kind, true, out Kind k))
-                throw new ArgumentException($"Invalid Voicemeeter kind: {kind}", nameof(kind));
-
-            return k;
-        }
+        #region Bitness
 
         /// <summary>
         ///   Adjusts the given Voicemeeter kind value to the correct bit version based on the current operating system.
@@ -61,5 +45,56 @@ namespace VoicemeeterAPI.Utils
 
         /// <inheritdoc cref="FromBit(int)"/>
         public static Kind FromBit(Kind kind) => (Kind)FromBit((int)kind);
+
+        #endregion
+
+        #region Parsing
+
+        /// <summary>
+        ///   Attempts to parse the given string into a <see cref="Kind"/> value and confirms the result is a valid Voicemeeter kind.
+        /// </summary>
+        /// <param name="kind"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static bool TryParseAsVm(string kind, out Kind result)
+            => Enum.TryParse(kind, true, out result) && result >= Kind.Standard && result <= Kind.Potatox64;
+
+        /// <summary>
+        ///   Attempts to parse the given string into an OS-biased <see cref="Kind"/>.
+        /// </summary>
+        /// <param name="kind"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static bool TryParseToBit(string kind, out Kind result)
+        {
+            if (!TryParseAsVm(kind, out Kind k))
+            {
+                result = k;
+                return false;
+            }
+
+            result = ToBit(k);
+            return true;
+        }
+
+        /// <summary>
+        ///   Attempts to parse the given string into an OS-agnostic <see cref="Kind"/>.
+        /// </summary>
+        /// <param name="kind"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static bool TryParseFromBit(string kind, out Kind result)
+        {
+            if (!TryParseAsVm(kind, out Kind k))
+            {
+                result = k;
+                return false;
+            }
+
+            result = FromBit(k);
+            return true;
+        }
+
+        #endregion
     }
 }
