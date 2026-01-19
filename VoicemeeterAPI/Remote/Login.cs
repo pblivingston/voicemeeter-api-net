@@ -90,7 +90,7 @@ namespace VoicemeeterAPI
         public void RunVoicemeeter(int kind)
         {
             // Standard -> Standardx64, etc. for 64-bit versions
-            kind = kind is <= (int)Kind.Potatox64 ? GeneralUtils.ToBitKind(kind) : kind;
+            kind = kind is <= (int)Kind.Potatox64 ? KindUtils.ToBit(kind) : kind;
 
             if (!LoggedIn) throw new RemoteAccessException(nameof(RunVoicemeeter), LoginStatus);
 
@@ -108,7 +108,7 @@ namespace VoicemeeterAPI
         /// <inheritdoc/>
         public void RunVoicemeeter(string kind)
         {
-            var k = GeneralUtils.ParseKind(kind);
+            var k = KindUtils.Parse(kind);
             RunVoicemeeter(k);
         }
 
