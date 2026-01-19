@@ -144,7 +144,7 @@ namespace VoicemeeterAPI
         /// <exception cref="RemoteAccessException">
         ///   Throws if not <see cref="LoggedIn"/>.
         /// </exception>
-        /// <exception cref="GetVmKindException">
+        /// <exception cref="GetKindException">
         ///   Throws if the API call fails or returns an invalid kind value.
         /// </exception>
         /// <remarks>

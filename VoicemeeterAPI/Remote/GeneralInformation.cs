@@ -21,7 +21,7 @@ namespace VoicemeeterAPI
             var result = (InfoResponse)_vmrApi.GetVoicemeeterType(out int k);
             var kind = (Kind)k;
             if (result != InfoResponse.Ok || kind < Kind.Standard || kind > Kind.Potato)
-                throw new GetVmKindException(result, kind);
+                throw new GetKindException(result, kind);
 
             LoginStatus = LoginResponse.Ok;
             return kind;

@@ -18,11 +18,11 @@ namespace VoicemeeterAPI.Messages
     {
     }
 
-    internal sealed class RemoteAccessException(string method, LoginResponse status)
-        : RemoteException($"Access to {method} denied - LoginStatus: {status}")
+    internal sealed class RemoteAccessException(string m, LoginResponse s)
+        : RemoteException($"Access to {m} denied - LoginStatus: {s}")
     {
-        public string Method { get; } = method;
-        public LoginResponse LoginStatus { get; } = status;
+        public string Method { get; } = m;
+        public LoginResponse LoginStatus { get; } = s;
     }
 
     internal sealed class LoginException(LoginResponse r)
@@ -38,7 +38,7 @@ namespace VoicemeeterAPI.Messages
         public Kind Kind { get; } = k;
     }
 
-    internal sealed class GetVmKindException(InfoResponse r, Kind k)
+    internal sealed class GetKindException(InfoResponse r, Kind k)
         : RemoteException($"GetVoicemeeterKind failed - {r}; returned kind: {k}")
     {
         public InfoResponse Response { get; } = r;
