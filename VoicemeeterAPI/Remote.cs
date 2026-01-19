@@ -24,6 +24,9 @@ namespace VoicemeeterAPI
         public LoginResponse LoginStatus { get; private set; } = LoginResponse.Unknown;
 
         /// <inheritdoc/>
+        public bool LoggedIn => LoginStatus is LoginResponse.Ok or LoginResponse.VoicemeeterNotRunning;
+
+        /// <inheritdoc/>
         public Kind RunningKind => LoginStatus == LoginResponse.Ok ? GetVoicemeeterKind()
             : LoginStatus == LoginResponse.VoicemeeterNotRunning ? Kind.None
             : Kind.Unknown;

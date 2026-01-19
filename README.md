@@ -43,14 +43,15 @@ Optional parameter:
 
 The following properties are available:
 
-- `LoginStatus`: Returns a `LoginResponse`. Possible values: `Ok, VoicemeeterNotRunning, LoggedOut, Unknown`.
-- `RunningKind`: Returns the currently running Voicemeeter `Kind`. Possible values: `Standard, Banana, Potato, None, Unknown`.
+- `LoginStatus`: `LoginResponse`; Possible values: `Ok, VoicemeeterNotRunning, LoggedOut, Unknown`
+- `LoggedIn`: `bool`; `true` if `LoginStatus` is either `Ok` or `VoicemeeterNotRunning`, otherwise `false`
+- `RunningKind`: `Kind`; Possible values: `Standard, Banana, Potato, None, Unknown`
 
 The following methods are available (see below for details):
 
-- `Login()`: Updates `LoginStatus` on successful login.
-- `Logout()`: Updates `LoginStatus` on timeout or successful logout.
-- `GetVoicemeeterKind()`: Returns the currently running Voicemeeter `Kind`.
+- `Login()`: `void`; Updates `LoginStatus` on successful login.
+- `Logout()`: `void`; Updates `LoginStatus` on timeout or successful logout.
+- `GetVoicemeeterKind()`: `Kind`; Returns the currently running Voicemeeter `Kind`.
 
 `Login()` must be called before any other methods, and `Logout()` should be called when finished.
 

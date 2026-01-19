@@ -18,8 +18,7 @@ namespace VoicemeeterAPI
         {
             if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
 
-            if (LoginStatus is LoginResponse.Ok or LoginResponse.VoicemeeterNotRunning)
-                throw new RemoteAccessException(nameof(Login), LoginStatus);
+            if (LoggedIn) throw new RemoteAccessException(nameof(Login), LoginStatus);
 
             RemoteInfo.Write("Logging in...");
 

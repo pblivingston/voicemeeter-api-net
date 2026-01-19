@@ -40,6 +40,14 @@ namespace VoicemeeterAPI
         LoginResponse LoginStatus { get; }
 
         /// <summary>
+        ///   Simplifies <see cref="LoginStatus"/> checks.
+        /// </summary>
+        /// <remarks>
+        ///   Returns `true` if <see cref="LoginStatus"/> is either <see cref="LoginResponse.Ok"/> or <see cref="LoginResponse.VoicemeeterNotRunning"/>, otherwise `false`.
+        /// </remarks>
+        bool LoggedIn { get; }
+
+        /// <summary>
         ///   Gets the currently running OS-agnostic Voicemeeter <see cref="Kind"/>.
         /// </summary>
         /// <remarks>
