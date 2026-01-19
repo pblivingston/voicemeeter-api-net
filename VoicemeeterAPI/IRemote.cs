@@ -11,24 +11,6 @@ namespace VoicemeeterAPI
     /// <summary>
     ///   Interface for interacting with the VoicemeeterRemote API via <see cref="RemoteApiWrapper"/>.
     /// </summary>
-    /// <remarks>
-    ///   <para>Provides methods for logging in and out, as well as checking the login status.</para>
-    ///   <para>Implements <see cref="IDisposable"/> to ensure proper cleanup of the underlying API wrapper.</para>
-    /// </remarks>
-    /// <example>
-    ///   <code>
-    ///     using var remote = new Remote();
-    ///     try
-    ///     {
-    ///       remote.Login();
-    ///       // Perform operations with the remote API
-    ///     }
-    ///     finally
-    ///     {
-    ///       remote.Logout();
-    ///     }
-    ///   </code>
-    /// </example>
     public interface IRemote : IDisposable
     {
         /// <summary>
@@ -52,9 +34,15 @@ namespace VoicemeeterAPI
         /// </summary>
         /// <remarks>
         ///   <list type="bullet">  
-        ///     <item><description><see cref="Kind.Unknown"/> if <see cref="LoginStatus"/> indicates not logged in.</description></item>
-        ///     <item><description><see cref="Kind.None"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.VoicemeeterNotRunning"/>.</description></item>
-        ///     <item><description>Otherwise, calls <see cref="GetVoicemeeterKind()"/>.</description></item>
+        ///     <item><description>
+        ///       <see cref="Kind.Unknown"/> if <see cref="LoginStatus"/> indicates not logged in.
+        ///     </description></item>
+        ///     <item><description>
+        ///       <see cref="Kind.None"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.VoicemeeterNotRunning"/>.
+        ///     </description></item>
+        ///     <item><description>
+        ///       Otherwise, calls <see cref="GetVoicemeeterKind()"/>.
+        ///     </description></item>
         ///   </list>
         /// </remarks>
         Kind RunningKind { get; }
@@ -75,8 +63,12 @@ namespace VoicemeeterAPI
         ///   <para>Updates <see cref="LoginStatus"/> on successful login.</para>
         ///   <para>Calls:</para>
         ///   <list type="bullet">
-        ///     <item><description>A-tG: <see cref="RemoteApiWrapper.Login()"/></description></item>
-        ///     <item><description>C API: long __stdcall VBVMR_Login(void);</description></item>
+        ///     <item><description>
+        ///       A-tG: <see cref="RemoteApiWrapper.Login()"/>
+        ///     </description></item>
+        ///     <item><description>
+        ///       C API: long __stdcall VBVMR_Login(void);
+        ///     </description></item>
         ///   </list>
         /// </remarks>
         /// <inheritdoc cref="IRemote" path="/example"/>
@@ -94,8 +86,12 @@ namespace VoicemeeterAPI
         ///   <para>Does nothing if <see cref="LoginStatus"/> is already <see cref="LoginResponse.LoggedOut"/>.</para>
         ///   <para>Calls:</para>
         ///   <list type="bullet">
-        ///     <item><description>A-tG: <see cref="RemoteApiWrapper.Logout()"/></description></item>
-        ///     <item><description>C API: long __stdcall VBVMR_Logout(void);</description></item>
+        ///     <item><description>
+        ///       A-tG: <see cref="RemoteApiWrapper.Logout()"/>
+        ///     </description></item>
+        ///     <item><description>
+        ///       C API: long __stdcall VBVMR_Logout(void);
+        ///     </description></item>
         ///   </list>
         /// </remarks>
         /// <inheritdoc cref="IRemote" path="/example"/>
@@ -118,8 +114,12 @@ namespace VoicemeeterAPI
         ///   </para>
         ///   <para>Calls:</para>
         ///   <list type="bullet">
-        ///     <item><description>A-tG: <see cref="RemoteApiWrapper.RunVoicemeeter(int)"/></description></item>
-        ///     <item><description>C API: long __stdcall VBVMR_RunVoicemeeter(long vType);</description></item>
+        ///     <item><description>
+        ///       A-tG: <see cref="RemoteApiWrapper.RunVoicemeeter(int)"/>
+        ///     </description></item>
+        ///     <item><description>
+        ///       C API: long __stdcall VBVMR_RunVoicemeeter(long vType);
+        ///     </description></item>
         ///   </list>
         /// </remarks>
         void RunVoicemeeter(int kind);
@@ -151,8 +151,12 @@ namespace VoicemeeterAPI
         ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.Ok"/> on successful call.</para>
         ///   <para>Calls:</para>
         ///   <list type="bullet">
-        ///     <item><description>A-tG: <see cref="RemoteApiWrapper.GetVoicemeeterType(out int)"/></description></item>
-        ///     <item><description>C API: long __stdcall VBVMR_GetVoicemeeterType(long * pType);</description></item>
+        ///     <item><description>
+        ///       A-tG: <see cref="RemoteApiWrapper.GetVoicemeeterType(out int)"/>
+        ///     </description></item>
+        ///     <item><description>
+        ///       C API: long __stdcall VBVMR_GetVoicemeeterType(long * pType);
+        ///     </description></item>
         ///   </list>
         /// </remarks>
         Kind GetVoicemeeterKind();

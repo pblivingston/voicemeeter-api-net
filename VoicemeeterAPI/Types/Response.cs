@@ -1,7 +1,7 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using AtgDev.Voicemeeter;
+using VoicemeeterAPI.Messages;
 
 namespace VoicemeeterAPI.Types
 {
@@ -16,8 +16,8 @@ namespace VoicemeeterAPI.Types
     }
 
     /// <summary>
-    ///   Represents responses from <see cref="RemoteApiWrapper.Login()"/> and <see cref="RemoteApiWrapper.Logout()"/>
-    ///   as well as values for <see cref="IRemote.LoginStatus"/>.
+    ///   Responses from <see cref="Remote.Login()"/> and <see cref="Remote.Logout()"/> for <see cref="LoginException"/>
+    ///   and values for <see cref="IRemote.LoginStatus"/>.
     /// </summary>
     public enum LoginResponse
     {
@@ -30,6 +30,9 @@ namespace VoicemeeterAPI.Types
         Unknown
     }
 
+    /// <summary>
+    ///   Responses from <see cref="Remote.RunVoicemeeter(int)"/> for <see cref="RunException"/>.
+    /// </summary>
     public enum RunResponse
     {
         UnknownKind = -2,
@@ -38,6 +41,9 @@ namespace VoicemeeterAPI.Types
         Timeout
     }
 
+    /// <summary>
+    ///   Responses from <see cref="Remote.GetVoicemeeterKind()"/> for <see cref="GetVmKindException"/>.
+    /// </summary>
     public enum InfoResponse
     {
         NoServer = -2,

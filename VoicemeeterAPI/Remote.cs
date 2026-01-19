@@ -12,9 +12,25 @@ namespace VoicemeeterAPI
     /// <summary>
     ///   Implements the <see cref="IRemote"/> interface to provide methods for interacting with the VoicemeeterRemote API.
     /// </summary>
-    /// <param name="wrapper"><see cref="RemoteApiWrapper"/> instance</param>
+    /// <param name="wrapper"><see cref="RemoteApiWrapper"/></param>
     /// <exception cref="ArgumentNullException"></exception>
-    /// <inheritdoc/>
+    /// <remarks>
+    ///   The primary constructor initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="RemoteApiWrapper"/>.
+    /// </remarks>
+    /// <example>
+    ///   <code>
+    ///     using var remote = new Remote();
+    ///     try
+    ///     {
+    ///       remote.Login();
+    ///       // Perform operations with the remote API
+    ///     }
+    ///     finally
+    ///     {
+    ///       remote.Logout();
+    ///     }
+    ///   </code>
+    /// </example>
     public sealed partial class Remote(RemoteApiWrapper wrapper) : IRemote
     {
         private readonly RemoteApiWrapper _vmrApi = wrapper ?? throw new ArgumentNullException(nameof(wrapper));
@@ -32,21 +48,21 @@ namespace VoicemeeterAPI
             : Kind.Unknown;
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="Remote"/> class with a new
-        ///   <see cref="RemoteApiWrapper"/> using the specified DLL path.
+        ///   Initializes a new instance of the <see cref="Remote"/> class with a new <see cref="RemoteApiWrapper"/> using the specified DLL path.
         /// </summary>
-        /// <param name="dllPath">Path string to the VoicemeeterRemote DLL</param>
+        /// <param name="dllPath"></param>
+        /// <inheritdoc cref="Remote(RemoteApiWrapper)" path="/example"/>
         public Remote(string dllPath) : this(new RemoteApiWrapper(dllPath))
         {
         }
 
         /// <summary>
-        ///   Initializes a new instance of <see cref="Remote"/> class with a new
-        ///   <see cref="RemoteApiWrapper"/> using the default DLL path.
+        ///   Initializes a new instance of <see cref="Remote"/> class with a new <see cref="RemoteApiWrapper"/> using the default DLL path.
         /// </summary>
         /// <remarks>
         ///   Uses <see cref="PathHelper.GetDllPath()"/> to determine the default path.
         /// </remarks>
+        /// <inheritdoc cref="Remote(RemoteApiWrapper)" path="/example"/>
         public Remote() : this(new RemoteApiWrapper(PathHelper.GetDllPath()))
         {
         }
