@@ -112,6 +112,37 @@ namespace VoicemeeterAPI
         /// <inheritdoc cref="IRemote" path="/example"/>
         void Logout(int ms = 1000);
 
+        /// <summary>
+        ///   Runs the specified <see cref="Kind"/>.
+        /// </summary>
+        /// <param name="kind">int, <see cref="Kind"/>, or string</param>
+        /// <param name="ms">
+        ///   Time in milliseconds to wait for Voicemeeter to start running.
+        /// </param>
+        /// <exception cref="ObjectDisposedException"></exception>
+        /// <exception cref="RemoteAccessException">
+        ///   Throws if not <see cref="LoggedIn"/>.
+        /// </exception>
+        /// <exception cref="RunException">
+        ///   Throws if the API call returns an error or the process times out.
+        /// </exception>
+        /// <remarks>
+        ///   <para>
+        ///     Waits for the process to start if the kind is a Voicemeeter kind (e.g. 3, <see cref="Kind.Bananax64"/>, "Standard", etc.).
+        ///   </para>
+        ///   <list type="bullet">
+        ///     <item><description>A-tG: <see cref="RemoteApiWrapper.RunVoicemeeter(int)"/></description></item>
+        ///     <item><description>C API: long __stdcall VBVMR_RunVoicemeeter(long vType);</description></item>
+        ///   </list>
+        /// </remarks>
+        void RunVoicemeeter(int kind, int ms = 2000);
+
+        /// <inheritdoc cref="RunVoicemeeter(int, int)"/>
+        void RunVoicemeeter(Kind kind, int ms = 2000);
+
+        /// <inheritdoc cref="RunVoicemeeter(int, int)"/>
+        void RunVoicemeeter(string kind, int ms = 2000);
+
         #endregion
 
         #region General Information

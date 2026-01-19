@@ -4,13 +4,13 @@
 namespace VoicemeeterAPI.Types
 {
     /// <summary>
-    ///   Voicemeeter applications that can be run with <see cref="Remote.RunVoicemeeter()"/> (not yet implemented)
+    ///   Voicemeeter applications that can be run with <see cref="Remote.RunVoicemeeter(int, int)"/>
     ///   and kinds returned by <see cref="Remote.GetVoicemeeterKind()"/>.
     /// </summary>
     /// <remarks>
     ///   Standard = 1, Banana = 2, and Potato = 3 represent both the 32-bit executables
     ///   and the OS-agnostic abstractions returned by <see cref="Remote.GetVoicemeeterKind()"/>.
-    ///   <see cref="Remote.RunVoicemeeter()"/> will automatically adjust where necessary.
+    ///   <see cref="Remote.RunVoicemeeter(int, int)"/> will automatically adjust where necessary.
     /// </remarks>
     public enum Kind
     {

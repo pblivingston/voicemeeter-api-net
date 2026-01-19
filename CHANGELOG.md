@@ -10,8 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Initial development
 
 - `Remote` class for interacting with the Voicemeeter Remote API. See [README](README.md) for usage details.
-  - `Login()` and `Logout()` methods to manage API sessions.
   - `LoginStatus` property to check the current login state.
   - `LoggedIn` bool property to simplify login status checks.
-  - `GetVoicemeeterKind()` method to determine which Voicemeeter version is running.
-  - `RunningKind` property to safely check the currently running Voicemeeter version.
+  - `RunningKind` property to safely check the currently running Voicemeeter kind.
+
+  - `Login()` and `Logout()` methods to manage API sessions.
+  - `RunVoicemeeter(kind, ms = 2000)` method to launch Voicemeeter applications.
+  - `GetVoicemeeterKind()` method to determine which Voicemeeter kind is running.

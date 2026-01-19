@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Threading;
 using VoicemeeterAPI.Types;
 using VoicemeeterAPI.Messages;
+using VoicemeeterAPI.Utils;
 
 namespace VoicemeeterAPI
 {
@@ -79,6 +80,36 @@ namespace VoicemeeterAPI
 
             RemoteWarning.Write($"Logout timed out; last result: {result}.");
             LoginStatus = LoginResponse.Unknown;
+        }
+
+        #endregion
+
+        #region Run Voicemeeter
+
+        /// <inheritdoc/>
+        public void RunVoicemeeter(int kind, int ms = 2000)
+        {
+            // Standard -> Standardx64, etc. for 64-bit versions
+            kind = kind is <= (int)Kind.Potatox64 ? GeneralUtils.ToBitKind(kind) : kind;
+
+            if (!LoggedIn) throw new RemoteAccessException(nameof(RunVoicemeeter), LoginStatus);
+
+            var result = (RunResponse)_vmrApi.RunVoicemeeter(kind);
+
+            if (result != RunResponse.Ok) throw new RunException(result, (Kind)kind);
+
+            if (kind <= (int)Kind.Potatox64 && !WaitForRunning(ms))
+                throw new RunException(RunResponse.Timeout, (Kind)kind);
+        }
+
+        /// <inheritdoc/>
+        public void RunVoicemeeter(Kind kind, int ms = 2000) => RunVoicemeeter((int)kind, ms);
+
+        /// <inheritdoc/>
+        public void RunVoicemeeter(string kind, int ms = 2000)
+        {
+            var k = GeneralUtils.ParseKind(kind);
+            RunVoicemeeter(k, ms);
         }
 
         #endregion

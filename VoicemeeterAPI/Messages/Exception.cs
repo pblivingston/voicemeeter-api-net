@@ -31,6 +31,13 @@ namespace VoicemeeterAPI.Messages
         public LoginResponse Response { get; } = r;
     }
 
+    internal sealed class RunException(RunResponse r, Kind k)
+        : RemoteException($"RunVoicemeeter failed - {r}; requested kind: {k}")
+    {
+        public RunResponse Response { get; } = r;
+        public Kind Kind { get; } = k;
+    }
+
     internal sealed class GetVmKindException(InfoResponse r, Kind k)
         : RemoteException($"GetVoicemeeterKind failed - {r}; returned kind: {k}")
     {
