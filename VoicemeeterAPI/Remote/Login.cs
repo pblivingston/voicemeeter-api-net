@@ -15,7 +15,7 @@ namespace VoicemeeterAPI
         #region Login
 
         /// <inheritdoc/>
-        public void Login(int ms = 2000)
+        public void Login()
         {
             if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
 
@@ -28,7 +28,7 @@ namespace VoicemeeterAPI
             switch (LoginStatus)
             {
                 case LoginResponse.Ok:
-                    if (!WaitForRunning(ms))
+                    if (!WaitForRunning())
                         throw new LoginException(LoginResponse.Timeout);
 
                     RemoteInfo.Write("Login successful.");
@@ -48,7 +48,7 @@ namespace VoicemeeterAPI
         #region Logout
 
         /// <inheritdoc/>
-        public void Logout(int ms = 1000)
+        public void Logout()
         {
             if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
 
@@ -58,7 +58,7 @@ namespace VoicemeeterAPI
                 return;
             }
 
-            var timeout = TimeSpan.FromMilliseconds(ms);
+            var timeout = TimeSpan.FromMilliseconds(1000);
             var stopwatch = Stopwatch.StartNew();
             int result = -1;
 
@@ -87,7 +87,7 @@ namespace VoicemeeterAPI
         #region Run Voicemeeter
 
         /// <inheritdoc/>
-        public void RunVoicemeeter(int kind, int ms = 2000)
+        public void RunVoicemeeter(int kind)
         {
             // Standard -> Standardx64, etc. for 64-bit versions
             kind = kind is <= (int)Kind.Potatox64 ? GeneralUtils.ToBitKind(kind) : kind;
@@ -98,31 +98,31 @@ namespace VoicemeeterAPI
 
             if (result != RunResponse.Ok) throw new RunException(result, (Kind)kind);
 
-            if (kind <= (int)Kind.Potatox64 && !WaitForRunning(ms))
+            if (kind <= (int)Kind.Potatox64 && !WaitForRunning())
                 throw new RunException(RunResponse.Timeout, (Kind)kind);
         }
 
         /// <inheritdoc/>
-        public void RunVoicemeeter(Kind kind, int ms = 2000) => RunVoicemeeter((int)kind, ms);
+        public void RunVoicemeeter(Kind kind) => RunVoicemeeter((int)kind);
 
         /// <inheritdoc/>
-        public void RunVoicemeeter(string kind, int ms = 2000)
+        public void RunVoicemeeter(string kind)
         {
             var k = GeneralUtils.ParseKind(kind);
-            RunVoicemeeter(k, ms);
+            RunVoicemeeter(k);
         }
 
         #endregion
 
         #region Helpers
 
-        private bool WaitForRunning(int ms)
+        private bool WaitForRunning(int ms = 2000)
         {
             var timeout = TimeSpan.FromMilliseconds(ms);
             var stopwatch = Stopwatch.StartNew();
             Exception? lastException = null;
 
-            RemoteInfo.Write("Checking for running Voicemeeter...");
+            RemoteInfo.Write("Waiting for running Voicemeeter...");
 
             while (stopwatch.Elapsed < timeout)
             {
@@ -134,15 +134,14 @@ namespace VoicemeeterAPI
                     lastException = null;
                     break;
                 }
-                catch (RemoteException ex)
-                {
-                    lastException = ex;
-                    RemoteWarning.Write($"Caught exception: \"{lastException.Message}\" - retrying...");
-                }
+                catch (RemoteException ex) { lastException = ex; }
             }
 
             if (lastException != null)
+            {
+                RemoteWarning.Write($"Timed out waiting for Voicemeeter. Last caught: \"{lastException.Message}\"");
                 return false;
+            }
 
             return true;
         }

@@ -43,7 +43,7 @@ namespace VoicemeeterAPI
         ///   Simplifies <see cref="LoginStatus"/> checks.
         /// </summary>
         /// <remarks>
-        ///   Returns `true` if <see cref="LoginStatus"/> is either <see cref="LoginResponse.Ok"/> or <see cref="LoginResponse.VoicemeeterNotRunning"/>, otherwise `false`.
+        ///   `true` if <see cref="LoginStatus"/> is <see cref="LoginResponse.Ok"/> or <see cref="LoginResponse.VoicemeeterNotRunning"/>, otherwise `false`.
         /// </remarks>
         bool LoggedIn { get; }
 
@@ -51,9 +51,11 @@ namespace VoicemeeterAPI
         ///   Gets the currently running OS-agnostic Voicemeeter <see cref="Kind"/>.
         /// </summary>
         /// <remarks>
-        ///   <para><see cref="Kind.Unknown"/> if <see cref="LoginStatus"/> indicates not logged in.</para>
-        ///   <para><see cref="Kind.None"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.VoicemeeterNotRunning"/>.</para>
-        ///   <para>Otherwise, calls <see cref="GetVoicemeeterKind()"/>.</para>
+        ///   <list type="bullet">  
+        ///     <item><description><see cref="Kind.Unknown"/> if <see cref="LoginStatus"/> indicates not logged in.</description></item>
+        ///     <item><description><see cref="Kind.None"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.VoicemeeterNotRunning"/>.</description></item>
+        ///     <item><description>Otherwise, calls <see cref="GetVoicemeeterKind()"/>.</description></item>
+        ///   </list>
         /// </remarks>
         Kind RunningKind { get; }
 
@@ -62,41 +64,27 @@ namespace VoicemeeterAPI
         /// <summary>
         ///   Open communication pipe with VoicemeeterRemote
         /// </summary>
-        /// <param name="ms">
-        ///   Time in milliseconds to wait for the running Voicemeeter to be detected.
-        /// </param>
         /// <exception cref="ObjectDisposedException"></exception>
         /// <exception cref="RemoteAccessException">
-        ///   Throws if <see cref="LoginStatus"/> indicates already logged in.
-        ///     <list type="bullet">
-        ///     <item><description><see cref="LoginResponse.Ok"/></description></item>
-        ///     <item><description><see cref="LoginResponse.VoicemeeterNotRunning"/></description></item>
-        ///     </list>
+        ///   Throws if <see cref="LoggedIn"/>.
         /// </exception>
         /// <exception cref="LoginException">
-        ///   <para>Throws if <see cref="LoginResponse"/> is an error.</para>
-        ///     <list type="bullet">
-        ///     <item><description><see cref="LoginResponse.NoClient"/> (-1)</description></item>
-        ///     <item><description><see cref="LoginResponse.AlreadyLoggedIn"/> (-2)</description></item>
-        ///     </list>
-        ///   <para>Throws if the login process times out.</para>
+        ///   <para>Throws if the API call returns an error or the process times out.</para>
         /// </exception>
         /// <remarks>
         ///   <para>Updates <see cref="LoginStatus"/> on successful login.</para>
+        ///   <para>Calls:</para>
         ///   <list type="bullet">
-        ///   <item><description>A-tG: <see cref="RemoteApiWrapper.Login()"/></description></item>
-        ///   <item><description>C API: long __stdcall VBVMR_Login(void);</description></item>
+        ///     <item><description>A-tG: <see cref="RemoteApiWrapper.Login()"/></description></item>
+        ///     <item><description>C API: long __stdcall VBVMR_Login(void);</description></item>
         ///   </list>
         /// </remarks>
         /// <inheritdoc cref="IRemote" path="/example"/>
-        void Login(int ms = 2000);
+        void Login();
 
         /// <summary>
         ///   Close communication pipe with VoicemeeterRemote
         /// </summary>
-        /// <param name="ms">
-        ///   Time in milliseconds to wait for the logout process to complete.
-        /// </param>
         /// <exception cref="ObjectDisposedException">
         ///   Only throws on disposed instances to allow multiple logout attempts.
         /// </exception>
@@ -104,21 +92,19 @@ namespace VoicemeeterAPI
         ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.LoggedOut"/> on successful logout.</para>
         ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.Unknown"/> if logout times out.</para>
         ///   <para>Does nothing if <see cref="LoginStatus"/> is already <see cref="LoginResponse.LoggedOut"/>.</para>
+        ///   <para>Calls:</para>
         ///   <list type="bullet">
-        ///   <item><description>A-tG: <see cref="RemoteApiWrapper.Logout()"/></description></item>
-        ///   <item><description>C API: long __stdcall VBVMR_Logout(void);</description></item>
+        ///     <item><description>A-tG: <see cref="RemoteApiWrapper.Logout()"/></description></item>
+        ///     <item><description>C API: long __stdcall VBVMR_Logout(void);</description></item>
         ///   </list>
         /// </remarks>
         /// <inheritdoc cref="IRemote" path="/example"/>
-        void Logout(int ms = 1000);
+        void Logout();
 
         /// <summary>
         ///   Runs the specified <see cref="Kind"/>.
         /// </summary>
         /// <param name="kind">int, <see cref="Kind"/>, or string</param>
-        /// <param name="ms">
-        ///   Time in milliseconds to wait for Voicemeeter to start running.
-        /// </param>
         /// <exception cref="ObjectDisposedException"></exception>
         /// <exception cref="RemoteAccessException">
         ///   Throws if not <see cref="LoggedIn"/>.
@@ -130,18 +116,19 @@ namespace VoicemeeterAPI
         ///   <para>
         ///     Waits for the process to start if the kind is a Voicemeeter kind (e.g. 3, <see cref="Kind.Bananax64"/>, "Standard", etc.).
         ///   </para>
+        ///   <para>Calls:</para>
         ///   <list type="bullet">
         ///     <item><description>A-tG: <see cref="RemoteApiWrapper.RunVoicemeeter(int)"/></description></item>
         ///     <item><description>C API: long __stdcall VBVMR_RunVoicemeeter(long vType);</description></item>
         ///   </list>
         /// </remarks>
-        void RunVoicemeeter(int kind, int ms = 2000);
+        void RunVoicemeeter(int kind);
 
-        /// <inheritdoc cref="RunVoicemeeter(int, int)"/>
-        void RunVoicemeeter(Kind kind, int ms = 2000);
+        /// <inheritdoc cref="RunVoicemeeter(int)"/>
+        void RunVoicemeeter(Kind kind);
 
-        /// <inheritdoc cref="RunVoicemeeter(int, int)"/>
-        void RunVoicemeeter(string kind, int ms = 2000);
+        /// <inheritdoc cref="RunVoicemeeter(int)"/>
+        void RunVoicemeeter(string kind);
 
         #endregion
 
@@ -155,13 +142,18 @@ namespace VoicemeeterAPI
         /// </returns>
         /// <exception cref="ObjectDisposedException"></exception>
         /// <exception cref="RemoteAccessException">
-        ///   Throws if <see cref="LoginStatus"/> is not <see cref="LoginResponse.Ok"/>.
+        ///   Throws if not <see cref="LoggedIn"/>.
         /// </exception>
         /// <exception cref="GetVmKindException">
         ///   Throws if the API call fails or returns an invalid kind value.
         /// </exception>
         /// <remarks>
-        ///   Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.Ok"/> on successful call.
+        ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.Ok"/> on successful call.</para>
+        ///   <para>Calls:</para>
+        ///   <list type="bullet">
+        ///     <item><description>A-tG: <see cref="RemoteApiWrapper.GetVoicemeeterType(out int)"/></description></item>
+        ///     <item><description>C API: long __stdcall VBVMR_GetVoicemeeterType(long * pType);</description></item>
+        ///   </list>
         /// </remarks>
         Kind GetVoicemeeterKind();
 

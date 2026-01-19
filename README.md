@@ -51,7 +51,7 @@ The following methods are available (see below for details):
 
 - `Login()`: `void`; Updates `LoginStatus` on successful login.
 - `Logout()`: `void`; Updates `LoginStatus` on timeout or successful logout.
-- `RunVoicemeeter(kind, ms = 2000)`: `void`; Launches the Voicemeeter application specified by `kind`: `int`, `Kind`, `string`.
+- `RunVoicemeeter(kind)`: `void`; Launches the Voicemeeter application specified by `kind`: `int`, `Kind`, `string`.
 - `GetVoicemeeterKind()`: `Kind`; Returns the currently running Voicemeeter `Kind`.
 
 `Login()` must be called before any other methods, and `Logout()` should be called when finished.
@@ -80,23 +80,17 @@ Opens communication pipe with VoicemeeterRemote. Updates `LoginStatus` on succes
 
 Throws if the pipe is already open.
 
-If API response is "Ok", optional `ms` parameter specifies how long to wait for the running Voicemeeter instance to respond before throwing. Default is 2000ms.
-
 #### Logout()
 
 Closes communication pipe with VoicemeeterRemote. Updates `LoginStatus` on timeout or successful logout.
 
 Does nothing if the pipe is already closed.
 
-Optional `ms` parameter specifies for how long logout re-attempts will be made before giving up. Default is 1000ms.
-
-#### RunVoicemeeter(kind, ms = 2000)
+#### RunVoicemeeter(kind)
 
 Launches the specified Voicemeeter application.
 
 `kind` parameter can be an `int`, `Kind`, or `string` representing the Voicemeeter application to launch.
-
-If the requested application is a Voicemeeter kind (e.g. `3`, `Kind.Bananax64`, `"Standard"`, etc.), optional `ms` parameter specifies how long to wait in milliseconds for the launched Voicemeeter instance to respond before throwing.
 
 #### GetVoicemeeterKind()
 

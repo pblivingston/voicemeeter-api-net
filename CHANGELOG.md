@@ -15,5 +15,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `RunningKind` property to safely check the currently running Voicemeeter kind.
 
   - `Login()` and `Logout()` methods to manage API sessions.
-  - `RunVoicemeeter(kind, ms = 2000)` method to launch Voicemeeter applications.
+  - `RunVoicemeeter(kind)` method to launch Voicemeeter applications.
   - `GetVoicemeeterKind()` method to determine which Voicemeeter kind is running.
