@@ -87,10 +87,28 @@ namespace VoicemeeterAPI
         #region Run Voicemeeter
 
         /// <inheritdoc/>
-        public void RunVoicemeeter(int kind)
+        public void RunVoicemeeter(object kind)
+        {
+            switch (kind)
+            {
+                case int i:
+                    RunVoicemeeter(i);
+                    return;
+                case Kind k:
+                    RunVoicemeeter(k);
+                    return;
+                case string s:
+                    RunVoicemeeter(s);
+                    return;
+                default:
+                    throw new ArgumentException("Object must be int, Kind, or string", nameof(kind));
+            }
+        }
+
+        private void RunVoicemeeter(int kind)
         {
             // Standard -> Standardx64, etc. for 64-bit versions
-            kind = kind is <= (int)Kind.Potatox64 ? KindUtils.ToBit(kind) : kind;
+            kind = kind <= (int)Kind.Potatox64 ? KindUtils.ToBit(kind) : kind;
 
             if (!LoggedIn) throw new RemoteAccessException(nameof(RunVoicemeeter), LoginStatus);
 
@@ -102,11 +120,9 @@ namespace VoicemeeterAPI
                 throw new RunException(RunResponse.Timeout, (Kind)kind);
         }
 
-        /// <inheritdoc/>
-        public void RunVoicemeeter(Kind kind) => RunVoicemeeter((int)kind);
+        private void RunVoicemeeter(Kind kind) => RunVoicemeeter((int)kind);
 
-        /// <inheritdoc/>
-        public void RunVoicemeeter(string kind)
+        private void RunVoicemeeter(string kind)
         {
             if (!Enum.TryParse(kind, true, out Kind k))
                 throw new ArgumentException($"Invalid Voicemeeter kind: {kind}", nameof(kind));

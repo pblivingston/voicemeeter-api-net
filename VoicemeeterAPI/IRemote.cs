@@ -137,13 +137,7 @@ namespace VoicemeeterAPI
         ///     </description></item>
         ///   </list>
         /// </remarks>
-        void RunVoicemeeter(int kind);
-
-        /// <inheritdoc cref="RunVoicemeeter(int)"/>
-        void RunVoicemeeter(Kind kind);
-
-        /// <inheritdoc cref="RunVoicemeeter(int)"/>
-        void RunVoicemeeter(string kind);
+        void RunVoicemeeter(object kind);
 
         #endregion
 
