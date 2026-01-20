@@ -43,9 +43,13 @@ namespace VoicemeeterAPI
         public bool LoggedIn => LoginStatus is LoginResponse.Ok or LoginResponse.VoicemeeterNotRunning;
 
         /// <inheritdoc/>
-        public Kind RunningKind => LoginStatus == LoginResponse.Ok ? GetVoicemeeterKind()
-            : LoginStatus == LoginResponse.VoicemeeterNotRunning ? Kind.None
+        public Kind RunningKind => LoginStatus is LoginResponse.Ok ? GetVoicemeeterKind()
+            : LoginStatus is LoginResponse.VoicemeeterNotRunning ? Kind.None
             : Kind.Unknown;
+
+        /// <inheritdoc/>
+        public VmVersion RunningVersion => LoginStatus is LoginResponse.Ok ? GetVoicemeeterVersion()
+            : new VmVersion(RunningKind, 0, 0, 0);
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="Remote"/> class with a new <see cref="RemoteApiWrapper"/> using the specified DLL path.

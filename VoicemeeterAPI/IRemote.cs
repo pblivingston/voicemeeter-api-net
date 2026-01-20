@@ -33,19 +33,34 @@ namespace VoicemeeterAPI
         ///   Gets the currently running OS-agnostic Voicemeeter <see cref="Kind"/>.
         /// </summary>
         /// <remarks>
-        ///   <list type="bullet">  
+        ///   <list type="bullet">
         ///     <item><description>
-        ///       <see cref="Kind.Unknown"/> if <see cref="LoginStatus"/> indicates not logged in.
+        ///       Calls <see cref="GetVoicemeeterKind()"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.Ok"/>.
         ///     </description></item>
         ///     <item><description>
         ///       <see cref="Kind.None"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.VoicemeeterNotRunning"/>.
         ///     </description></item>
         ///     <item><description>
-        ///       Otherwise, calls <see cref="GetVoicemeeterKind()"/>.
+        ///       Otherwise, <see cref="Kind.Unknown"/>.
         ///     </description></item>
         ///   </list>
         /// </remarks>
         Kind RunningKind { get; }
+
+        /// <summary>
+        ///   Gets the currently running Voicemeeter <see cref="VmVersion"/>.
+        /// </summary>
+        /// <remarks>
+        ///   <list type="bullet">
+        ///     <item><description>
+        ///       Calls <see cref="GetVoicemeeterVersion()"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.Ok"/>.
+        ///     </description></item>
+        ///     <item><description>
+        ///       Otherwise, a <see cref="VmVersion"/> with <see cref="RunningKind"/> and version 0.0.0.
+        ///     </description></item>
+        ///   </list>
+        /// </remarks>
+        VmVersion RunningVersion { get; }
 
         #region Login
 
@@ -160,6 +175,31 @@ namespace VoicemeeterAPI
         ///   </list>
         /// </remarks>
         Kind GetVoicemeeterKind();
+
+        /// <summary>
+        ///   Gets the currently running Voicemeeter version.
+        /// </summary>
+        /// <returns><see cref="VmVersion"></returns>
+        /// <exception cref="ObjectDisposedException"></exception>
+        /// <exception cref="RemoteAccessException">
+        ///   Throws if not <see cref="LoggedIn"/>.
+        /// </exception>
+        /// <exception cref="GetVersionException">
+        ///   Throws if the API call fails or returns an invalid version value.
+        /// </exception>
+        /// <remarks>
+        ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.Ok"/> on successful call.</para>
+        ///   <para>Calls:</para>
+        ///   <list type="bullet">
+        ///     <item><description>
+        ///       A-tG: <see cref="RemoteApiWrapper.GetVoicemeeterVersion(out int)"/>
+        ///     </description></item>
+        ///     <item><description>
+        ///       C API: long __stdcall VBVMR_GetVoicemeeterVersion(long * pVersion);
+        ///     </description></item>
+        ///   </list>
+        /// </remarks>
+        VmVersion GetVoicemeeterVersion();
 
         #endregion
     }

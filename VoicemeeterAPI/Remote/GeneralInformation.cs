@@ -28,5 +28,25 @@ namespace VoicemeeterAPI
         }
 
         #endregion
+
+        #region Get Voicemeeter Version
+
+        /// <inheritdoc/>
+        public VmVersion GetVoicemeeterVersion()
+        {
+            if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
+
+            if (!LoggedIn) throw new RemoteAccessException(nameof(GetVoicemeeterVersion), LoginStatus);
+
+            var result = (InfoResponse)_vmrApi.GetVoicemeeterVersion(out int v);
+            var version = (VmVersion)v;
+            if (result != InfoResponse.Ok || !version.IsValid())
+                throw new GetVersionException(result, version);
+
+            LoginStatus = LoginResponse.Ok;
+            return version;
+        }
+
+        #endregion
     }
 }
