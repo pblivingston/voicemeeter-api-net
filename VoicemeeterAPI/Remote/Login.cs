@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Threading;
 using VoicemeeterAPI.Types;
 using VoicemeeterAPI.Messages;
-using VoicemeeterAPI.Utils;
 
 namespace VoicemeeterAPI
 {
@@ -93,7 +92,7 @@ namespace VoicemeeterAPI
 
             app = AppUtils.BitAdjust(app);
 
-            RemoteInfo.Write($"Running app: {(App)app}...");
+            RemoteInfo.Write($"Running application: {(App)app}...");
 
             var result = (RunResponse)_vmrApi.RunVoicemeeter(app);
 

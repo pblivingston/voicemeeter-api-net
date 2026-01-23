@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using System;
-using VoicemeeterAPI.Utils;
 
 namespace VoicemeeterAPI.Types
 {
@@ -87,9 +86,9 @@ namespace VoicemeeterAPI.Types
 
         public static bool IsValid(int kind, int major, int minor, int patch)
             => kind is >= 1 and <= 3
-            && GeneralUtils.InByte(major)
-            && GeneralUtils.InByte(minor)
-            && GeneralUtils.InByte(patch);
+            && major.InByte()
+            && minor.InByte()
+            && patch.InByte();
 
         public static bool IsValid(Kind kind, int major, int minor, int patch)
             => IsValid((int)kind, major, minor, patch);

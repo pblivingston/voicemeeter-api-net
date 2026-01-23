@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using System;
-using VoicemeeterAPI.Utils;
 
 namespace VoicemeeterAPI.Types
 {
@@ -46,9 +45,9 @@ namespace VoicemeeterAPI.Types
         #region Validation
 
         public static bool IsValid(int major, int minor, int patch)
-            => GeneralUtils.InByte(major)
-            && GeneralUtils.InByte(minor)
-            && GeneralUtils.InByte(patch);
+            => major.InByte()
+            && minor.InByte()
+            && patch.InByte();
 
         #endregion
 
