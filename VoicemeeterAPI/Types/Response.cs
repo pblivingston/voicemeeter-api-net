@@ -42,7 +42,7 @@ namespace VoicemeeterAPI.Types
     }
 
     /// <summary>
-    ///   Responses from <see cref="Remote.GetVoicemeeterKind()"/> for <see cref="GetVmKindException"/>.
+    ///   Responses from <see cref="Remote.GetKind()"/> for <see cref="GetKindException"/>.
     /// </summary>
     public enum InfoResponse
     {

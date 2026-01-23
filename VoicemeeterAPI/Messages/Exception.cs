@@ -39,7 +39,7 @@ namespace VoicemeeterAPI.Messages
     }
 
     internal sealed class GetKindException(InfoResponse r, Kind k)
-        : RemoteException($"GetVoicemeeterKind failed - {r}; returned kind: {k}")
+        : RemoteException($"GetKind failed - {r}; returned kind: {k}")
     {
         public InfoResponse Response { get; } = r;
         public Kind Kind { get; } = k;

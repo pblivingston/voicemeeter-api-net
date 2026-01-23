@@ -92,13 +92,13 @@ namespace VoicemeeterAPI.Types
             && GeneralUtils.InByte(patch);
 
         public static bool IsValid(Kind kind, int major, int minor, int patch)
-            => IsValid(KindUtils.FromBit((int)kind), major, minor, patch);
+            => IsValid((int)kind, major, minor, patch);
 
         public static bool IsValid(int kind, SemVersion? semVersion)
             => kind is >= 1 and <= 3 && semVersion is not null;
 
         public static bool IsValid(Kind kind, SemVersion? semVersion)
-            => IsValid(KindUtils.FromBit((int)kind), semVersion);
+            => IsValid((int)kind, semVersion);
 
         #endregion
 
@@ -108,10 +108,7 @@ namespace VoicemeeterAPI.Types
             => (v1 << 24) | (v2 << 16) | (v3 << 8) | v4;
 
         public static int Pack(Kind kind, int major, int minor, int patch)
-        {
-            int k = KindUtils.FromBit((int)kind); // Validate kind and adjust for 64-bit versions
-            return Pack(k, major, minor, patch);
-        }
+            => Pack((int)kind, major, minor, patch);
 
         public static bool TryPack(int v1, int v2, int v3, int v4, out int packed)
         {
@@ -120,10 +117,7 @@ namespace VoicemeeterAPI.Types
         }
 
         public static bool TryPack(Kind kind, int major, int minor, int patch, out int packed)
-        {
-            int k = KindUtils.FromBit((int)kind); // Validate kind and adjust for 64-bit versions
-            return TryPack(k, major, minor, patch, out packed);
-        }
+            => TryPack((int)kind, major, minor, patch, out packed);
 
         #endregion
 

@@ -158,7 +158,7 @@ namespace VoicemeeterAPI
 
                 try
                 {
-                    RemoteInfo.Write($"Voicemeeter {GetVoicemeeterKind()} is running.");
+                    RemoteInfo.Write($"Voicemeeter {GetKind()} is running.");
                     lastException = null;
                     break;
                 }

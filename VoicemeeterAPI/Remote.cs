@@ -43,7 +43,7 @@ namespace VoicemeeterAPI
         public bool LoggedIn => LoginStatus is LoginResponse.Ok or LoginResponse.VoicemeeterNotRunning;
 
         /// <inheritdoc/>
-        public Kind RunningKind => LoginStatus is LoginResponse.Ok ? GetVoicemeeterKind()
+        public Kind RunningKind => LoginStatus is LoginResponse.Ok ? GetKind()
             : LoginStatus is LoginResponse.VoicemeeterNotRunning ? Kind.None
             : Kind.Unknown;
 

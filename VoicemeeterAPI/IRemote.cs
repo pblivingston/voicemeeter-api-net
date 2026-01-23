@@ -30,12 +30,12 @@ namespace VoicemeeterAPI
         bool LoggedIn { get; }
 
         /// <summary>
-        ///   Gets the currently running OS-agnostic Voicemeeter <see cref="Kind"/>.
+        ///   Gets the currently running Voicemeeter <see cref="Kind"/>.
         /// </summary>
         /// <remarks>
         ///   <list type="bullet">
         ///     <item><description>
-        ///       Calls <see cref="GetVoicemeeterKind()"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.Ok"/>.
+        ///       Calls <see cref="GetKind()"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.Ok"/>.
         ///     </description></item>
         ///     <item><description>
         ///       <see cref="Kind.None"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.VoicemeeterNotRunning"/>.
@@ -148,9 +148,7 @@ namespace VoicemeeterAPI
         /// <summary>
         ///   Gets the currently running Voicemeeter kind.
         /// </summary>
-        /// <returns>
-        ///   OS-agnostic Voicemeeter <see cref="Kind"/>.
-        /// </returns>
+        /// <returns></returns>
         /// <exception cref="ObjectDisposedException"></exception>
         /// <exception cref="RemoteAccessException">
         ///   Throws if not <see cref="LoggedIn"/>.
@@ -170,7 +168,7 @@ namespace VoicemeeterAPI
         ///     </description></item>
         ///   </list>
         /// </remarks>
-        Kind GetVoicemeeterKind();
+        Kind GetKind();
 
         /// <summary>
         ///   Gets the currently running Voicemeeter version.

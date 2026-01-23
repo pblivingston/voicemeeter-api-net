@@ -12,11 +12,11 @@ namespace VoicemeeterAPI
         #region Get Voicemeeter Kind
 
         /// <inheritdoc/>
-        public Kind GetVoicemeeterKind()
+        public Kind GetKind()
         {
             if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
 
-            if (!LoggedIn) throw new RemoteAccessException(nameof(GetVoicemeeterKind), LoginStatus);
+            if (!LoggedIn) throw new RemoteAccessException(nameof(GetKind), LoginStatus);
 
             var result = (InfoResponse)_vmrApi.GetVoicemeeterType(out int k);
             var kind = (Kind)k;
