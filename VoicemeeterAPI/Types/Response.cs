@@ -31,11 +31,11 @@ namespace VoicemeeterAPI.Types
     }
 
     /// <summary>
-    ///   Responses from <see cref="Remote.RunVoicemeeter(int)"/> for <see cref="RunException"/>.
+    ///   Responses from <see cref="Remote.Run(int)"/> for <see cref="RunException"/>.
     /// </summary>
     public enum RunResponse
     {
-        UnknownKind = -2,
+        UnknownApp = -2,
         NotInstalled = -1,
         Ok = 0,
         Timeout

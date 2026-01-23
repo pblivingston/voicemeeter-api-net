@@ -31,11 +31,11 @@ namespace VoicemeeterAPI.Messages
         public LoginResponse Response { get; } = r;
     }
 
-    internal sealed class RunException(RunResponse r, Kind k)
-        : RemoteException($"RunVoicemeeter failed - {r}; requested kind: {k}")
+    internal sealed class RunException(RunResponse r, App a)
+        : RemoteException($"Run failed - {r}; requested app: {a}")
     {
         public RunResponse Response { get; } = r;
-        public Kind Kind { get; } = k;
+        public App App { get; } = a;
     }
 
     internal sealed class GetKindException(InfoResponse r, Kind k)

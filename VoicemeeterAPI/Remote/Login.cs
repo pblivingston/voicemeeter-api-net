@@ -86,48 +86,58 @@ namespace VoicemeeterAPI
 
         #region Run Voicemeeter
 
-        /// <inheritdoc/>
-        public void RunVoicemeeter(object kind)
+        /// <inheritdoc cref="IRemote.Run{T}(T)"/>
+        public void Run(int app)
         {
-            switch (kind)
+            if (!LoggedIn) throw new RemoteAccessException(nameof(Run), LoginStatus);
+
+            app = AppUtils.BitAdjust(app);
+
+            RemoteInfo.Write($"Running app: {(App)app}...");
+
+            var result = (RunResponse)_vmrApi.RunVoicemeeter(app);
+
+            if (result != RunResponse.Ok) throw new RunException(result, (App)app);
+
+            if (app <= (int)App.Potatox64 && !WaitForRunning())
+                throw new RunException(RunResponse.Timeout, (App)app);
+        }
+
+        /// <inheritdoc cref="IRemote.Run{T}(T)"/>
+        public void Run(App app) => Run((int)app);
+
+        /// <inheritdoc cref="IRemote.Run{T}(T)"/>
+        public void Run(Kind kind) => Run((int)kind);
+
+        /// <inheritdoc cref="IRemote.Run{T}(T)"/>
+        public void Run(string app)
+        {
+            if (!Enum.TryParse(app, true, out App a))
+                throw new ArgumentException($"Invalid app: {app}", nameof(app));
+
+            Run((int)a);
+        }
+
+        /// <inheritdoc/>
+        void IRemote.Run<T>(T app)
+        {
+            switch (app)
             {
                 case int i:
-                    RunVoicemeeter(i);
-                    return;
+                    Run(i);
+                    break;
+                case App a:
+                    Run(a);
+                    break;
                 case Kind k:
-                    RunVoicemeeter(k);
-                    return;
+                    Run(k);
+                    break;
                 case string s:
-                    RunVoicemeeter(s);
-                    return;
+                    Run(s);
+                    break;
                 default:
-                    throw new ArgumentException("Object must be int, Kind, or string", nameof(kind));
+                    throw new ArgumentException("Object must be int, App, Kind, or string", nameof(app));
             }
-        }
-
-        private void RunVoicemeeter(int kind)
-        {
-            // Standard -> Standardx64, etc. for 64-bit versions
-            kind = kind <= (int)Kind.Potatox64 ? KindUtils.ToBit(kind) : kind;
-
-            if (!LoggedIn) throw new RemoteAccessException(nameof(RunVoicemeeter), LoginStatus);
-
-            var result = (RunResponse)_vmrApi.RunVoicemeeter(kind);
-
-            if (result != RunResponse.Ok) throw new RunException(result, (Kind)kind);
-
-            if (kind <= (int)Kind.Potatox64 && !WaitForRunning())
-                throw new RunException(RunResponse.Timeout, (Kind)kind);
-        }
-
-        private void RunVoicemeeter(Kind kind) => RunVoicemeeter((int)kind);
-
-        private void RunVoicemeeter(string kind)
-        {
-            if (!Enum.TryParse(kind, true, out Kind k))
-                throw new ArgumentException($"Invalid Voicemeeter kind: {kind}", nameof(kind));
-
-            RunVoicemeeter(k);
         }
 
         #endregion

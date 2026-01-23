@@ -113,9 +113,10 @@ namespace VoicemeeterAPI
         void Logout();
 
         /// <summary>
-        ///   Runs the specified <see cref="Kind"/>.
+        ///   Runs the specified <see cref="App"/>.
         /// </summary>
-        /// <param name="kind">int, <see cref="Kind"/>, or string</param>
+        /// <typeparam name="T">int, <see cref="App"/>, <see cref="Kind"/>, or string</typeparam>
+        /// <param name="app"></param>
         /// <exception cref="ObjectDisposedException"></exception>
         /// <exception cref="RemoteAccessException">
         ///   Throws if not <see cref="LoggedIn"/>.
@@ -125,7 +126,8 @@ namespace VoicemeeterAPI
         /// </exception>
         /// <remarks>
         ///   <para>
-        ///     Waits for the process to start if the kind is a Voicemeeter kind (e.g. 3, <see cref="Kind.Bananax64"/>, "Standard", etc.).
+        ///     If the app is a Voicemeeter app (e.g. 3, <see cref="App.Bananax64"/>, <see cref="Kind.Potato"/>, "Standard", etc.),
+        ///     automatically adjusts for OS bitness where necessary and waits for the process to start.
         ///   </para>
         ///   <para>Calls:</para>
         ///   <list type="bullet">
@@ -137,7 +139,7 @@ namespace VoicemeeterAPI
         ///     </description></item>
         ///   </list>
         /// </remarks>
-        void RunVoicemeeter(object kind);
+        void Run<T>(T app) where T : notnull;
 
         #endregion
 
