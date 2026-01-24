@@ -5,8 +5,9 @@ using System;
 
 namespace VoicemeeterAPI.Types
 {
-    public readonly struct VmVersion(int packed) : IEquatable<VmVersion>, IComparable<VmVersion>, IComparable
+    public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     {
+        /// <inheritdoc/>
         public int Packed { get; } = packed;
 
         // Parts
@@ -15,13 +16,16 @@ namespace VoicemeeterAPI.Types
         private int V3 => (Packed >> 8) & 0xFF;
         private int V4 => Packed & 0xFF;
 
-        // Derived properties
+        /// <inheritdoc/>
         public Kind Kind => V1 < (int)Kind.None || V1 > (int)Kind.Potato ? Kind.Unknown : (Kind)V1;
+        /// <inheritdoc/>
         public SemVersion Semantic => new(Packed & 0x00FF_FFFF); // Extract the lower 24 bits for semantic version
 
-        // Aliases
+        /// <inheritdoc/>
         public int Major => V2;
+        /// <inheritdoc/>
         public int Minor => V3;
+        /// <inheritdoc/>
         public int Patch => V4;
 
         #region Constructors
@@ -50,25 +54,29 @@ namespace VoicemeeterAPI.Types
 
         #region Deconstructors
 
-        public void Deconstruct(out int k, out int maj, out int min, out int pat)
+        /// <inheritdoc/>
+        public void Deconstruct<T>(out T k, out int maj, out int min, out int pat) where T : unmanaged
         {
-            k = V1; maj = V2; min = V3; pat = V4;
+            KindUtils.GetKindType<T>();
+
+            k = (T)(object)V1;
+            maj = V2;
+            min = V3;
+            pat = V4;
         }
 
-        public void Deconstruct(out Kind kind, out int maj, out int min, out int pat)
+        /// <inheritdoc/>
+        public void Deconstruct<T>(out T k, out SemVersion sem) where T : unmanaged
         {
-            kind = Kind; maj = Major; min = Minor; pat = Patch;
+            KindUtils.GetKindType<T>();
+
+            k = (T)(object)V1;
+            sem = Semantic;
         }
 
-        public void Deconstruct(out int k, out SemVersion sem)
-        {
-            k = V1; sem = Semantic;
-        }
-
-        public void Deconstruct(out Kind kind, out SemVersion sem)
-        {
-            kind = Kind; sem = Semantic;
-        }
+        /// <inheritdoc/>
+        void IVersion.Deconstruct(out int maj, out int min, out int pat)
+            => Deconstruct(out int _, out maj, out min, out pat);
 
         #endregion
 

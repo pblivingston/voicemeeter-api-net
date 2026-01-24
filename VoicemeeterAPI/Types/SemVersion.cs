@@ -5,18 +5,27 @@ using System;
 
 namespace VoicemeeterAPI.Types
 {
-    public readonly struct SemVersion(int packed) : IEquatable<SemVersion>, IComparable<SemVersion>, IComparable
+    public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     {
-        public int Packed { get; } = packed & 0x00FF_FFFF; // Mask out kind if provided (upper 8 bits)
+        /// <inheritdoc/>
+        public int Packed { get; } = packed;
 
         // Parts
+        private int V0 => (Packed >> 24) & 0xFF;
         private int V1 => (Packed >> 16) & 0xFF;
         private int V2 => (Packed >> 8) & 0xFF;
         private int V3 => Packed & 0xFF;
 
-        // Aliases
+        /// <inheritdoc/>
+        Kind IVersion.Kind => V0 == 0 ? Kind.None : Kind.Unknown;
+        /// <inheritdoc/>
+        SemVersion IVersion.Semantic => this;
+
+        /// <inheritdoc/>
         public int Major => V1;
+        /// <inheritdoc/>
         public int Minor => V2;
+        /// <inheritdoc/>
         public int Patch => V3;
 
         #region Constructors
@@ -35,14 +44,37 @@ namespace VoicemeeterAPI.Types
 
         #region Deconstructors
 
+        /// <inheritdoc/>
         public void Deconstruct(out int maj, out int min, out int pat)
         {
-            maj = Major; min = Minor; pat = Patch;
+            maj = V1;
+            min = V2;
+            pat = V3;
+        }
+
+        /// <inheritdoc/>
+        void IVersion.Deconstruct<T>(out T k, out SemVersion sem)
+        {
+            KindUtils.GetKindType<T>();
+
+            k = (T)(object)V0;
+            sem = this;
+        }
+
+        /// <inheritdoc/>
+        void IVersion.Deconstruct<T>(out T k, out int maj, out int min, out int pat)
+        {
+            KindUtils.GetKindType<T>();
+
+            k = (T)(object)V0;
+            Deconstruct(out maj, out min, out pat);
         }
 
         #endregion
 
         #region Validation
+
+        public bool IsValid() => V0 == 0;
 
         public static bool IsValid(int maj, int min, int pat)
             => maj.InByte()
