@@ -10,39 +10,39 @@ namespace VoicemeeterAPI.Types
         public int Packed { get; } = packed;
 
         // Parts
-        public int V1 => (Packed >> 24) & 0xFF;
-        public int V2 => (Packed >> 16) & 0xFF;
-        public int V3 => (Packed >> 8) & 0xFF;
-        public int V4 => Packed & 0xFF;
+        private int V1 => (Packed >> 24) & 0xFF;
+        private int V2 => (Packed >> 16) & 0xFF;
+        private int V3 => (Packed >> 8) & 0xFF;
+        private int V4 => Packed & 0xFF;
+
+        // Derived properties
+        public Kind Kind => V1 < (int)Kind.None || V1 > (int)Kind.Potato ? Kind.Unknown : (Kind)V1;
+        public SemVersion Semantic => new(Packed & 0x00FF_FFFF); // Extract the lower 24 bits for semantic version
 
         // Aliases
         public int Major => V2;
         public int Minor => V3;
         public int Patch => V4;
 
-        // Derived properties
-        public Kind Kind => V1 < (int)Kind.None || V1 > (int)Kind.Potato ? Kind.Unknown : (Kind)V1;
-        public SemVersion Semantic => new(Packed & 0x00FF_FFFF); // Extract the lower 24 bits for semantic version
-
         #region Constructors
 
-        public VmVersion(int v1, int v2, int v3, int v4)
-            : this(Pack(v1, v2, v3, v4))
+        public VmVersion(int k, int maj, int min, int pat)
+            : this(Pack(k, maj, min, pat))
         {
         }
 
-        public VmVersion(Kind kind, int major, int minor, int patch)
-            : this(Pack(kind, major, minor, patch))
+        public VmVersion(Kind kind, int maj, int min, int pat)
+            : this(Pack(kind, maj, min, pat))
         {
         }
 
-        public VmVersion(int v1, SemVersion semVersion)
-            : this(v1, semVersion.V1, semVersion.V2, semVersion.V3)
+        public VmVersion(int k, SemVersion sem)
+            : this(k, sem.Major, sem.Minor, sem.Patch)
         {
         }
 
-        public VmVersion(Kind kind, SemVersion semVersion)
-            : this(kind, semVersion.Major, semVersion.Minor, semVersion.Patch)
+        public VmVersion(Kind kind, SemVersion sem)
+            : this(kind, sem.Major, sem.Minor, sem.Patch)
         {
         }
 
@@ -50,24 +50,24 @@ namespace VoicemeeterAPI.Types
 
         #region Deconstructors
 
-        public void Deconstruct(out int v1, out int v2, out int v3, out int v4)
+        public void Deconstruct(out int k, out int maj, out int min, out int pat)
         {
-            v1 = V1; v2 = V2; v3 = V3; v4 = V4;
+            k = V1; maj = V2; min = V3; pat = V4;
         }
 
-        public void Deconstruct(out Kind kind, out int major, out int minor, out int patch)
+        public void Deconstruct(out Kind kind, out int maj, out int min, out int pat)
         {
-            kind = Kind; major = Major; minor = Minor; patch = Patch;
+            kind = Kind; maj = Major; min = Minor; pat = Patch;
         }
 
-        public void Deconstruct(out int v1, out SemVersion semVersion)
+        public void Deconstruct(out int k, out SemVersion sem)
         {
-            v1 = V1; semVersion = Semantic;
+            k = V1; sem = Semantic;
         }
 
-        public void Deconstruct(out Kind kind, out SemVersion semVersion)
+        public void Deconstruct(out Kind kind, out SemVersion sem)
         {
-            kind = Kind; semVersion = Semantic;
+            kind = Kind; sem = Semantic;
         }
 
         #endregion
@@ -76,7 +76,7 @@ namespace VoicemeeterAPI.Types
 
         public bool IsValid() => Kind is not Kind.None and not Kind.Unknown;
 
-        public static bool IsValid(VmVersion version) => version.IsValid();
+        public static bool IsValid(VmVersion vm) => vm.IsValid();
 
         public static bool IsValid(int packed)
         {
@@ -84,39 +84,39 @@ namespace VoicemeeterAPI.Types
             return kind is >= 1 and <= 3;
         }
 
-        public static bool IsValid(int kind, int major, int minor, int patch)
+        public static bool IsValid(int kind, int maj, int min, int pat)
             => kind is >= 1 and <= 3
-            && major.InByte()
-            && minor.InByte()
-            && patch.InByte();
+            && maj.InByte()
+            && min.InByte()
+            && pat.InByte();
 
-        public static bool IsValid(Kind kind, int major, int minor, int patch)
-            => IsValid((int)kind, major, minor, patch);
+        public static bool IsValid(Kind kind, int maj, int min, int pat)
+            => IsValid((int)kind, maj, min, pat);
 
-        public static bool IsValid(int kind, SemVersion? semVersion)
-            => kind is >= 1 and <= 3 && semVersion is not null;
+        public static bool IsValid(int kind, SemVersion? sem)
+            => kind is >= 1 and <= 3 && sem is not null;
 
-        public static bool IsValid(Kind kind, SemVersion? semVersion)
-            => IsValid((int)kind, semVersion);
+        public static bool IsValid(Kind kind, SemVersion? sem)
+            => IsValid((int)kind, sem);
 
         #endregion
 
         #region Packing
 
-        public static int Pack(int v1, int v2, int v3, int v4)
-            => (v1 << 24) | (v2 << 16) | (v3 << 8) | v4;
+        public static int Pack(int k, int maj, int min, int pat)
+            => (k << 24) | (maj << 16) | (min << 8) | pat;
 
-        public static int Pack(Kind kind, int major, int minor, int patch)
-            => Pack((int)kind, major, minor, patch);
+        public static int Pack(Kind kind, int maj, int min, int pat)
+            => Pack((int)kind, maj, min, pat);
 
-        public static bool TryPack(int v1, int v2, int v3, int v4, out int packed)
+        public static bool TryPack(int k, int maj, int min, int pat, out int packed)
         {
-            packed = Pack(v1, v2, v3, v4);
-            return IsValid(v1, v2, v3, v4);
+            packed = Pack(k, maj, min, pat);
+            return IsValid(k, maj, min, pat);
         }
 
-        public static bool TryPack(Kind kind, int major, int minor, int patch, out int packed)
-            => TryPack((int)kind, major, minor, patch, out packed);
+        public static bool TryPack(Kind kind, int maj, int min, int pat, out int packed)
+            => TryPack((int)kind, maj, min, pat, out packed);
 
         #endregion
 
@@ -124,9 +124,9 @@ namespace VoicemeeterAPI.Types
 
         public override string ToString() => $"{V1}.{V2}.{V3}.{V4}";
 
-        public static bool TryParse(string s, out VmVersion version)
+        public static bool TryParse(string s, out VmVersion vm)
         {
-            version = default;
+            vm = default;
             if (string.IsNullOrWhiteSpace(s)) return false;
             var parts = s.Split('.');
             if (parts.Length != 4) return false;
@@ -134,7 +134,7 @@ namespace VoicemeeterAPI.Types
             if (!int.TryParse(parts[1], out var maj)) return false;
             if (!int.TryParse(parts[2], out var min)) return false;
             if (!int.TryParse(parts[3], out var pat)) return false;
-            version = new(k, maj, min, pat);
+            vm = new(k, maj, min, pat);
             return true;
         }
 
@@ -142,42 +142,42 @@ namespace VoicemeeterAPI.Types
 
         #region Conversions
 
-        public static explicit operator SemVersion(VmVersion v) => new(v); // VmVersion -> SemVersion
+        public static explicit operator SemVersion(VmVersion vm) => new(vm); // VmVersion -> SemVersion
 
-        public static explicit operator int(VmVersion v) => v.Packed;         // VmVersion -> int
+        public static explicit operator int(VmVersion vm) => vm.Packed;         // VmVersion -> int
         public static explicit operator VmVersion(int packed) => new(packed); // int -> VmVersion
 
-        public static explicit operator (int v1, int v2, int v3, int v4)(VmVersion v) // VmVersion -> (int, int, int, int)
-            => (v.V1, v.V2, v.V3, v.V4);
-        public static explicit operator VmVersion((int v1, int v2, int v3, int v4) t) // (int, int, int, int) -> VmVersion
-            => new(t.v1, t.v2, t.v3, t.v4);
+        public static explicit operator (int k, int maj, int min, int pat)(VmVersion vm) // VmVersion -> (int, int, int, int)
+            => (vm.V1, vm.V2, vm.V3, vm.V4);
+        public static explicit operator VmVersion((int k, int maj, int min, int pat) t) // (int, int, int, int) -> VmVersion
+            => new(t.k, t.maj, t.min, t.pat);
 
-        public static explicit operator (Kind kind, int major, int minor, int patch)(VmVersion v) // VmVersion -> (Kind, int, int, int)
-            => (v.Kind, v.Major, v.Minor, v.Patch);
-        public static explicit operator VmVersion((Kind kind, int major, int minor, int patch) t) // (Kind, int, int, int) -> VmVersion
-            => new(t.kind, t.major, t.minor, t.patch);
+        public static explicit operator (Kind kind, int maj, int min, int pat)(VmVersion vm) // VmVersion -> (Kind, int, int, int)
+            => (vm.Kind, vm.Major, vm.Minor, vm.Patch);
+        public static explicit operator VmVersion((Kind kind, int maj, int min, int pat) t) // (Kind, int, int, int) -> VmVersion
+            => new(t.kind, t.maj, t.min, t.pat);
 
-        public static explicit operator (int kind, SemVersion semVersion)(VmVersion v) // VmVersion -> (int, SemVersion)
-            => (v.V1, v.Semantic);
-        public static explicit operator VmVersion((int kind, SemVersion semVersion) t) // (int, SemVersion) -> VmVersion
-            => new(t.kind, t.semVersion.V1, t.semVersion.V2, t.semVersion.V3);
+        public static explicit operator (int kind, SemVersion sem)(VmVersion vm) // VmVersion -> (int, SemVersion)
+            => (vm.V1, vm.Semantic);
+        public static explicit operator VmVersion((int kind, SemVersion sem) t) // (int, SemVersion) -> VmVersion
+            => new(t.kind, t.sem.Major, t.sem.Minor, t.sem.Patch);
 
-        public static explicit operator (Kind kind, SemVersion semVersion)(VmVersion v) // VmVersion -> (Kind, SemVersion)
-            => (v.Kind, v.Semantic);
-        public static explicit operator VmVersion((Kind kind, SemVersion semVersion) t) // (Kind, SemVersion) -> VmVersion
-            => new(t.kind, t.semVersion);
+        public static explicit operator (Kind kind, SemVersion sem)(VmVersion vm) // VmVersion -> (Kind, SemVersion)
+            => (vm.Kind, vm.Semantic);
+        public static explicit operator VmVersion((Kind kind, SemVersion sem) t) // (Kind, SemVersion) -> VmVersion
+            => new(t.kind, t.sem);
 
         #endregion
 
         #region Equality and Ordering
         public bool Equals(VmVersion other) => Packed == other.Packed;
-        public override bool Equals(object? obj) => obj is VmVersion v && Equals(v);
+        public override bool Equals(object? obj) => obj is VmVersion vm && Equals(vm);
         public override int GetHashCode() => Packed;
 
         public int CompareTo(VmVersion other) => Packed.CompareTo(other.Packed);
         int IComparable.CompareTo(object? obj)
-            => obj is VmVersion v
-            ? CompareTo(v)
+            => obj is VmVersion vm
+            ? CompareTo(vm)
             : throw new ArgumentException("Object must be VmVersion", nameof(obj));
 
         public static bool operator ==(VmVersion a, VmVersion b) => a.Packed == b.Packed;
