@@ -27,7 +27,7 @@ namespace VoicemeeterAPI.Types
         ///   Converts given Voicemeeter <see cref="Kind"/> to an OS-biased Voicemeeter <see cref="App"/>.
         /// </summary>
         /// <param name="kind"></param>
-        /// <returns></returns>
+        /// <returns><see cref="App.Unknown"/> if not a valid Voicemeeter <see cref="Kind"/></returns>
         public static App ToApp(Kind kind)
             => kind is < Kind.None or > Kind.Potato ? App.Unknown
             : ((App)kind).BitAdjust();
