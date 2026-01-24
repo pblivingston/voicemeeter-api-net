@@ -48,7 +48,7 @@ namespace VoicemeeterAPI
             : Kind.Unknown;
 
         /// <inheritdoc/>
-        public VmVersion RunningVersion => LoginStatus is LoginResponse.Ok ? GetVoicemeeterVersion()
+        public VmVersion RunningVersion => LoginStatus is LoginResponse.Ok ? GetVersion()
             : new VmVersion(RunningKind, 0, 0, 0);
 
         /// <summary>

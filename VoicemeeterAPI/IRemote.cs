@@ -53,7 +53,7 @@ namespace VoicemeeterAPI
         /// <remarks>
         ///   <list type="bullet">
         ///     <item><description>
-        ///       Calls <see cref="GetVoicemeeterVersion()"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.Ok"/>.
+        ///       Calls <see cref="GetVersion()"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.Ok"/>.
         ///     </description></item>
         ///     <item><description>
         ///       Otherwise, a <see cref="VmVersion"/> with <see cref="RunningKind"/> and version 0.0.0.
@@ -173,7 +173,7 @@ namespace VoicemeeterAPI
         /// <summary>
         ///   Gets the currently running Voicemeeter version.
         /// </summary>
-        /// <returns><see cref="VmVersion"></returns>
+        /// <returns><see cref="VmVersion"/></returns>
         /// <exception cref="ObjectDisposedException"></exception>
         /// <exception cref="RemoteAccessException">
         ///   Throws if not <see cref="LoggedIn"/>.
@@ -193,7 +193,7 @@ namespace VoicemeeterAPI
         ///     </description></item>
         ///   </list>
         /// </remarks>
-        VmVersion GetVoicemeeterVersion();
+        VmVersion GetVersion();
 
         #endregion
     }

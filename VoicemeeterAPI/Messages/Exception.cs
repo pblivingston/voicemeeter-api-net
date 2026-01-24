@@ -46,7 +46,7 @@ namespace VoicemeeterAPI.Messages
     }
 
     internal sealed class GetVersionException(InfoResponse r, VmVersion v)
-        : RemoteException($"GetVoicemeeterVersion failed - {r}; returned version: {v}")
+        : RemoteException($"GetVersion failed - {r}; returned version: {v}")
     {
         public InfoResponse Response { get; } = r;
         public VmVersion Version { get; } = v;
