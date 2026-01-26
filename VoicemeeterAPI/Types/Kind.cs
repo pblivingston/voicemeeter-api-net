@@ -21,6 +21,9 @@ namespace VoicemeeterAPI.Types
     {
         /// <inheritdoc cref="KindUtils.ToApp(Kind)"/>
         public static App ToApp(this Kind kind) => KindUtils.ToApp(kind);
+
+        /// <inheritdoc cref="KindUtils.IsValid{T}(T)"/>
+        public static bool IsValid(this Kind kind) => KindUtils.IsValid(kind);
     }
 
     public static class KindUtils
@@ -34,30 +37,39 @@ namespace VoicemeeterAPI.Types
             => kind is < Kind.None or > Kind.Potato ? App.Unknown
             : ((App)kind).BitAdjust();
 
+        public static bool IsValid<T>(T kind) where T : unmanaged
+            => IsKindType<T>()
+            && kind is > 0 and <= 3;
+
         #region Type Validation
 
-        internal static bool IsKindType(Type t)
+        public static bool IsKindType(Type t)
             => t == typeof(int) || t == typeof(Kind);
 
-        internal static bool IsKindType<T>() where T : unmanaged
+        public static bool IsKindType<T>() where T : unmanaged
             => IsKindType(typeof(T));
 
-        internal static bool TryGetKindType<T>(out Type t) where T : unmanaged
+        public static bool TryGetKindType<T>(out Type t) where T : unmanaged
         {
             t = typeof(T);
             if (!IsKindType(t)) return false;
             return true;
         }
 
-        internal static Type GetKindType<T>() where T : unmanaged
+        public static Type GetKindType<T>() where T : unmanaged
             => TryGetKindType<T>(out Type t) ? t
             : throw new NotSupportedException($"Type '{t.Name}' is not supported. Use int or Kind.");
 
-        internal static void ValidateKindType(Type t)
+        /// <summary>
+        ///   Simply throws if the given type is not supported.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <exception cref="NotSupportedException"></exception>
+        public static void ValidateKindType(Type t)
         { if (!IsKindType(t)) throw new NotSupportedException($"Type '{t.Name}' is not supported. Use int or Kind."); }
 
-
-        internal static void ValidateKindType<T>() where T : unmanaged
+        /// <inheritdoc cref="ValidateKindType(Type)"/>
+        public static void ValidateKindType<T>() where T : unmanaged
             => ValidateKindType(typeof(T));
 
         #endregion

@@ -7,6 +7,8 @@ namespace VoicemeeterAPI.Types
 {
     public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     {
+        private const int dV0 = 0;
+
         /// <inheritdoc/>
         public int Packed { get; } = packed;
 
@@ -17,10 +19,7 @@ namespace VoicemeeterAPI.Types
         private int V3 => Packed & 0xFF;
 
         /// <inheritdoc/>
-        Kind IVersion.Kind => V0 == 0 ? Kind.None : Kind.Unknown;
-        /// <inheritdoc/>
-        SemVersion IVersion.Semantic => this;
-
+        int IVersion.Kind => V0;
         /// <inheritdoc/>
         public int Major => V1;
         /// <inheritdoc/>
@@ -28,10 +27,15 @@ namespace VoicemeeterAPI.Types
         /// <inheritdoc/>
         public int Patch => V3;
 
+        /// <inheritdoc/>
+        Kind IVersion.K => V0 == dV0 ? Kind.None : Kind.Unknown;
+        /// <inheritdoc/>
+        SemVersion IVersion.Semantic => this;
+
         #region Constructors
 
         public SemVersion(int maj, int min, int pat)
-            : this(Pack(maj, min, pat))
+            : this(RawPack(maj, min, pat))
         {
         }
 
@@ -53,20 +57,20 @@ namespace VoicemeeterAPI.Types
         }
 
         /// <inheritdoc/>
-        void IVersion.Deconstruct<T>(out T k, out SemVersion sem)
+        void IVersion.Deconstruct<T>(out T kind, out SemVersion sem)
         {
-            KindUtils.GetKindType<T>();
+            KindUtils.ValidateKindType<T>();
 
-            k = (T)(object)V0;
+            kind = (T)(object)V0;
             sem = this;
         }
 
         /// <inheritdoc/>
-        void IVersion.Deconstruct<T>(out T k, out int maj, out int min, out int pat)
+        void IVersion.Deconstruct<T>(out T kind, out int maj, out int min, out int pat)
         {
-            KindUtils.GetKindType<T>();
+            KindUtils.ValidateKindType<T>();
 
-            k = (T)(object)V0;
+            kind = (T)(object)V0;
             Deconstruct(out maj, out min, out pat);
         }
 
@@ -74,24 +78,54 @@ namespace VoicemeeterAPI.Types
 
         #region Validation
 
-        public bool IsValid() => V0 == 0;
+        public bool IsValid() => V0 == dV0;
+
+        public static bool IsValid(SemVersion sem) => sem.IsValid();
+
+        public static bool IsValid(int packed)
+            => ((packed >> 24) & 0xFF) == dV0;
 
         public static bool IsValid(int maj, int min, int pat)
-            => maj.InByte()
-            && min.InByte()
-            && pat.InByte();
+            => VersionUtils.IsValid(maj, min, pat);
 
         #endregion
 
         #region Packing
 
-        public static int Pack(int maj, int min, int pat)
-            => (maj << 16) | (min << 8) | pat;
+        public static int RawPack(int maj, int min, int pat)
+            => VersionUtils.RawPack(dV0, maj, min, pat);
 
-        public static bool ValidateAndPack(int maj, int min, int pat, out int packed)
+        public static bool TryPack(int maj, int min, int pat, out int packed)
         {
-            packed = Pack(maj, min, pat);
-            return IsValid(maj, min, pat);
+            packed = 0;
+            if (!IsValid(maj, min, pat)) return false;
+            packed = RawPack(maj, min, pat);
+            return true;
+        }
+
+        public static int Pack(int maj, int min, int pat, out int packed)
+            => TryPack(maj, min, pat, out packed) ? packed
+            : throw new ArgumentException($"Invalid Semantic version part(s): {nameof(maj)} = {maj}, {nameof(min)} = {min}, {nameof(pat)} = {pat}.");
+
+        #endregion
+
+        #region Unpacking
+
+        public static void RawUnpack(int packed, out int maj, out int min, out int pat)
+            => VersionUtils.RawUnpack(packed, out _, out maj, out min, out pat);
+
+        public static bool TryUnpack(int packed, out int maj, out int min, out int pat)
+        {
+            maj = 0; min = 0; pat = 0;
+            if (!IsValid(packed)) return false;
+            RawUnpack(packed, out maj, out min, out pat);
+            return true;
+        }
+
+        public static void Unpack(int packed, out int maj, out int min, out int pat)
+        {
+            if (!TryUnpack(packed, out maj, out min, out pat))
+                throw new ArgumentOutOfRangeException(nameof(packed));
         }
 
         #endregion
@@ -100,18 +134,31 @@ namespace VoicemeeterAPI.Types
 
         public override string ToString() => $"{V1}.{V2}.{V3}";
 
+        public static bool TryParse(string s, out int maj, out int min, out int pat)
+        {
+            if (!VersionUtils.TryParse(s, out int k, out maj, out min, out pat)) return false;
+            if (k is not dV0) return false;
+            return true;
+        }
+
+        public static void Parse(string s, out int maj, out int min, out int pat)
+        {
+            if (!TryParse(s, out maj, out min, out pat))
+                throw new ArgumentException(nameof(s));
+        }
+
         public static bool TryParse(string s, out SemVersion sem)
         {
             sem = default;
-            if (string.IsNullOrWhiteSpace(s)) return false;
-            var parts = s.Split('.');
-            if (parts.Length != 3) return false;
-            if (!int.TryParse(parts[0], out var maj)) return false;
-            if (!int.TryParse(parts[1], out var min)) return false;
-            if (!int.TryParse(parts[2], out var pat)) return false;
-            sem = new(maj, min, pat);
+            if (!VersionUtils.TryParse(s, out int packed)) return false;
+            if (!IsValid(packed)) return false;
+            sem = new(packed);
             return true;
         }
+
+        public static SemVersion Parse(string s)
+            => TryParse(s, out SemVersion sem) ? sem
+            : throw new ArgumentException(nameof(s));
 
         #endregion
 
@@ -119,12 +166,12 @@ namespace VoicemeeterAPI.Types
 
         public static explicit operator SemVersion(VmVersion vm) => new(vm); // VmVersion -> SemVersion
 
-        public static explicit operator int(SemVersion sem) => sem.Packed;         // SemVersion -> int
+        public static explicit operator int(SemVersion sem) => sem.Packed;     // SemVersion -> int
         public static explicit operator SemVersion(int packed) => new(packed); // int -> SemVersion
 
         public static explicit operator (int maj, int min, int pat)(SemVersion sem) // SemVersion -> (int, int, int)
             => (sem.Major, sem.Minor, sem.Patch);
-        public static explicit operator SemVersion((int maj, int min, int pat) t) // (int, int, int) -> SemVersion
+        public static explicit operator SemVersion((int maj, int min, int pat) t)   // (int, int, int) -> SemVersion
             => new(t.maj, t.min, t.pat);
 
         #endregion

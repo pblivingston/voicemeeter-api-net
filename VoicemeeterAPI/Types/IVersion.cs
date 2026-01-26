@@ -13,22 +13,14 @@ namespace VoicemeeterAPI.Types
     public interface IVersion : IComparable
     {
         /// <summary>
-        ///   <code>(k &lt;&lt; 24) | (maj &lt;&lt; 16) | (min &lt;&lt; 8) | pat;</code>
+        ///   <code>(kind &lt;&lt; 24) | (maj &lt;&lt; 16) | (min &lt;&lt; 8) | pat;</code>
         /// </summary>
         int Packed { get; }
 
         /// <summary>
-        ///   <code>(Kind)((IVersion.Packed &gt;&gt; 24) &amp; 0xFF);</code>
+        ///   <code>(IVersion.Packed &gt;&gt; 24) &amp; 0xFF;</code>
         /// </summary>
-        Kind Kind { get; }
-
-        /// <summary>
-        ///   <code>(SemVersion)(IVersion.Packed &amp; 0x00FF_FFFF)</code>
-        /// </summary>
-        /// <remarks>
-        ///   <see cref="SemVersion"/> implements <see cref="IVersion"/>
-        /// </remarks>
-        SemVersion Semantic { get; }
+        int Kind { get; }
 
         /// <summary>
         ///   <code>(IVersion.Packed &gt;&gt; 16) &amp; 0xFF;</code>
@@ -46,6 +38,19 @@ namespace VoicemeeterAPI.Types
         int Patch { get; }
 
         /// <summary>
+        ///   <code>(Kind)((IVersion.Packed &gt;&gt; 24) &amp; 0xFF);</code>
+        /// </summary>
+        Kind K { get; }
+
+        /// <summary>
+        ///   <code>(SemVersion)(IVersion.Packed &amp; 0x00FF_FFFF)</code>
+        /// </summary>
+        /// <remarks>
+        ///   <see cref="SemVersion"/> implements <see cref="IVersion"/>
+        /// </remarks>
+        SemVersion Semantic { get; }
+
+        /// <summary>
         ///   Deconstructs the version number into the requested parts.
         /// </summary>
         /// <param name="maj"></param>
@@ -55,19 +60,21 @@ namespace VoicemeeterAPI.Types
 
         /// <inheritdoc cref="Deconstruct(out int, out int, out int)" path="/summary"/>
         /// <typeparam name="T">int, <see cref="Types.Kind"/></typeparam>
-        /// <param name="k"></param>
+        /// <param name="kind"></param>
         /// <param name="sem"></param>
         /// <remarks>
         /// </remarks>
-        void Deconstruct<T>(out T k, out SemVersion sem) where T : unmanaged;
+        void Deconstruct<T>(out T kind, out SemVersion sem)
+            where T : unmanaged;
 
         /// <inheritdoc cref="Deconstruct(out int, out int, out int)" path="/summary"/>
         /// <typeparam name="T">int, <see cref="Types.Kind"/></typeparam>
-        /// <param name="k"></param>
+        /// <param name="kind"></param>
         /// <param name="maj"></param>
         /// <param name="min"></param>
         /// <param name="pat"></param>
-        void Deconstruct<T>(out T k, out int maj, out int min, out int pat) where T : unmanaged;
+        void Deconstruct<T>(out T kind, out int maj, out int min, out int pat)
+            where T : unmanaged;
 
         bool IsValid();
     }
