@@ -1,6 +1,7 @@
 # A .NET Library for the Voicemeeter Remote API built on A-tG's Dynamic Wrapper
 
 This library is meant to ease interaction with Voicemeeter. It provides:
+
 - Typed methods for interacting with VoicemeeterRemote via A-tG's [dynamic wrapper](https://github.com/A-tG/Voicemeeter-Remote-API-dll-dynamic-wrapper)
 - An object model representing Voicemeeter parameters and commands
 - An object model representing Voicemeeter MacroButtons
@@ -16,6 +17,7 @@ Notable changes will be documented in the [CHANGELOG](CHANGELOG.md).
 ### Tested Against
 
 Voicemeeter December 2025 release:
+
 - Voicemeeter Standard 1.1.2.2
 - Voicemeeter Banana 2.1.2.2
 - Voicemeeter Potato 3.1.2.2
@@ -23,6 +25,7 @@ Voicemeeter December 2025 release:
 ## Target Frameworks
 
 .NET Standard 2.0, compatible with:
+
 - .NET Core 2.0+
 - .NET Framework 4.6.1+
 - .NET 5.0+
@@ -46,13 +49,15 @@ The following properties are available:
 - `LoginStatus`: `LoginResponse`; Possible values: `Ok, VoicemeeterNotRunning, LoggedOut, Unknown`
 - `LoggedIn`: `bool`; `true` if `LoginStatus` is either `Ok` or `VoicemeeterNotRunning`, otherwise `false`
 - `RunningKind`: `Kind`; Possible values: `Standard, Banana, Potato, None, Unknown`
+- `RunningVersion`: `VmVersion`
 
 The following methods are available (see below for details):
 
 - `Login()`: `void`; Updates `LoginStatus` on successful login.
 - `Logout()`: `void`; Updates `LoginStatus` on timeout or successful logout.
-- `RunVoicemeeter(kind)`: `void`; Launches the Voicemeeter application specified by `kind`: `int`, `Kind`, `string`.
-- `GetVoicemeeterKind()`: `Kind`; Returns the currently running Voicemeeter `Kind`.
+- `Run(app)`: `void`; Launches the application specified by `app`: `int`, `App`, `Kind`, `string`.
+- `GetKind()`: `Kind`; Returns the currently running Voicemeeter `Kind`.
+- `GetVersion()`: `VmVersion`; Returns the currently running Voicemeeter `VmVersion`.
 
 `Login()` must be called before any other methods, and `Logout()` should be called when finished.
 
@@ -86,13 +91,13 @@ Closes communication pipe with VoicemeeterRemote. Updates `LoginStatus` on timeo
 
 Does nothing if the pipe is already closed.
 
-#### RunVoicemeeter(kind)
+#### Run(app)
 
-Launches the specified Voicemeeter application.
+Launches the specified application.
 
-`kind` parameter can be an `int`, `Kind`, or `string` representing the Voicemeeter application to launch.
+`app` parameter can be an `int`, `App`, `Kind`, or `string` representing the application to launch.
 
-#### GetVoicemeeterKind()
+#### GetKind()
 
 Returns the currently running Voicemeeter `Kind`. Possible values: `Standard, Banana, Potato`.
 
@@ -100,7 +105,17 @@ Ensures `LoginStatus` is `Ok` if the call is successful.
 
 Throws if not logged in or API response is an error.
 
-Using the `RunningKind` property will reduce thrown exceptions, as it only calls `GetVoicemeeterKind()` if `LoginStatus` is `Ok`, but this will not be accurate if Voicemeeter was launched by an external process. `RunningKind` returns `None` if `LoginStatus` is `VoicemeeterNotRunning` and `Unknown` if `LoginStatus` is otherwise not `Ok`.
+Using the `RunningKind` property will reduce thrown exceptions, as it only calls `GetKind()` if `LoginStatus` is `Ok`, but this will not be accurate if Voicemeeter was launched by an external process. `RunningKind` returns `None` if `LoginStatus` is `VoicemeeterNotRunning` and `Unknown` if `LoginStatus` is otherwise not `Ok`.
+
+#### GetVersion()
+
+Returns the currently running Voicemeeter `VmVersion`.
+
+Ensures `LoginStatus` is `Ok` if the call is successful.
+
+Throws if not logged in or API response is an error.
+
+As with `RunningKind`, using the `RunningVersion` property will reduce thrown exceptions but can fall prone to innaccuracy in unexpected circumstances. `RunningVersion` returns a `VmVersion` "0.0.0.0" if `LoginStatus` is `VoicemeeterNotRunning` and a `VmVersion` "255.0.0.0" if `LoginStatus` is otherwise not `Ok`.
 
 ## Licensing
 
@@ -121,7 +136,7 @@ Using the `RunningKind` property will reduce thrown exceptions, as it only calls
 
 - Source: <https://github.com/pblivingston/voicemeeter-api-net>
 
-[not published yet]: # (- NuGet: <https://www.nuget.org/packages/VoicemeeterAPI>)
+<!-- not published yet - NuGet: <https://www.nuget.org/packages/VoicemeeterAPI> -->
 
 ### Dependencies
 

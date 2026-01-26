@@ -13,7 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `LoginStatus` property to check the current login state.
   - `LoggedIn` bool property to simplify login status checks.
   - `RunningKind` property to safely check the currently running Voicemeeter kind.
+  - `RunningVersion` property to safely check the currently running Voicemeeter version.
 
   - `Login()` and `Logout()` methods to manage API sessions.
-  - `RunVoicemeeter(kind)` method to launch Voicemeeter applications.
-  - `GetVoicemeeterKind()` method to determine which Voicemeeter kind is running.
+  - `Run(app)` method to launch VB-Audio applications.
+  - `GetKind()` method to get the running Voicemeeter kind.
+  - `GetVersion()` method to get the running Voicemeeter version.
