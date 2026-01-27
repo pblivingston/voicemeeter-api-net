@@ -58,6 +58,7 @@ The following methods are available (see below for details):
 - `Run(app)`: `void`; Launches the application specified by `app`: `int`, `App`, `Kind`, `string`.
 - `GetKind()`: `Kind`; Returns the currently running Voicemeeter `Kind`.
 - `GetVersion()`: `VmVersion`; Returns the currently running Voicemeeter `VmVersion`.
+- `ParamsDirty()`: `bool`; Checks if parameters have changed.
 
 `Login()` must be called before any other methods, and `Logout()` should be called when finished.
 
@@ -116,6 +117,12 @@ Ensures `LoginStatus` is `Ok` if the call is successful.
 Throws if not logged in or API response is an error.
 
 As with `RunningKind`, using the `RunningVersion` property will reduce thrown exceptions but can fall prone to innaccuracy in unexpected circumstances. `RunningVersion` returns a `VmVersion` "0.0.0.0" if `LoginStatus` is `VoicemeeterNotRunning` and a `VmVersion` "255.0.0.0" if `LoginStatus` is otherwise not `Ok`.
+
+#### ParamsDirty()
+
+Checks if parameters have changed.
+
+Throws if `LoginStatus` is not `Ok` or API response is an error.
 
 ## Licensing
 

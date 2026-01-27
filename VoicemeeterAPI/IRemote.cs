@@ -196,5 +196,33 @@ namespace VoicemeeterAPI
         VmVersion GetVersion();
 
         #endregion
+
+        #region Get Parameters
+
+        /// <summary>
+        ///   Checks if parameters have changed.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="ObjectDisposedException"></exception>
+        /// <exception cref="RemoteAccessException">
+        ///   Throws if <see cref="LoginStatus"/> is not <see cref="LoginResponse.Ok"/>.
+        /// </exception>
+        /// <exception cref="RemoteException">
+        ///   Throws if the API call fails or returns an invalid version value.
+        /// </exception>
+        /// <remarks>
+        ///   <para>Calls:</para>
+        ///   <list type="bullet">
+        ///     <item><description>
+        ///       A-tG: <see cref="RemoteApiWrapper.IsParametersDirty()"/>
+        ///     </description></item>
+        ///     <item><description>
+        ///       C API: long __stdcall VBVMR_IsParametersDirty(void);
+        ///     </description></item>
+        ///   </list>
+        /// </remarks>
+        bool ParamsDirty();
+
+        #endregion
     }
 }

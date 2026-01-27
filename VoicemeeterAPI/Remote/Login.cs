@@ -170,6 +170,8 @@ namespace VoicemeeterAPI
                 return false;
             }
 
+            while (ParamsDirty()) Thread.Sleep(1);
+
             return true;
         }
 
