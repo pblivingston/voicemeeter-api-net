@@ -100,6 +100,9 @@ namespace VoicemeeterAPI
 
             if (app <= (int)App.Potatox64 && !WaitForRunning())
                 throw new RunException(RunResponse.Timeout, (App)app);
+
+            if (app == (int)App.MacroButtons)
+                while (ButtonsDirty()) Thread.Sleep(1);
         }
 
         /// <inheritdoc cref="IRemote.Run{T}(T)"/>
@@ -170,7 +173,7 @@ namespace VoicemeeterAPI
                 return false;
             }
 
-            while (ParamsDirty()) Thread.Sleep(1);
+            while (ParamsDirty() || ButtonsDirty()) Thread.Sleep(1);
 
             return true;
         }

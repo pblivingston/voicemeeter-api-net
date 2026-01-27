@@ -120,8 +120,8 @@ namespace VoicemeeterAPI
         /// <exception cref="RemoteAccessException">
         ///   Throws if not <see cref="LoggedIn"/>.
         /// </exception>
-        /// <exception cref="GetKindException">
-        ///   Throws if the API call fails or returns an invalid kind value.
+        /// <exception cref="RemoteException">
+        ///   Throws if the API call returns an error or an invalid kind value.
         /// </exception>
         /// <remarks>
         ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.Ok"/> on successful call.</para>
@@ -151,7 +151,9 @@ namespace VoicemeeterAPI
         ///     </description></item>
         ///   </list>
         /// </param>
-        /// <returns>False if <see cref="GetKind()"/> throws a <see cref="RemoteException"/></returns>
+        /// <returns>
+        ///   False if <see cref="GetKind()"/> throws a <see cref="RemoteException"/>
+        /// </returns>
         bool TryGetKind(out Kind kind);
 
         /// <summary>
@@ -162,8 +164,8 @@ namespace VoicemeeterAPI
         /// <exception cref="RemoteAccessException">
         ///   Throws if not <see cref="LoggedIn"/>.
         /// </exception>
-        /// <exception cref="GetVersionException">
-        ///   Throws if the API call fails or returns an invalid version value.
+        /// <exception cref="RemoteException">
+        ///   Throws if the API call returns an error or an invalid version value.
         /// </exception>
         /// <remarks>
         ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.Ok"/> on successful call.</para>
@@ -209,7 +211,7 @@ namespace VoicemeeterAPI
         ///   Throws if <see cref="LoginStatus"/> is not <see cref="LoginResponse.Ok"/>.
         /// </exception>
         /// <exception cref="RemoteException">
-        ///   Throws if the API call fails or returns an invalid version value.
+        ///   Throws if the API call returns an error.
         /// </exception>
         /// <remarks>
         ///   <para>Calls:</para>
@@ -223,6 +225,34 @@ namespace VoicemeeterAPI
         ///   </list>
         /// </remarks>
         bool ParamsDirty();
+
+        #endregion
+
+        #region Macro Buttons
+
+        /// <summary>
+        ///   Checks if any button status has changed.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="ObjectDisposedException"></exception>
+        /// <exception cref="RemoteAccessException">
+        ///   Throws if <see cref="LoginStatus"/> is not <see cref="LoginResponse.Ok"/>.
+        /// </exception>
+        /// <exception cref="RemoteException">
+        ///   Throws if the API call returns an error.
+        /// </exception>
+        /// <remarks>
+        ///   <para>Calls:</para>
+        ///   <list type="bullet">
+        ///     <item><description>
+        ///       A-tG: <see cref="RemoteApiWrapper.MacroButtonIsDirty()"/>
+        ///     </description></item>
+        ///     <item><description>
+        ///       C API: long __stdcall VBVMR_MacroButton_IsDirty(void);
+        ///     </description></item>
+        ///   </list>
+        /// </remarks>
+        bool ButtonsDirty();
 
         #endregion
     }

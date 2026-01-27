@@ -59,6 +59,7 @@ The following methods are available (see below for details):
 - `GetVersion()` => `VmVersion`
 - `TryGetVersion(out VmVersion vm)` => `bool`
 - `ParamsDirty()` => `bool`
+- `ButtonsDirty()` => `bool`
 
 `Login()` must be called before any other methods, and `Logout()` should be called when finished.
 
@@ -121,6 +122,12 @@ If calling `TryGetVersion(out VmVersion vm)` and `GetVersion()` throws, returns 
 #### ParamsDirty()
 
 Checks if parameters have changed.
+
+Throws if `LoginStatus` is not `Ok` or API response is an error.
+
+#### ButtonsDirty()
+
+Checks if any button status has changed.
 
 Throws if `LoginStatus` is not `Ok` or API response is an error.
 

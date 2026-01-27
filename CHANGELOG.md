@@ -17,3 +17,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `GetKind()` and `TryGetKind(out k)` methods to get the running Voicemeeter kind.
   - `GetVersion()` and `TryGetVersion(out vm)` methods to get the running Voicemeeter version.
   - `ParamsDirty()` method to check if parameters have changed.
+  - `ButtonDirty(out button)` method to check if any button status has changed.

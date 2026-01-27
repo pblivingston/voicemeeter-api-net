@@ -6,7 +6,7 @@ using VoicemeeterAPI.Messages;
 namespace VoicemeeterAPI.Types
 {
     /// <summary>
-    ///   Responses from <see cref="Remote.ParamsDirty()"/>, ... (more to be added)
+    ///   Responses from <see cref="Remote.ParamsDirty()"/>, <see cref="Remote.ButtonsDirty()"/> ... (more to be added)
     /// </summary>
     public enum Response
     {
