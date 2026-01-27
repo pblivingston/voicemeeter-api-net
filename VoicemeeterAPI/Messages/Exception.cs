@@ -38,20 +38,6 @@ namespace VoicemeeterAPI.Messages
         public App App { get; } = a;
     }
 
-    internal sealed class GetKindException(InfoResponse r, Kind k)
-        : RemoteException($"GetKind failed - {r}; returned kind: {k}")
-    {
-        public InfoResponse Response { get; } = r;
-        public Kind Kind { get; } = k;
-    }
-
-    internal sealed class GetVersionException(InfoResponse r, VmVersion v)
-        : RemoteException($"GetVersion failed - {r}; returned version: {v}")
-    {
-        public InfoResponse Response { get; } = r;
-        public VmVersion Version { get; } = v;
-    }
-
     #endregion
 
     #region Voicemeeter Exceptions

@@ -5,6 +5,9 @@ using VoicemeeterAPI.Messages;
 
 namespace VoicemeeterAPI.Types
 {
+    /// <summary>
+    ///   Responses from <see cref="Remote.ParamsDirty()"/>, ... (more to be added)
+    /// </summary>
     public enum Response
     {
         StructureMismatch = -5,
@@ -42,7 +45,7 @@ namespace VoicemeeterAPI.Types
     }
 
     /// <summary>
-    ///   Responses from <see cref="Remote.GetKind()"/> for <see cref="GetKindException"/> and from <see cref="Remote.GetVersion()"/> for <see cref="GetVersionException"/>.
+    ///   Responses from <see cref="Remote.GetKind()"/> and <see cref="Remote.GetVersion()"/>.
     /// </summary>
     public enum InfoResponse
     {

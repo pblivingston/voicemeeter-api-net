@@ -21,7 +21,7 @@ namespace VoicemeeterAPI
             var result = (InfoResponse)_vmrApi.GetVoicemeeterType(out int k);
             var kind = (Kind)k;
             if (result != InfoResponse.Ok || kind < Kind.Standard || kind > Kind.Potato)
-                throw new GetKindException(result, kind);
+                throw new RemoteException($"GetKind failed - {result}; returned kind: {kind}");
 
             LoginStatus = LoginResponse.Ok;
             return kind;
@@ -56,7 +56,7 @@ namespace VoicemeeterAPI
             var result = (InfoResponse)_vmrApi.GetVoicemeeterVersion(out int v);
             var version = (VmVersion)v;
             if (result != InfoResponse.Ok || !version.IsValid())
-                throw new GetVersionException(result, version);
+                throw new RemoteException($"GetVersion failed - {result}; returned version: {version}");
 
             LoginStatus = LoginResponse.Ok;
             return version;
