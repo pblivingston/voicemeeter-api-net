@@ -46,19 +46,19 @@ Optional parameter:
 
 The following properties are available:
 
-- `LoginStatus`: `LoginResponse`; Possible values: `Ok, VoicemeeterNotRunning, LoggedOut, Unknown`
-- `LoggedIn`: `bool`; `true` if `LoginStatus` is either `Ok` or `VoicemeeterNotRunning`, otherwise `false`
-- `RunningKind`: `Kind`; Possible values: `Standard, Banana, Potato, None, Unknown`
-- `RunningVersion`: `VmVersion`
+- `LoginStatus` => `LoginResponse`; `Ok, VoicemeeterNotRunning, LoggedOut, Unknown`
+- `LoggedIn` => `bool`; `LoginStatus` is `Ok` or `VoicemeeterNotRunning`
 
 The following methods are available (see below for details):
 
-- `Login()`: `void`; Updates `LoginStatus` on successful login.
-- `Logout()`: `void`; Updates `LoginStatus` on timeout or successful logout.
-- `Run(app)`: `void`; Launches the application specified by `app`: `int`, `App`, `Kind`, `string`.
-- `GetKind()`: `Kind`; Returns the currently running Voicemeeter `Kind`.
-- `GetVersion()`: `VmVersion`; Returns the currently running Voicemeeter `VmVersion`.
-- `ParamsDirty()`: `bool`; Checks if parameters have changed.
+- `Login()` => `void`
+- `Logout()` => `void`
+- `Run<T>(T app)` => `void`
+- `GetKind()` => `Kind`
+- `TryGetKind(out Kind k)` => `bool`
+- `GetVersion()` => `VmVersion`
+- `TryGetVersion(out VmVersion vm)` => `bool`
+- `ParamsDirty()` => `bool`
 
 `Login()` must be called before any other methods, and `Logout()` should be called when finished.
 
@@ -106,7 +106,7 @@ Ensures `LoginStatus` is `Ok` if the call is successful.
 
 Throws if not logged in or API response is an error.
 
-Using the `RunningKind` property will reduce thrown exceptions, as it only calls `GetKind()` if `LoginStatus` is `Ok`, but this will not be accurate if Voicemeeter was launched by an external process. `RunningKind` returns `None` if `LoginStatus` is `VoicemeeterNotRunning` and `Unknown` if `LoginStatus` is otherwise not `Ok`.
+If calling `TryGetKind(out Kind k)` and `GetKind()` throws, returns false and sets `k` to either `None` (`VoicemeeterNotRunning`) or `Unknown`.
 
 #### GetVersion()
 
@@ -116,7 +116,7 @@ Ensures `LoginStatus` is `Ok` if the call is successful.
 
 Throws if not logged in or API response is an error.
 
-As with `RunningKind`, using the `RunningVersion` property will reduce thrown exceptions but can fall prone to innaccuracy in unexpected circumstances. `RunningVersion` returns a `VmVersion` "0.0.0.0" if `LoginStatus` is `VoicemeeterNotRunning` and a `VmVersion` "255.0.0.0" if `LoginStatus` is otherwise not `Ok`.
+If calling `TryGetVersion(out VmVersion vm)` and `GetVersion()` throws, returns false and sets `vm` to a new `VmVersion` either `"0.0.0.0"` (`VoicemeeterNotRunning`) or `"255.0.0.0"`.
 
 #### ParamsDirty()
 

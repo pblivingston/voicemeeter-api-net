@@ -27,6 +27,21 @@ namespace VoicemeeterAPI
             return kind;
         }
 
+        /// <inheritdoc/>
+        public bool TryGetKind(out Kind kind)
+        {
+            try
+            {
+                kind = GetKind();
+                return true;
+            }
+            catch (RemoteException)
+            {
+                kind = NoKind;
+                return false;
+            }
+        }
+
         #endregion
 
         #region Get Voicemeeter Version
@@ -45,6 +60,21 @@ namespace VoicemeeterAPI
 
             LoginStatus = LoginResponse.Ok;
             return version;
+        }
+
+        /// <inheritdoc/>
+        public bool TryGetVersion(out VmVersion vm)
+        {
+            try
+            {
+                vm = GetVersion();
+                return true;
+            }
+            catch (RemoteException)
+            {
+                vm = new(NoKind, 0, 0, 0);
+                return false;
+            }
         }
 
         #endregion

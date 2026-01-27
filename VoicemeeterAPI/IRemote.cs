@@ -29,39 +29,6 @@ namespace VoicemeeterAPI
         /// </remarks>
         bool LoggedIn { get; }
 
-        /// <summary>
-        ///   Gets the currently running Voicemeeter <see cref="Kind"/>.
-        /// </summary>
-        /// <remarks>
-        ///   <list type="bullet">
-        ///     <item><description>
-        ///       Calls <see cref="GetKind()"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.Ok"/>.
-        ///     </description></item>
-        ///     <item><description>
-        ///       <see cref="Kind.None"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.VoicemeeterNotRunning"/>.
-        ///     </description></item>
-        ///     <item><description>
-        ///       Otherwise, <see cref="Kind.Unknown"/>.
-        ///     </description></item>
-        ///   </list>
-        /// </remarks>
-        Kind RunningKind { get; }
-
-        /// <summary>
-        ///   Gets the currently running Voicemeeter <see cref="VmVersion"/>.
-        /// </summary>
-        /// <remarks>
-        ///   <list type="bullet">
-        ///     <item><description>
-        ///       Calls <see cref="GetVersion()"/> if <see cref="LoginStatus"/> is <see cref="LoginResponse.Ok"/>.
-        ///     </description></item>
-        ///     <item><description>
-        ///       Otherwise, a <see cref="VmVersion"/> with <see cref="RunningKind"/> and version 0.0.0.
-        ///     </description></item>
-        ///   </list>
-        /// </remarks>
-        VmVersion RunningVersion { get; }
-
         #region Login
 
         /// <summary>
@@ -171,6 +138,23 @@ namespace VoicemeeterAPI
         Kind GetKind();
 
         /// <summary>
+        ///   Attempts to get the running Voicemeeter kind.
+        /// </summary>
+        /// <param name="kind">
+        ///   If <see cref="GetKind()"/> throws
+        ///   <list type="bullet">
+        ///     <item><description>
+        ///       <see cref="Kind.None"/> when <see cref="LoginStatus"/> is <see cref="LoginResponse.VoicemeeterNotRunning"/>
+        ///     </description></item>
+        ///     <item><description>
+        ///       <see cref="Kind.Unknown"/> otherwise
+        ///     </description></item>
+        ///   </list>
+        /// </param>
+        /// <returns>False if <see cref="GetKind()"/> throws a <see cref="RemoteException"/></returns>
+        bool TryGetKind(out Kind kind);
+
+        /// <summary>
         ///   Gets the currently running Voicemeeter version.
         /// </summary>
         /// <returns><see cref="VmVersion"/></returns>
@@ -194,6 +178,23 @@ namespace VoicemeeterAPI
         ///   </list>
         /// </remarks>
         VmVersion GetVersion();
+
+        /// <summary>
+        ///   Attempts to get the running Voicemeeter version.
+        /// </summary>
+        /// <param name="vm">
+        ///   If <see cref="GetVersion()"/> throws
+        ///   <list type="bullet">
+        ///     <item><description>
+        ///       "0.0.0.0" when <see cref="LoginStatus"/> is <see cref="LoginResponse.VoicemeeterNotRunning"/>
+        ///     </description></item>
+        ///     <item><description>
+        ///       "255.0.0.0" otherwise
+        ///     </description></item>
+        ///   </list>
+        /// </param>
+        /// <returns>False if <see cref="GetVersion()"/> throws a <see cref="RemoteException"/></returns>
+        bool TryGetVersion(out VmVersion vm);
 
         #endregion
 
