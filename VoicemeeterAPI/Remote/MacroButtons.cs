@@ -5,30 +5,29 @@ using System;
 using VoicemeeterAPI.Types;
 using VoicemeeterAPI.Messages;
 
-namespace VoicemeeterAPI
+namespace VoicemeeterAPI;
+
+partial class Remote
 {
-    partial class Remote
+    #region MacroButton Is Dirty
+
+    /// <inheritdoc/>
+    public bool ButtonsDirty()
     {
-        #region MacroButton Is Dirty
+        if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
 
-        /// <inheritdoc/>
-        public bool ButtonsDirty()
+        if (LoginStatus is not LoginResponse.Ok)
+            throw new RemoteAccessException(nameof(ButtonsDirty), LoginStatus);
+
+        var result = (Response)_vmrApi.MacroButtonIsDirty();
+
+        return result switch
         {
-            if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
-
-            if (LoginStatus is not LoginResponse.Ok)
-                throw new RemoteAccessException(nameof(ButtonsDirty), LoginStatus);
-
-            var result = (Response)_vmrApi.MacroButtonIsDirty();
-
-            return result switch
-            {
-                Response.Ok => false,
-                Response.Dirty => true,
-                _ => throw new RemoteException($"ButtonDirty failed - {result}")
-            };
-        }
-
-        #endregion
+            Response.Ok => false,
+            Response.Dirty => true,
+            _ => throw new RemoteException($"ButtonDirty failed - {result}")
+        };
     }
+
+    #endregion
 }

@@ -5,114 +5,113 @@ using System;
 using VoicemeeterAPI.Types;
 using VoicemeeterAPI.Messages;
 
-namespace VoicemeeterAPI
+namespace VoicemeeterAPI;
+
+partial class Remote
 {
-    partial class Remote
+    #region Is Parameters Dirty
+
+    /// <inheritdoc/>
+    public bool ParamsDirty()
     {
-        #region Is Parameters Dirty
+        if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
 
-        /// <inheritdoc/>
-        public bool ParamsDirty()
+        if (LoginStatus is not LoginResponse.Ok)
+            throw new RemoteAccessException(nameof(ParamsDirty), LoginStatus);
+
+        var result = (Response)_vmrApi.IsParametersDirty();
+
+        return result switch
         {
-            if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
+            Response.Ok => false,
+            Response.Dirty => true,
+            _ => throw new RemoteException($"ParamsDirty failed - {result}"),
+        };
+    }
 
-            if (LoginStatus is not LoginResponse.Ok)
-                throw new RemoteAccessException(nameof(ParamsDirty), LoginStatus);
+    #endregion
 
-            var result = (Response)_vmrApi.IsParametersDirty();
+    #region Get Parameter Float
 
-            return result switch
-            {
-                Response.Ok => false,
-                Response.Dirty => true,
-                _ => throw new RemoteException($"ParamsDirty failed - {result}"),
-            };
-        }
+    /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
+    public void GetParam(string param, out float value)
+    {
+        if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
 
-        #endregion
+        if (LoginStatus is not LoginResponse.Ok)
+            throw new RemoteAccessException(nameof(ParamsDirty), LoginStatus);
 
-        #region Get Parameter Float
+        var result = (Response)_vmrApi.GetParameter(param, out value);
 
-        /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
-        public void GetParam(string param, out float value)
-        {
-            if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
+        if (result != Response.Ok)
+            throw new RemoteException($"GetParam failed - {result}; requested param: {param}, returned value: {value}");
+    }
 
-            if (LoginStatus is not LoginResponse.Ok)
-                throw new RemoteAccessException(nameof(ParamsDirty), LoginStatus);
+    /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
+    public void GetParam(string param, out int value)
+    {
+        GetParam(param, out float val);
+        value = (int)val;
+    }
 
-            var result = (Response)_vmrApi.GetParameter(param, out value);
+    /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
+    public void GetParam(string param, out bool value)
+    {
+        GetParam(param, out float val);
+        value = val != 0;
+    }
 
-            if (result != Response.Ok)
-                throw new RemoteException($"GetParam failed - {result}; requested param: {param}, returned value: {value}");
-        }
+    #endregion
 
-        /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
-        public void GetParam(string param, out int value)
+    #region Get Parameter String
+
+    /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
+    public void GetParam(string param, out string value)
+    {
+        if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
+
+        if (LoginStatus is not LoginResponse.Ok)
+            throw new RemoteAccessException(nameof(ParamsDirty), LoginStatus);
+
+        var result = (Response)_vmrApi.GetParameter(param, out value);
+
+        if (result != Response.Ok)
+            throw new RemoteException($"GetParam failed - {result}; requested param: {param}, returned value: {value}");
+    }
+
+    #endregion
+
+    /// <inheritdoc/>
+    void IRemote.GetParam<T>(string param, out T value)
+    {
+        if (typeof(T) == typeof(float))
         {
             GetParam(param, out float val);
-            value = (int)val;
+            value = (T)(object)val;
+            return;
         }
 
-        /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
-        public void GetParam(string param, out bool value)
+        if (typeof(T) == typeof(int))
         {
-            GetParam(param, out float val);
-            value = val != 0;
+            GetParam(param, out int val);
+            value = (T)(object)val;
+            return;
         }
 
-        #endregion
-
-        #region Get Parameter String
-
-        /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
-        public void GetParam(string param, out string value)
+        if (typeof(T) == typeof(bool))
         {
-            if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
-
-            if (LoginStatus is not LoginResponse.Ok)
-                throw new RemoteAccessException(nameof(ParamsDirty), LoginStatus);
-
-            var result = (Response)_vmrApi.GetParameter(param, out value);
-
-            if (result != Response.Ok)
-                throw new RemoteException($"GetParam failed - {result}; requested param: {param}, returned value: {value}");
+            GetParam(param, out bool val);
+            value = (T)(object)val;
+            return;
         }
 
-        #endregion
-
-        /// <inheritdoc/>
-        void IRemote.GetParam<T>(string param, out T value)
+        if (typeof(T) == typeof(string))
         {
-            if (typeof(T) == typeof(float))
-            {
-                GetParam(param, out float val);
-                value = (T)(object)val;
-                return;
-            }
-
-            if (typeof(T) == typeof(int))
-            {
-                GetParam(param, out int val);
-                value = (T)(object)val;
-                return;
-            }
-
-            if (typeof(T) == typeof(bool))
-            {
-                GetParam(param, out bool val);
-                value = (T)(object)val;
-                return;
-            }
-
-            if (typeof(T) == typeof(string))
-            {
-                GetParam(param, out string val);
-                value = (T)(object)val;
-                return;
-            }
-
-            throw new NotSupportedException($"'{nameof(value)}' type '{typeof(T)}' is not supported for GetParams.");
+            GetParam(param, out string val);
+            value = (T)(object)val;
+            return;
         }
+
+        throw new NotSupportedException($"'{nameof(value)}' type '{typeof(T)}' is not supported for GetParams.");
     }
 }
