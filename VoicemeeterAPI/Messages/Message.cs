@@ -7,50 +7,60 @@ namespace VoicemeeterAPI.Messages
 {
     internal static class VmApiMessage
     {
-        public static void Write(string? domain, string? level, string message)
+        public static void Write(string message, string? domain = null, string? level = null)
         {
-            var prefix = $"[VoicemeeterAPI]";
-            if (!string.IsNullOrWhiteSpace(domain)) prefix += $" {domain}";
-            if (!string.IsNullOrWhiteSpace(level)) prefix += $" {level}";
-            else prefix += $" Message";
-            Console.WriteLine($"{prefix}: {message}");
+            var d = string.IsNullOrWhiteSpace(domain) ? "" : $"{domain} ";
+            var l = string.IsNullOrWhiteSpace(domain) ? "Message" : level;
+
+            Console.WriteLine($"[VoicemeeterAPI] {d}{l}: {message}");
         }
+    }
 
-        public static void Write(string? domain, string? level, string format, params object[] args)
-            => Write(domain, level, string.Format(format, args));
+    internal static class VmApiInfo
+    {
+        public static void Write(string message, string? domain = null)
+            => VmApiMessage.Write(message, domain, "Info");
+    }
 
-        public static void Write(string message)
-            => Write(null, null, message);
-
-        public static void Write(string format, params object[] args)
-            => Write(null, null, string.Format(format, args));
+    internal static class VmApiWarning
+    {
+        public static void Write(string message, string? domain = null)
+            => VmApiMessage.Write(message, domain, "Warning");
     }
 
     internal static class RemoteMessage
     {
-        public static void Write(string? level, string message)
-            => VmApiMessage.Write("Remote", level, message);
+        public static void Write(string message, string? level = null)
+            => VmApiMessage.Write(message, "Remote", level);
+    }
 
-        public static void Write(string? level, string format, params object[] args)
-            => VmApiMessage.Write("Remote", level, format, args);
-
+    internal static class RemoteInfo
+    {
         public static void Write(string message)
-            => Write(null, message);
+            => VmApiInfo.Write(message, "Remote");
+    }
 
-        public static void Write(string format, params object[] args)
-            => Write(null, format, args);
+    internal static class RemoteWarning
+    {
+        public static void Write(string message)
+            => VmApiWarning.Write(message, "Remote");
     }
 
     internal static class VoicemeeterMessage
     {
-        public static void Write(string? level, string message)
-            => VmApiMessage.Write("Voicemeeter", level, message);
-        public static void Write(string? level, string format, params object[] args)
-            => VmApiMessage.Write("Voicemeeter", level, format, args);
+        public static void Write(string message, string? level = null)
+            => VmApiMessage.Write(message, "Voicemeeter", level);
+    }
 
+    internal static class VoicemeeterInfo
+    {
         public static void Write(string message)
-            => Write(null, message);
-        public static void Write(string format, params object[] args)
-            => Write(null, format, args);
+            => VmApiInfo.Write(message, "Voicemeeter");
+    }
+
+    internal static class VoicemeeterWarning
+    {
+        public static void Write(string message)
+            => VmApiWarning.Write(message, "Voicemeeter");
     }
 }
