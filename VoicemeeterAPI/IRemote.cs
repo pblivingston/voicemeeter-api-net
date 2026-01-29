@@ -32,7 +32,7 @@ namespace VoicemeeterAPI
         #region Login
 
         /// <summary>
-        ///   Open communication pipe with VoicemeeterRemote
+        ///   Opens communication pipe with VoicemeeterRemote.
         /// </summary>
         /// <exception cref="ObjectDisposedException"></exception>
         /// <exception cref="RemoteAccessException">
@@ -43,6 +43,7 @@ namespace VoicemeeterAPI
         /// </exception>
         /// <remarks>
         ///   <para>Updates <see cref="LoginStatus"/> on successful login.</para>
+        ///   <para>If API call returns <see cref="LoginResponse.Ok"/>, waits for the running Voicemeeter instance to be detected.</para>
         ///   <para>Calls:</para>
         ///   <list type="bullet">
         ///     <item><description>
@@ -57,7 +58,7 @@ namespace VoicemeeterAPI
         void Login();
 
         /// <summary>
-        ///   Close communication pipe with VoicemeeterRemote
+        ///   Closes communication pipe with VoicemeeterRemote.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///   Only throws on disposed instances to allow multiple logout attempts.
@@ -84,6 +85,9 @@ namespace VoicemeeterAPI
         /// </summary>
         /// <typeparam name="T">int, <see cref="App"/>, <see cref="Kind"/>, or string</typeparam>
         /// <param name="app"></param>
+        /// <exception cref="ArgumentException">
+        ///   Throws if the given type is not supported or parsing a given string fails.
+        /// </exception>
         /// <exception cref="ObjectDisposedException"></exception>
         /// <exception cref="RemoteAccessException">
         ///   Throws if not <see cref="LoggedIn"/>.
@@ -225,6 +229,40 @@ namespace VoicemeeterAPI
         ///   </list>
         /// </remarks>
         bool ParamsDirty();
+
+        /// <summary>
+        ///   Gets the requested Voicemeeter parameter.
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="value"></param>
+        /// <exception cref="NotSupportedException">
+        ///   Throws if the given value type is not supported.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException"></exception>
+        /// <exception cref="RemoteAccessException">
+        ///   Throws if <see cref="LoginStatus"/> is not <see cref="LoginResponse.Ok"/>.
+        /// </exception>
+        /// <exception cref="RemoteException">
+        ///   Throws if the API call returns an error.
+        /// </exception>
+        /// <remarks>
+        ///   <para>Calls:</para>
+        ///   <list type="bullet">
+        ///     <item><description>
+        ///       A-tG float: <see cref="RemoteApiWrapper.GetParameter(string, out float)"/>
+        ///     </description></item>
+        ///     <item><description>
+        ///       A-tG string: <see cref="RemoteApiWrapper.GetParameter(string, out string)"/>
+        ///     </description></item>
+        ///     <item><description>
+        ///       C API float: long __stdcall VBVMR_GetParameterFloat(char * szParamName, float * pValue);
+        ///     </description></item>
+        ///     <item><description>
+        ///       C API string: long __stdcall VBVMR_GetParameterStringW(char * szParamName, unsigned short * wszString);
+        ///     </description></item>
+        ///   </list>
+        /// </remarks>
+        void GetParam<T>(string param, out T value);
 
         #endregion
 

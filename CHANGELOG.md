@@ -10,11 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Initial development
 
 - `Remote` class for interacting with the Voicemeeter Remote API. See [README](README.md) for usage details.
-  - `Login()` and `Logout()` methods to manage API sessions.
   - `LoginStatus` property to check the current login state.
   - `LoggedIn` bool property to simplify login status checks.
+
+  - `Login()` and `Logout()` methods to manage API sessions.
   - `Run(app)` method to launch VB-Audio applications.
+
   - `GetKind()` and `TryGetKind(out k)` methods to get the running Voicemeeter kind.
   - `GetVersion()` and `TryGetVersion(out vm)` methods to get the running Voicemeeter version.
+
   - `ParamsDirty()` method to check if parameters have changed.
+  - `GetParam(param, value)` method to get the requested Voicemeeter parameter.
+
   - `ButtonDirty(out button)` method to check if any button status has changed.

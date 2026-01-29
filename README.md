@@ -46,20 +46,21 @@ Optional parameter:
 
 The following properties are available:
 
-- `LoginStatus` => `LoginResponse`; `Ok, VoicemeeterNotRunning, LoggedOut, Unknown`
-- `LoggedIn` => `bool`; `LoginStatus` is `Ok` or `VoicemeeterNotRunning`
+- `LoginStatus => LoginResponse`: `Ok, VoicemeeterNotRunning, LoggedOut, Unknown`
+- `LoggedIn => bool`: `LoginStatus` is `Ok` or `VoicemeeterNotRunning`
 
 The following methods are available (see below for details):
 
-- `Login()` => `void`
-- `Logout()` => `void`
-- `Run<T>(T app)` => `void`
-- `GetKind()` => `Kind`
-- `TryGetKind(out Kind k)` => `bool`
-- `GetVersion()` => `VmVersion`
-- `TryGetVersion(out VmVersion vm)` => `bool`
-- `ParamsDirty()` => `bool`
-- `ButtonsDirty()` => `bool`
+- `Login() => void`
+- `Logout() => void`
+- `Run<T>(T app) => void`
+- `GetKind() => Kind`
+- `TryGetKind(out Kind k) => bool`
+- `GetVersion() => VmVersion`
+- `TryGetVersion(out VmVersion vm) => bool`
+- `ParamsDirty() => bool`
+- `GetParam(param, out value) => void`
+- `ButtonsDirty() => bool`
 
 `Login()` must be called before any other methods, and `Logout()` should be called when finished.
 
@@ -85,7 +86,9 @@ finally
 
 Opens communication pipe with VoicemeeterRemote. Updates `LoginStatus` on successful login.
 
-Throws if the pipe is already open.
+Throws if the pipe is already open or the API response is an error.
+
+If API response is `Ok`, waits for the running Voicemeeter instance to be detected.
 
 #### Logout()
 
@@ -97,7 +100,11 @@ Does nothing if the pipe is already closed.
 
 Launches the specified application.
 
-`app` parameter can be an `int`, `App`, `Kind`, or `string` representing the application to launch.
+- `app`: `int`, `App`, `Kind`, or `string` representing the application to launch
+
+Throws if not logged in or API response is an error.
+
+If `app` is a Voicemeeter application (e.g. `3`, `App.Bananax64`, `Kind.Potato`, `"Standard"`, etc.), automatically adjusts for OS bitness where necessary and waits for the process to start.
 
 #### GetKind()
 
@@ -122,6 +129,15 @@ If calling `TryGetVersion(out VmVersion vm)` and `GetVersion()` throws, returns 
 #### ParamsDirty()
 
 Checks if parameters have changed.
+
+Throws if `LoginStatus` is not `Ok` or API response is an error.
+
+#### GetParam(param, out value)
+
+Gets the requested Voicemeeter parameter.
+
+- `param`: requested parameter string
+- `out value`: `float`, `int`, `bool`, or `string` depending on the requested Voicemeeter parameter
 
 Throws if `LoginStatus` is not `Ok` or API response is an error.
 
