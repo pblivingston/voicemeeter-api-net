@@ -12,10 +12,10 @@ namespace VoicemeeterAPI;
 /// <summary>
 ///   Implements the <see cref="IRemote"/> interface to provide methods for interacting with the VoicemeeterRemote API.
 /// </summary>
-/// <param name="wrapper"><see cref="RemoteApiWrapper"/></param>
+/// <param name="wrapper"><see cref="IWrapper"/></param>
 /// <exception cref="ArgumentNullException"></exception>
 /// <remarks>
-///   The primary constructor initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="RemoteApiWrapper"/>.
+///   The primary constructor initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="IWrapper"/>.
 /// </remarks>
 /// <example>
 ///   <code>
@@ -31,9 +31,9 @@ namespace VoicemeeterAPI;
 ///     }
 ///   </code>
 /// </example>
-public sealed partial class Remote(RemoteApiWrapper wrapper) : IRemote
+public sealed partial class Remote(IWrapper wrapper) : IRemote
 {
-    private readonly RemoteApiWrapper _vmrApi = wrapper ?? throw new ArgumentNullException(nameof(wrapper));
+    private readonly IWrapper _vmrApi = wrapper ?? throw new ArgumentNullException(nameof(wrapper));
     private bool _isDisposed = false;
 
     /// <inheritdoc/>
@@ -45,10 +45,18 @@ public sealed partial class Remote(RemoteApiWrapper wrapper) : IRemote
         ? Kind.None : Kind.Unknown;
 
     /// <summary>
+    ///   Initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="RemoteApiWrapper"/>.
+    /// </summary>
+    /// <param name="apiWrapper"></param>
+    public Remote(RemoteApiWrapper apiWrapper) : this(new Wrapper(apiWrapper))
+    {
+    }
+
+    /// <summary>
     ///   Initializes a new instance of the <see cref="Remote"/> class with a new <see cref="RemoteApiWrapper"/> using the specified DLL path.
     /// </summary>
     /// <param name="dllPath"></param>
-    /// <inheritdoc cref="Remote(RemoteApiWrapper)" path="/example"/>
+    /// <inheritdoc cref="Remote(IWrapper)" path="/example"/>
     public Remote(string dllPath) : this(new RemoteApiWrapper(dllPath))
     {
     }
@@ -59,7 +67,7 @@ public sealed partial class Remote(RemoteApiWrapper wrapper) : IRemote
     /// <remarks>
     ///   Uses <see cref="PathHelper.GetDllPath()"/> to determine the default path.
     /// </remarks>
-    /// <inheritdoc cref="Remote(RemoteApiWrapper)" path="/example"/>
+    /// <inheritdoc cref="Remote(IWrapper)" path="/example"/>
     public Remote() : this(new RemoteApiWrapper(PathHelper.GetDllPath()))
     {
     }
