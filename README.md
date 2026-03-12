@@ -67,7 +67,7 @@ The following methods are available (see below for details):
 example:
 
 ```csharp
-using VoicemeeterAPI;
+using PBLivingston.VoicemeeterAPI;
 
 using var vmr = new Remote();
 try
