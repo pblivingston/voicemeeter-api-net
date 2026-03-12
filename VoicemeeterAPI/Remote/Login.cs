@@ -4,10 +4,10 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
-using VoicemeeterAPI.Types;
-using VoicemeeterAPI.Messages;
+using PBLivingston.VoicemeeterAPI.Types;
+using PBLivingston.VoicemeeterAPI.Messages;
 
-namespace VoicemeeterAPI;
+namespace PBLivingston.VoicemeeterAPI;
 
 partial class Remote
 {

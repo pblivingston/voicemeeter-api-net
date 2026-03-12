@@ -3,7 +3,7 @@
 
 using System;
 
-namespace VoicemeeterAPI.Types;
+namespace PBLivingston.VoicemeeterAPI.Types;
 
 /// <summary>
 ///   Voicemeeter kinds returned by <see cref="Remote.GetKind()"/>.

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace VoicemeeterAPI.Messages;
+namespace PBLivingston.VoicemeeterAPI.Messages;
 
 internal static class VmApiMessage
 {

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace VoicemeeterAPI.Types;
+namespace PBLivingston.VoicemeeterAPI.Types;
 
 public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 {

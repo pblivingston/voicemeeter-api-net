@@ -3,7 +3,7 @@
 
 using System;
 
-namespace VoicemeeterAPI.Types;
+namespace PBLivingston.VoicemeeterAPI.Types;
 
 public interface IVersion<T> : IEquatable<T>, IComparable<T>, IVersion
     where T : struct, IVersion<T>

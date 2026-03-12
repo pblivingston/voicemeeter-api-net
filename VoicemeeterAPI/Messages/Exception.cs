@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using System;
-using VoicemeeterAPI.Types;
+using PBLivingston.VoicemeeterAPI.Types;
 
-namespace VoicemeeterAPI.Messages;
+namespace PBLivingston.VoicemeeterAPI.Messages;
 
 internal abstract class VmApiException(string m)
     : Exception($"[VoicemeeterAPI] {m}")

@@ -5,9 +5,9 @@ using System;
 using AtgDev.Utils.Native;
 using AtgDev.Voicemeeter;
 using AtgDev.Voicemeeter.Utils;
-using VoicemeeterAPI.Types;
+using PBLivingston.VoicemeeterAPI.Types;
 
-namespace VoicemeeterAPI;
+namespace PBLivingston.VoicemeeterAPI;
 
 /// <summary>
 ///   Implements the <see cref="IRemote"/> interface to provide methods for interacting with the VoicemeeterRemote API.

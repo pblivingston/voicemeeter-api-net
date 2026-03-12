@@ -3,10 +3,10 @@
 
 using System;
 using AtgDev.Voicemeeter;
-using VoicemeeterAPI.Types;
-using VoicemeeterAPI.Messages;
+using PBLivingston.VoicemeeterAPI.Types;
+using PBLivingston.VoicemeeterAPI.Messages;
 
-namespace VoicemeeterAPI;
+namespace PBLivingston.VoicemeeterAPI;
 
 /// <summary>
 ///   Interface for interacting with the VoicemeeterRemote API via <see cref="RemoteApiWrapper"/>.

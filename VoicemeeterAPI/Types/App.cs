@@ -3,7 +3,7 @@
 
 using System;
 
-namespace VoicemeeterAPI.Types;
+namespace PBLivingston.VoicemeeterAPI.Types;
 
 /// <summary>
 ///   Applications that can be run with <see cref="Remote.Run(App)"/>.

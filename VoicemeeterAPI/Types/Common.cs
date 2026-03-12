@@ -1,7 +1,7 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-namespace VoicemeeterAPI.Types;
+namespace PBLivingston.VoicemeeterAPI.Types;
 
 public static class Utils
 {

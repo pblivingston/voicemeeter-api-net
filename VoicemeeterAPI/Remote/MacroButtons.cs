@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using System;
-using VoicemeeterAPI.Types;
-using VoicemeeterAPI.Messages;
+using PBLivingston.VoicemeeterAPI.Types;
+using PBLivingston.VoicemeeterAPI.Messages;
 
-namespace VoicemeeterAPI;
+namespace PBLivingston.VoicemeeterAPI;
 
 partial class Remote
 {

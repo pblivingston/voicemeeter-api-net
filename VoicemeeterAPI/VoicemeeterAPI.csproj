@@ -15,6 +15,7 @@
     <PackageTags>Voicemeeter vmrapi</PackageTags>
     <PackageReleaseNotes>See CHANGELOG.md</PackageReleaseNotes>
     <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
+    <RootNamespace>PBLivingston.VoicemeeterAPI</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

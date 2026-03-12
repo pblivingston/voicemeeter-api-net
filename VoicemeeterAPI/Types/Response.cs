@@ -1,9 +1,9 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using VoicemeeterAPI.Messages;
+using PBLivingston.VoicemeeterAPI.Messages;
 
-namespace VoicemeeterAPI.Types;
+namespace PBLivingston.VoicemeeterAPI.Types;
 
 /// <summary>
 ///   Responses from <see cref="Remote.ParamsDirty()"/>, <see cref="Remote.ButtonsDirty()"/> ... (more to be added)

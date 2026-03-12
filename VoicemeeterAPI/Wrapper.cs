@@ -3,7 +3,7 @@
 
 using AtgDev.Voicemeeter;
 
-namespace VoicemeeterAPI;
+namespace PBLivingston.VoicemeeterAPI;
 
 /// <summary>
 ///   Implements the <see cref="IWrapper"/> interface to abstract underlying calls to the VoicemeeterRemote API.

@@ -4,7 +4,7 @@
 using System;
 using AtgDev.Voicemeeter;
 
-namespace VoicemeeterAPI;
+namespace PBLivingston.VoicemeeterAPI;
 
 /// <summary>
 ///   Interface to abstract underlying calls to the VoicemeeterRemote API.
