@@ -38,7 +38,7 @@ The `Remote` class provides access to the Voicemeeter Remote API.
 
 Optional parameter:
 
-- `wrapper`: an instance of `AtgDev.Voicemeeter.RemoteApiWrapper`
+- `apiWrapper`: an instance of `AtgDev.Voicemeeter.RemoteApiWrapper`
 
   or
 
