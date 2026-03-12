@@ -9,7 +9,7 @@ namespace PBLivingston.VoicemeeterAPI;
 /// <summary>
 ///   Interface to abstract underlying calls to the VoicemeeterRemote API.
 /// </summary>
-public interface IWrapper : IDisposable
+internal interface IWrapper : IDisposable
 {
     /// <inheritdoc cref="RemoteApiWrapper.Login()"/>
     int Login();
