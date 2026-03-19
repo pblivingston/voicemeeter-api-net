@@ -25,4 +25,10 @@
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="PBLivingston.VoicemeeterAPI.Tests.UnitTests" />
+    <InternalsVisibleTo Include="PBLivingston.VoicemeeterAPI.Tests.IntegrationTests" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
 </Project>

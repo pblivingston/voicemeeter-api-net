@@ -6,6 +6,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoicemeeterAPI", "Voicemeet
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{35460613-8843-4870-84C0-07AA716547DB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VoicemeeterAPI.Tests", "VoicemeeterAPI.Tests", "{3F69488F-F5B8-4B94-97DA-F4F787417B04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "VoicemeeterAPI.Tests\UnitTests\UnitTests.csproj", "{5C7F360D-9A17-4CEF-B75B-C75E57AB27D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "VoicemeeterAPI.Tests\IntegrationTests\IntegrationTests.csproj", "{9F4DBC0E-D920-41E2-93C5-E318114F8E0B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,11 +26,27 @@ Global
 		{35460613-8843-4870-84C0-07AA716547DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35460613-8843-4870-84C0-07AA716547DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35460613-8843-4870-84C0-07AA716547DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E7E3549-B099-4FF9-A686-D13413C7E8DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E7E3549-B099-4FF9-A686-D13413C7E8DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E7E3549-B099-4FF9-A686-D13413C7E8DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E7E3549-B099-4FF9-A686-D13413C7E8DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C7F360D-9A17-4CEF-B75B-C75E57AB27D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C7F360D-9A17-4CEF-B75B-C75E57AB27D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C7F360D-9A17-4CEF-B75B-C75E57AB27D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C7F360D-9A17-4CEF-B75B-C75E57AB27D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F4DBC0E-D920-41E2-93C5-E318114F8E0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F4DBC0E-D920-41E2-93C5-E318114F8E0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F4DBC0E-D920-41E2-93C5-E318114F8E0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F4DBC0E-D920-41E2-93C5-E318114F8E0B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2AA51CF8-B790-40B6-8C06-E217912A0BDA}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5C7F360D-9A17-4CEF-B75B-C75E57AB27D8} = {3F69488F-F5B8-4B94-97DA-F4F787417B04}
+		{9F4DBC0E-D920-41E2-93C5-E318114F8E0B} = {3F69488F-F5B8-4B94-97DA-F4F787417B04}
 	EndGlobalSection
 EndGlobal
