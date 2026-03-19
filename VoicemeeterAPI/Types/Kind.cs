@@ -39,7 +39,7 @@ public static class KindUtils
 
     public static bool IsValid<T>(T kind) where T : unmanaged
         => IsKindType<T>()
-        && kind is > 0 and <= 3;
+        && (int)(object)kind is > 0 and <= 3;
 
     #region Type Validation
 
