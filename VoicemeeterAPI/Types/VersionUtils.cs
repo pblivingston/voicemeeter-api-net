@@ -62,15 +62,25 @@ public static class VersionUtils
     public static bool TryParse(string s, out int kind, out int maj, out int min, out int pat)
     {
         kind = 0; maj = 0; min = 0; pat = 0;
+
         if (string.IsNullOrWhiteSpace(s)) return false;
         var parts = s.Split('.');
         var l = parts.Length;
         if (l is not (3 or 4)) return false;
-        if (l == 4 && !(int.TryParse(parts[0], out kind) && KindUtils.IsValid(kind))) return false;
-        if (!int.TryParse(parts[l - 3], out maj)) return false;
-        if (!int.TryParse(parts[l - 2], out min)) return false;
-        if (!int.TryParse(parts[l - 1], out pat)) return false;
-        if (!IsValid(maj, min, pat)) return false;
+
+        if (!int.TryParse(parts[l - 3], out int m)) return false;
+        if (!int.TryParse(parts[l - 2], out int n)) return false;
+        if (!int.TryParse(parts[l - 1], out int p)) return false;
+        if (!IsValid(m, n, p)) return false;
+
+        if (l == 4)
+        {
+            if (!(int.TryParse(parts[0], out int k) && KindUtils.IsValid(k)))
+                return false;
+            kind = k;
+        }
+
+        maj = m; min = n; pat = p;
         return true;
     }
 
