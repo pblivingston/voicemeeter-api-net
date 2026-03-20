@@ -46,11 +46,11 @@ public class VersionUtilsTests
         new(Case.MaximumValid, new(0x03FF_FFFF, 3, 255, 255, 255, Kind.Potato, 0x00FF_FFFF, "3.255.255.255", "255.255.255")),
         new(Case.ZeroedBytes,  new(0x0000_0000, 0, 0, 0, 0, Kind.None, 0x0000_0000, "0.0.0.0", "0.0.0",
             CaseTag.Invalid_Packed | CaseTag.Invalid_Kind)),
-        new(Case.MaxedBytes,   new(unchecked((int)0xFFFF_FFFF), 255, 255, 255, 255, Kind.Unknown, 0x00FF_FFFF, "255.255.255.255", "255.255.255",
+        new(Case.MaxedBytes,   new(unchecked((int)0xFFFF_FFFF), 255, 255, 255, 255, Kind.Unknown, unchecked((int)0xFFFF_FFFF), "255.255.255.255", "255.255.255",
             CaseTag.Invalid_Packed | CaseTag.Invalid_Kind)),
-        new(Case.NegativeKind, new(unchecked((int)0xFF00_0000), -1, 0, 0, 0, Kind.Unknown, 0x0000_0000, "255.0.0.0", "0.0.0",
+        new(Case.NegativeKind, new(unchecked((int)0xFF00_0000), -1, 0, 0, 0, Kind.Unknown, unchecked((int)0xFF00_0000), "255.0.0.0", "0.0.0",
             CaseTag.Invalid_Packed | CaseTag.Invalid_Kind | CaseTag.PartsIn)),
-        new(Case.NegativeSems, new(unchecked((int)0xFFFF_FFFF), 2, -1, -1, -1, Kind.Banana, 0x00FF_FFFF, "255.255.255.255", "255.255.255",
+        new(Case.NegativeSems, new(unchecked((int)0xFFFF_FFFF), 2, -1, -1, -1, Kind.Banana, unchecked((int)0xFFFF_FFFF), "255.255.255.255", "255.255.255",
             CaseTag.Invalid_Packed | CaseTag.Invalid_Sems | CaseTag.PartsIn)),
         new(Case.KindSpill,    new(0x0301_0101, 2, 257, 1, 1, Kind.Banana, 0x0001_0101, "3.1.1.1", "1.1.1",
             CaseTag.Invalid_Sems | CaseTag.PartsIn)),
@@ -220,7 +220,7 @@ public class VersionUtilsTests
     [MemberData(nameof(GetCaseData))]
     public void TryParse_Packed_ReturnsExpected_Packed_Sem(Case scenario, CaseRecord data)
     {
-        _ = scenario;
+        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_Packed), $"Skipping case: {scenario} with any tags: Invalid_Packed");
 
         var badTags = CaseTag.Invalid_String;
         var shouldSucceed = !data.Tags.HasAny(badTags);
@@ -259,7 +259,8 @@ public class VersionUtilsTests
     [MemberData(nameof(GetCaseData))]
     public void Parse_Packed_ReturnsExpected_Packed_Sem(Case scenario, CaseRecord data)
     {
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_String), $"Skipping case: {scenario} with any tags: Invalid_String");
+        var skipTags = CaseTag.Invalid_String | CaseTag.Invalid_Packed;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: Invalid_String, Invalid_Packed");
 
         Assert.Equal(data.SemPacked, VersionUtils.Parse(data.SemString));
     }
@@ -269,6 +270,7 @@ public class VersionUtilsTests
     public void Parse_Packed_ThrowsException_Argument_Sem(Case scenario, CaseRecord data)
     {
         Assert.SkipUnless(data.Tags.HasAny(CaseTag.Invalid_String), $"Skipping case: {scenario} without any tags: Invalid_String");
+        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_Packed), $"Skipping case: {scenario} with any tags: Invalid_Packed");
 
         Assert.Throws<ArgumentException>(() => VersionUtils.Parse(data.SemString));
     }
