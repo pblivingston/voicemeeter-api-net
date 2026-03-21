@@ -10,7 +10,8 @@ public class VersionUtilsTests
         MinimumValid, MaximumValid,
         ZeroedBytes, MaxedBytes,
         NegativeKind, NegativeSems,
-        KindSpill, BadStrings
+        KindSpill, InvKindSpill,
+        BadStrings, ZeroedSems
     }
 
     [Flags]
@@ -42,20 +43,24 @@ public class VersionUtilsTests
         new(Case.Standard,     new(0x0102_0304, 1, 2, 3, 4, Kind.Standard, 0x0002_0304, "1.2.3.4", "2.3.4")),
         new(Case.Banana,       new(0x0203_0405, 2, 3, 4, 5, Kind.Banana, 0x0003_0405, "2.3.4.5", "3.4.5")),
         new(Case.Potato,       new(0x0304_0506, 3, 4, 5, 6, Kind.Potato, 0x0004_0506, "3.4.5.6", "4.5.6")),
-        new(Case.MinimumValid, new(0x0100_0000, 1, 0, 0, 0, Kind.Standard, 0x0000_0000, "1.0.0.0", "0.0.0")),
+        new(Case.MinimumValid, new(0x0100_0001, 1, 0, 0, 1, Kind.Standard, 0x0000_0001, "1.0.0.1", "0.0.1")),
         new(Case.MaximumValid, new(0x03FF_FFFF, 3, 255, 255, 255, Kind.Potato, 0x00FF_FFFF, "3.255.255.255", "255.255.255")),
         new(Case.ZeroedBytes,  new(0x0000_0000, 0, 0, 0, 0, Kind.None, 0x0000_0000, "0.0.0.0", "0.0.0",
-            CaseTag.Invalid_Packed | CaseTag.Invalid_Kind)),
+            CaseTag.Invalid_Packed | CaseTag.Invalid_Kind | CaseTag.Invalid_Sems)),
         new(Case.MaxedBytes,   new(unchecked((int)0xFFFF_FFFF), 255, 255, 255, 255, Kind.Unknown, unchecked((int)0xFFFF_FFFF), "255.255.255.255", "255.255.255",
             CaseTag.Invalid_Packed | CaseTag.Invalid_Kind)),
-        new(Case.NegativeKind, new(unchecked((int)0xFF00_0000), -1, 0, 0, 0, Kind.Unknown, unchecked((int)0xFF00_0000), "255.0.0.0", "0.0.0",
+        new(Case.NegativeKind, new(unchecked((int)0xFF00_0001), -1, 0, 0, 1, Kind.Unknown, unchecked((int)0xFF00_0001), "255.0.0.1", "0.0.1",
             CaseTag.Invalid_Packed | CaseTag.Invalid_Kind | CaseTag.PartsIn)),
         new(Case.NegativeSems, new(unchecked((int)0xFFFF_FFFF), 2, -1, -1, -1, Kind.Banana, unchecked((int)0xFFFF_FFFF), "255.255.255.255", "255.255.255",
             CaseTag.Invalid_Packed | CaseTag.Invalid_Sems | CaseTag.PartsIn)),
         new(Case.KindSpill,    new(0x0301_0101, 2, 257, 1, 1, Kind.Banana, 0x0001_0101, "3.1.1.1", "1.1.1",
             CaseTag.Invalid_Sems | CaseTag.PartsIn)),
+        new(Case.InvKindSpill, new(0x0100_0001, 0, 256, 0, 1, Kind.None, 0x0000_0001, "1.0.0.1", "0.0.1",
+            CaseTag.Invalid_Kind | CaseTag.Invalid_Sems | CaseTag.PartsIn)),
         new(Case.BadStrings,   new(0x0103_0507, 1, 3, 5, 7, Kind.Standard, 0x0003_0507, "1.3.5.7.9", "Invalid",
-            CaseTag.Invalid_String))
+            CaseTag.Invalid_String)),
+        new(Case.ZeroedSems,  new(0x0100_0000, 1, 0, 0, 0, Kind.Standard, 0x0000_0000, "0.0.0.0", "0.0.0",
+            CaseTag.Invalid_Packed | CaseTag.Invalid_Sems))
     ];
 #pragma warning restore xUnit1047
 
@@ -124,7 +129,7 @@ public class VersionUtilsTests
     {
         Assert.SkipWhen(data.Tags.HasAny(CaseTag.PartsIn), $"Skipping case: {scenario} with any tags: PartsIn");
 
-        var badTags = CaseTag.Invalid_String;
+        var badTags = CaseTag.Invalid_String | CaseTag.Invalid_Sems;
         var shouldSucceed = !data.Tags.HasAny(badTags);
 
         var maj = 0; var min = 0; var pat = 0;
@@ -174,8 +179,8 @@ public class VersionUtilsTests
     [MemberData(nameof(GetCaseData))]
     public void Parse_Parts_ReturnsExpected_Parts_Sem(Case scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.PartsIn | CaseTag.Invalid_String;
-        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: PartsIn, Invalid_String");
+        var skipTags = CaseTag.PartsIn | CaseTag.Invalid_String | CaseTag.Invalid_Sems;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: PartsIn, Invalid_String, Invalid_Sems");
 
         VersionUtils.Parse(data.SemString, out int k, out int m, out int n, out int p);
 
@@ -191,7 +196,8 @@ public class VersionUtilsTests
     [MemberData(nameof(GetCaseData))]
     public void Parse_Parts_ThrowsException_Argument_Sem(Case scenario, CaseRecord data)
     {
-        Assert.SkipUnless(data.Tags.HasAny(CaseTag.Invalid_String), $"Skipping case: {scenario} without any tags: Invalid_String");
+        var runTags = CaseTag.Invalid_String | CaseTag.Invalid_Sems;
+        Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: Invalid_String, Invalid_Sems");
         Assert.SkipWhen(data.Tags.HasAny(CaseTag.PartsIn), $"Skipping case: {scenario} with any tags: PartsIn");
 
         Assert.Throws<ArgumentException>(() => VersionUtils.Parse(data.SemString, out int _, out int _, out int _, out int _));

@@ -46,7 +46,8 @@ public static class VersionUtils
     public static bool IsValid(int maj, int min, int pat)
         => maj.InByte()
         && min.InByte()
-        && pat.InByte();
+        && pat.InByte()
+        && (maj | min | pat) > 0;
 
     public static int RawPack(int kind, int maj, int min, int pat)
         => (kind << 24) | (maj << 16) | (min << 8) | pat;

@@ -8,7 +8,8 @@ namespace PBLivingston.VoicemeeterAPI.Types;
 public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 {
     /// <inheritdoc/>
-    public int Packed { get; } = packed;
+    public int Packed { get; } = IsValid(packed) ? packed
+        : throw new ArgumentOutOfRangeException(nameof(packed));
 
     // Parts
     private int V1 => (Packed >> 24) & 0xFF;
@@ -25,14 +26,14 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public int Patch => V4;
 
     /// <inheritdoc/>
-    public Kind K => V1 == 0 || KindUtils.IsValid(V1) ? (Kind)V1 : (Kind)(-1);
+    public Kind K => (Kind)V1;
     /// <inheritdoc/>
     public SemVersion Semantic => new(Packed & 0x00FF_FFFF);
 
     #region Constructors
 
     public VmVersion(int kind, int maj, int min, int pat)
-        : this(RawPack(kind, maj, min, pat))
+        : this(Pack(kind, maj, min, pat))
     {
     }
 
@@ -42,7 +43,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     }
 
     public VmVersion(int kind, SemVersion sem)
-        : this(RawPack(kind, sem))
+        : this(Pack(kind, sem))
     {
     }
 
@@ -85,12 +86,13 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 
     #region Validation
 
-    public bool IsValid() => V1 is > 0 and <= 3;
+    public bool IsValid() => IsValid(Packed);
 
     public static bool IsValid(VmVersion vm) => vm.IsValid();
 
     public static bool IsValid(int packed)
-        => ((packed >> 24) & 0xFF) is >= 1 and <= 3;
+        => ((packed >> 24) & 0xFF) is >= 1 and <= 3
+        && (packed & 0x00FF_FFFF) > 0;
 
     public static bool IsValid<T>(T kind, int maj, int min, int pat)
         where T : unmanaged

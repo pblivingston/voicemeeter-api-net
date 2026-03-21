@@ -7,10 +7,9 @@ namespace PBLivingston.VoicemeeterAPI.Types;
 
 public readonly struct SemVersion(int packed) : IVersion<SemVersion>
 {
-    private const int dV0 = 0;
-
     /// <inheritdoc/>
-    public int Packed { get; } = packed;
+    public int Packed { get; } = IsValid(packed) ? packed
+        : throw new ArgumentOutOfRangeException(nameof(packed));
 
     // Parts
     private int V0 => (Packed >> 24) & 0xFF;
@@ -28,14 +27,14 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     public int Patch => V3;
 
     /// <inheritdoc/>
-    Kind IVersion.K => V0 == dV0 ? Kind.None : Kind.Unknown;
+    Kind IVersion.K => (Kind)V0;
     /// <inheritdoc/>
     SemVersion IVersion.Semantic => this;
 
     #region Constructors
 
     public SemVersion(int maj, int min, int pat)
-        : this(RawPack(maj, min, pat))
+        : this(Pack(maj, min, pat))
     {
     }
 
@@ -78,12 +77,13 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
 
     #region Validation
 
-    public bool IsValid() => V0 == dV0;
+    public bool IsValid() => IsValid(Packed);
 
     public static bool IsValid(SemVersion sem) => sem.IsValid();
 
     public static bool IsValid(int packed)
-        => ((packed >> 24) & 0xFF) == dV0;
+        => ((packed >> 24) & 0xFF) == 0
+        && packed > 0;
 
     public static bool IsValid(int maj, int min, int pat)
         => VersionUtils.IsValid(maj, min, pat);
@@ -93,7 +93,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     #region Packing
 
     public static int RawPack(int maj, int min, int pat)
-        => VersionUtils.RawPack(dV0, maj, min, pat);
+        => VersionUtils.RawPack(0, maj, min, pat);
 
     public static bool TryPack(int maj, int min, int pat, out int packed)
     {
@@ -103,8 +103,8 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
         return true;
     }
 
-    public static int Pack(int maj, int min, int pat, out int packed)
-        => TryPack(maj, min, pat, out packed) ? packed
+    public static int Pack(int maj, int min, int pat)
+        => TryPack(maj, min, pat, out int packed) ? packed
         : throw new ArgumentException($"Invalid Semantic version part(s): {nameof(maj)} = {maj}, {nameof(min)} = {min}, {nameof(pat)} = {pat}.");
 
     #endregion
@@ -137,7 +137,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     public static bool TryParse(string s, out int maj, out int min, out int pat)
     {
         if (!VersionUtils.TryParse(s, out int k, out maj, out min, out pat)) return false;
-        if (k is not dV0) return false;
+        if (k is not 0) return false;
         return true;
     }
 
