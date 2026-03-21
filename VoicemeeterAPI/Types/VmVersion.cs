@@ -17,6 +17,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     private int V3 => (Packed >> 8) & 0xFF;
     private int V4 => Packed & 0xFF;
 
+    /// <inheritdoc/>
     public int Kind => V1;
     /// <inheritdoc/>
     public int Major => V2;
@@ -56,25 +57,47 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 
     #region Deconstructors
 
-    /// <inheritdoc/>
-    public void Deconstruct<T>(out T kind, out int maj, out int min, out int pat)
-        where T : unmanaged
+    /// <inheritdoc cref="IVersion.Deconstruct{T}(out T, out int, out int, out int)"/>
+    public void Deconstruct(out int kind, out int maj, out int min, out int pat)
     {
-        KindUtils.ValidateKindType<T>();
+        kind = V1; maj = V2; min = V3; pat = V4;
+    }
 
-        kind = (T)(object)V1;
-        maj = V2;
-        min = V3;
-        pat = V4;
+    /// <inheritdoc cref="IVersion.Deconstruct{T}(out T, out int, out int, out int)"/>
+    public void Deconstruct(out Kind k, out int maj, out int min, out int pat)
+    {
+        k = K; maj = V2; min = V3; pat = V4;
+    }
+
+    /// <inheritdoc cref="IVersion.Deconstruct{T}(out T, out SemVersion)"/>
+    public void Deconstruct(out int kind, out SemVersion sem)
+    {
+        kind = V1; sem = Semantic;
+    }
+
+    /// <inheritdoc cref="IVersion.Deconstruct{T}(out T, out SemVersion)"/>
+    public void Deconstruct(out Kind k, out SemVersion sem)
+    {
+        k = K; sem = Semantic;
     }
 
     /// <inheritdoc/>
-    public void Deconstruct<T>(out T kind, out SemVersion sem)
-        where T : unmanaged
+    void IVersion.Deconstruct<T>(out T kind, out int maj, out int min, out int pat)
     {
-        KindUtils.ValidateKindType<T>();
+        if (typeof(T) == typeof(int)) { kind = (T)(object)V1; }
+        else if (typeof(T) == typeof(Kind)) { kind = (T)(object)K; }
+        else throw new NotSupportedException($"Type {typeof(T).Name} is not supported. Use int or Kind.");
 
-        kind = (T)(object)V1;
+        maj = V2; min = V3; pat = V4;
+    }
+
+    /// <inheritdoc/>
+    void IVersion.Deconstruct<T>(out T kind, out SemVersion sem)
+    {
+        if (typeof(T) == typeof(int)) { kind = (T)(object)V1; }
+        else if (typeof(T) == typeof(Kind)) { kind = (T)(object)K; }
+        else throw new NotSupportedException($"Type {typeof(T).Name} is not supported. Use int or Kind.");
+
         sem = Semantic;
     }
 

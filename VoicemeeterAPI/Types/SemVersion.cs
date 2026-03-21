@@ -50,26 +50,26 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     /// <inheritdoc/>
     public void Deconstruct(out int maj, out int min, out int pat)
     {
-        maj = V1;
-        min = V2;
-        pat = V3;
+        maj = V1; min = V2; pat = V3;
     }
 
     /// <inheritdoc/>
     void IVersion.Deconstruct<T>(out T kind, out SemVersion sem)
     {
-        KindUtils.ValidateKindType<T>();
+        if (typeof(T) == typeof(int)) { kind = (T)(object)V0; }
+        else if (typeof(T) == typeof(Kind)) { kind = (T)(object)((IVersion)this).K; }
+        else throw new NotSupportedException($"Type {typeof(T).Name} is not supported. Use int or Kind.");
 
-        kind = (T)(object)V0;
         sem = this;
     }
 
     /// <inheritdoc/>
     void IVersion.Deconstruct<T>(out T kind, out int maj, out int min, out int pat)
     {
-        KindUtils.ValidateKindType<T>();
+        if (typeof(T) == typeof(int)) { kind = (T)(object)V0; }
+        else if (typeof(T) == typeof(Kind)) { kind = (T)(object)((IVersion)this).K; }
+        else throw new NotSupportedException($"Type {typeof(T).Name} is not supported. Use int or Kind.");
 
-        kind = (T)(object)V0;
         Deconstruct(out maj, out min, out pat);
     }
 
