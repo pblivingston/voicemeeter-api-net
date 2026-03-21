@@ -94,16 +94,19 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
         => ((packed >> 24) & 0xFF) is >= 1 and <= 3
         && (packed & 0x00FF_FFFF) > 0;
 
-    public static bool IsValid<T>(T kind, int maj, int min, int pat)
-        where T : unmanaged
-        => KindUtils.IsKindType<T>()
-        && kind is > 0 and <= 3
+    public static bool IsValid(int kind, int maj, int min, int pat)
+        => KindUtils.IsValid(kind)
         && VersionUtils.IsValid(maj, min, pat);
 
-    public static bool IsValid<T>(T kind, SemVersion sem)
-        where T : unmanaged
+    public static bool IsValid(Kind kind, int maj, int min, int pat)
+        => IsValid((int)kind, maj, min, pat);
+
+    public static bool IsValid(int kind, SemVersion sem)
         => KindUtils.IsValid(kind)
         && sem.IsValid();
+
+    public static bool IsValid(Kind kind, SemVersion sem)
+        => IsValid((int)kind, sem);
 
     #endregion
 
