@@ -10,7 +10,7 @@ public class VersionUtilsTests
         MinimumValid, MaximumValid,
         ZeroedBytes, MaxedBytes,
         NegativeKind, NegativeSems,
-        KindSpill, InvKindSpill,
+        ValidKindBad, InvalKindBad,
         BadStrings, ZeroedSems
     }
 
@@ -22,7 +22,8 @@ public class VersionUtilsTests
         Invalid_Packed = 1 << 1,
         Invalid_Kind = 1 << 2,
         Invalid_Sems = 1 << 3,
-        Invalid_String = 1 << 4
+        Invalid_String = 1 << 4,
+        KindSpill = 1 << 5
     }
 
     public record CaseRecord(
@@ -52,14 +53,14 @@ public class VersionUtilsTests
         new(Case.NegativeKind, new(unchecked((int)0xFF00_0001), -1, 0, 0, 1, Kind.Unknown, unchecked((int)0xFF00_0001), "255.0.0.1", "0.0.1",
             CaseTag.Invalid_Packed | CaseTag.Invalid_Kind | CaseTag.PartsIn)),
         new(Case.NegativeSems, new(unchecked((int)0xFFFF_FFFF), 2, -1, -1, -1, Kind.Banana, unchecked((int)0xFFFF_FFFF), "255.255.255.255", "255.255.255",
-            CaseTag.Invalid_Packed | CaseTag.Invalid_Sems | CaseTag.PartsIn)),
-        new(Case.KindSpill,    new(0x0301_0101, 2, 257, 1, 1, Kind.Banana, 0x0001_0101, "3.1.1.1", "1.1.1",
-            CaseTag.Invalid_Sems | CaseTag.PartsIn)),
-        new(Case.InvKindSpill, new(0x0100_0001, 0, 256, 0, 1, Kind.None, 0x0000_0001, "1.0.0.1", "0.0.1",
-            CaseTag.Invalid_Kind | CaseTag.Invalid_Sems | CaseTag.PartsIn)),
+            CaseTag.Invalid_Packed | CaseTag.Invalid_Sems | CaseTag.PartsIn | CaseTag.KindSpill)),
+        new(Case.ValidKindBad, new(0x0301_0101, 2, 257, 1, 1, Kind.Banana, 0x0001_0101, "3.1.1.1", "1.1.1",
+            CaseTag.Invalid_Sems | CaseTag.PartsIn | CaseTag.KindSpill)),
+        new(Case.InvalKindBad, new(0x0100_0001, 0, 256, 0, 1, Kind.None, 0x0000_0001, "1.0.0.1", "0.0.1",
+            CaseTag.Invalid_Kind | CaseTag.Invalid_Sems | CaseTag.PartsIn | CaseTag.KindSpill)),
         new(Case.BadStrings,   new(0x0103_0507, 1, 3, 5, 7, Kind.Standard, 0x0003_0507, "1.3.5.7.9", "Invalid",
             CaseTag.Invalid_String)),
-        new(Case.ZeroedSems,  new(0x0100_0000, 1, 0, 0, 0, Kind.Standard, 0x0000_0000, "0.0.0.0", "0.0.0",
+        new(Case.ZeroedSems,   new(0x0100_0000, 1, 0, 0, 0, Kind.Standard, 0x0000_0000, "0.0.0.0", "0.0.0",
             CaseTag.Invalid_Packed | CaseTag.Invalid_Sems))
     ];
 #pragma warning restore xUnit1047

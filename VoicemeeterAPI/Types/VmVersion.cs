@@ -115,35 +115,44 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public static int RawPack(int kind, int maj, int min, int pat)
         => VersionUtils.RawPack(kind, maj, min, pat);
 
-    public static bool TryPack<T>(T kind, int maj, int min, int pat, out int packed)
-        where T : unmanaged
+    public static bool TryPack(int kind, int maj, int min, int pat, out int packed)
     {
         packed = 0;
         if (!IsValid(kind, maj, min, pat)) return false;
-        packed = RawPack((int)(object)kind, maj, min, pat);
+        packed = RawPack(kind, maj, min, pat);
         return true;
     }
 
-    public static int Pack<T>(T kind, int maj, int min, int pat)
-        where T : unmanaged
+    public static bool TryPack(Kind kind, int maj, int min, int pat, out int packed)
+        => TryPack((int)kind, maj, min, pat, out packed);
+
+    public static int Pack(int kind, int maj, int min, int pat)
         => TryPack(kind, maj, min, pat, out int packed) ? packed
         : throw new ArgumentException($"Invalid Voicemeeter version part(s): {nameof(kind)} = {kind}, {nameof(maj)} = {maj}, {nameof(min)} = {min}, {nameof(pat)} = {pat}.");
+
+    public static int Pack(Kind kind, int maj, int min, int pat)
+        => Pack((int)kind, maj, min, pat);
 
     public static int RawPack(int kind, SemVersion sem)
         => (kind << 24) | sem.Packed;
 
-    public static bool TryPack<T>(T kind, SemVersion sem, out int packed)
-        where T : unmanaged
+    public static bool TryPack(int kind, SemVersion sem, out int packed)
     {
         packed = 0;
         if (!IsValid(kind, sem)) return false;
-        packed = RawPack((int)(object)kind, sem);
+        packed = RawPack(kind, sem);
         return true;
     }
 
-    public static int Pack<T>(T kind, SemVersion sem) where T : unmanaged
+    public static bool TryPack(Kind kind, SemVersion sem, out int packed)
+        => TryPack((int)kind, sem, out packed);
+
+    public static int Pack(int kind, SemVersion sem)
         => TryPack(kind, sem, out int packed) ? packed
         : throw new ArgumentException($"Invalid Voicemeeter version part(s): {nameof(kind)} = {kind}, {nameof(sem)} = {sem}.");
+
+    public static int Pack(Kind kind, SemVersion sem)
+        => Pack((int)kind, sem);
 
     #endregion
 
