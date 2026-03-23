@@ -184,18 +184,29 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public static void RawUnpack(int packed, out int kind, out int maj, out int min, out int pat)
         => VersionUtils.RawUnpack(packed, out kind, out maj, out min, out pat);
 
-    public static bool TryUnpack<T>(int packed, out T kind, out int maj, out int min, out int pat)
-        where T : unmanaged
+    public static bool TryUnpack(int packed, out int kind, out int maj, out int min, out int pat)
     {
-        kind = default; maj = 0; min = 0; pat = 0;
+        kind = 0; maj = 0; min = 0; pat = 0;
         if (!IsValid(packed)) return false;
-        RawUnpack(packed, out int k, out maj, out min, out pat);
-        kind = (T)(object)k;
+        RawUnpack(packed, out kind, out maj, out min, out pat);
         return true;
     }
 
-    public static void Unpack<T>(int packed, out T kind, out int maj, out int min, out int pat)
-        where T : unmanaged
+    public static void Unpack(int packed, out int kind, out int maj, out int min, out int pat)
+    {
+        if (!TryUnpack(packed, out kind, out maj, out min, out pat))
+            throw new ArgumentOutOfRangeException(nameof(packed));
+    }
+
+    public static bool TryUnpack(int packed, out Kind kind, out int maj, out int min, out int pat)
+    {
+        kind = default; maj = 0; min = 0; pat = 0;
+        if (!TryUnpack(packed, out int k, out int m, out int n, out int p)) return false;
+        kind = (Kind)k; maj = m; min = n; pat = p;
+        return true;
+    }
+
+    public static void Unpack(int packed, out Kind kind, out int maj, out int min, out int pat)
     {
         if (!TryUnpack(packed, out kind, out maj, out min, out pat))
             throw new ArgumentOutOfRangeException(nameof(packed));
@@ -207,18 +218,29 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
         sem = new(packed & 0x00FF_FFFF);
     }
 
-    public static bool TryUnpack<T>(int packed, out T kind, out SemVersion sem)
-        where T : unmanaged
+    public static bool TryUnpack(int packed, out int kind, out SemVersion sem)
     {
-        kind = default; sem = default;
+        kind = 0; sem = default;
         if (!IsValid(packed)) return false;
-        RawUnpack(packed, out int k, out sem);
-        kind = (T)(object)k;
+        RawUnpack(packed, out kind, out sem);
         return true;
     }
 
-    public static void Unpack<T>(int packed, out T kind, out SemVersion sem)
-        where T : unmanaged
+    public static void Unpack(int packed, out int kind, out SemVersion sem)
+    {
+        if (!TryUnpack(packed, out kind, out sem))
+            throw new ArgumentOutOfRangeException(nameof(packed));
+    }
+
+    public static bool TryUnpack(int packed, out Kind kind, out SemVersion sem)
+    {
+        kind = default; sem = default;
+        if (!TryUnpack(packed, out int k, out SemVersion s)) return false;
+        kind = (Kind)k; sem = s;
+        return true;
+    }
+
+    public static void Unpack(int packed, out Kind kind, out SemVersion sem)
     {
         if (!TryUnpack(packed, out kind, out sem))
             throw new ArgumentOutOfRangeException(nameof(packed));
