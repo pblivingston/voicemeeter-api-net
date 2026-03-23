@@ -1,18 +1,16 @@
 using PBLivingston.VoicemeeterAPI.Types;
-using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionUtilsTests;
+using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
 
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VmVersionTests;
 
 public class Deconstruction
 {
-    public static TheoryDataRow<Case, CaseRecord>[] GetCaseData => VersionUtilsTests.GetCaseData;
-
     [Theory]
-    [MemberData(nameof(GetCaseData))]
+    [ClassData(typeof(VersionData))]
     public void Deconstructor_Sems_ReturnsExpected_Parts(Case scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.PartsIn | CaseTag.Invalid_Packed;
-        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: PartsIn, Invalid_Packed");
+        var skipTags = CaseTag.SemsIn | CaseTag.Invalid_Packed;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: SemsIn, Invalid_Packed");
 
         var version = new VmVersion(data.Packed);
         ((IVersion)version).Deconstruct(out int m, out int n, out int p);
@@ -25,7 +23,7 @@ public class Deconstruction
     }
 
     [Theory]
-    [MemberData(nameof(GetCaseData))]
+    [ClassData(typeof(VersionData))]
     public void Deconstructor_Ints_ReturnsExpected_Parts(Case scenario, CaseRecord data)
     {
         var skipTags = CaseTag.PartsIn | CaseTag.Invalid_Packed;
@@ -43,7 +41,7 @@ public class Deconstruction
     }
 
     [Theory]
-    [MemberData(nameof(GetCaseData))]
+    [ClassData(typeof(VersionData))]
     public void Deconstructor_Kind_ReturnsExpected_Parts(Case scenario, CaseRecord data)
     {
         var skipTags = CaseTag.PartsIn | CaseTag.Invalid_Packed;
@@ -61,11 +59,11 @@ public class Deconstruction
     }
 
     [Theory]
-    [MemberData(nameof(GetCaseData))]
+    [ClassData(typeof(VersionData))]
     public void Deconstructor_Semantic_ReturnsExpected_Parts(Case scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.PartsIn | CaseTag.Invalid_Packed;
-        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: PartsIn, Invalid_Packed");
+        var skipTags = CaseTag.KindIn | CaseTag.Invalid_Packs;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: KindIn, Invalid_Packs");
 
         var version = new VmVersion(data.Packed);
         version.Deconstruct(out int k, out SemVersion sem);
@@ -77,11 +75,11 @@ public class Deconstruction
     }
 
     [Theory]
-    [MemberData(nameof(GetCaseData))]
+    [ClassData(typeof(VersionData))]
     public void Deconstructor_KindSemantic_ReturnsExpected_Parts(Case scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.PartsIn | CaseTag.Invalid_Packed;
-        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: PartsIn, Invalid_Packed");
+        var skipTags = CaseTag.KindIn | CaseTag.Invalid_Packs;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: KindIn, Invalid_Packs");
 
         var version = new VmVersion(data.Packed);
         version.Deconstruct(out Kind k, out SemVersion sem);
@@ -93,7 +91,7 @@ public class Deconstruction
     }
 
     [Theory]
-    [MemberData(nameof(GetCaseData))]
+    [ClassData(typeof(VersionData))]
     public void Deconstructor_GenericParts_ReturnsExpected_Ints(Case scenario, CaseRecord data)
     {
         var skipTags = CaseTag.PartsIn | CaseTag.Invalid_Packed;
@@ -112,7 +110,7 @@ public class Deconstruction
     }
 
     [Theory]
-    [MemberData(nameof(GetCaseData))]
+    [ClassData(typeof(VersionData))]
     public void Deconstructor_GenericParts_ReturnsExpected_Kind(Case scenario, CaseRecord data)
     {
         var skipTags = CaseTag.PartsIn | CaseTag.Invalid_Packed;
@@ -131,11 +129,11 @@ public class Deconstruction
     }
 
     [Theory]
-    [MemberData(nameof(GetCaseData))]
+    [ClassData(typeof(VersionData))]
     public void Deconstructor_GenericSemantic_ReturnsExpected_Semantic(Case scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.PartsIn | CaseTag.Invalid_Packed;
-        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: PartsIn, Invalid_Packed");
+        var skipTags = CaseTag.KindIn | CaseTag.Invalid_Packs;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: KindIn, Invalid_Packs");
 
         var version = new VmVersion(data.Packed);
 
@@ -148,11 +146,11 @@ public class Deconstruction
     }
 
     [Theory]
-    [MemberData(nameof(GetCaseData))]
+    [ClassData(typeof(VersionData))]
     public void Deconstructor_GenericSemantic_ReturnsExpected_KindSemantic(Case scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.PartsIn | CaseTag.Invalid_Packed;
-        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: PartsIn, Invalid_Packed");
+        var skipTags = CaseTag.KindIn | CaseTag.Invalid_Packs;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: KindIn, Invalid_Packs");
 
         var version = new VmVersion(data.Packed);
 
