@@ -9,7 +9,8 @@ public class Validation
     [ClassData(typeof(VersionData))]
     public void IsValid_ReturnsExpected_True(Case scenario, CaseRecord data)
     {
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_Packed), $"Skipping case: {scenario} with any tags: Invalid_Packed");
+        var skipTags = CaseTag.Invalid_Packed;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = new VmVersion(data.Packed);
 
@@ -20,7 +21,8 @@ public class Validation
     [ClassData(typeof(VersionData))]
     public void IsValid_VmVersion_ReturnsExpected_True(Case scenario, CaseRecord data)
     {
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_Packed), $"Skipping case: {scenario} with any tags: Invalid_Packed");
+        var skipTags = CaseTag.Invalid_Packed;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = new VmVersion(data.Packed);
 
@@ -33,7 +35,8 @@ public class Validation
     {
         _ = scenario;
 
-        var expected = !data.Tags.HasAny(CaseTag.Invalid_Packed);
+        var badTags = CaseTag.Invalid_Packed;
+        var expected = !data.Tags.HasAny(badTags);
 
         Assert.Equal(expected, VmVersion.IsValid(data.Packed));
     }
@@ -44,7 +47,8 @@ public class Validation
     {
         _ = scenario;
 
-        var expected = !data.Tags.HasAny(CaseTag.Invalid_Parts);
+        var badTags = CaseTag.Invalid_Parts;
+        var expected = !data.Tags.HasAny(badTags);
 
         Assert.Equal(expected, VmVersion.IsValid(data.Kind, data.Major, data.Minor, data.Patch));
     }
@@ -55,7 +59,8 @@ public class Validation
     {
         _ = scenario;
 
-        var expected = !data.Tags.HasAny(CaseTag.Invalid_Parts);
+        var badTags = CaseTag.Invalid_Parts;
+        var expected = !data.Tags.HasAny(badTags);
 
         Assert.Equal(expected, VmVersion.IsValid(data.K, data.Major, data.Minor, data.Patch));
     }
@@ -64,9 +69,12 @@ public class Validation
     [ClassData(typeof(VersionData))]
     public void IsValid_Semantic_ReturnsExpected_Bool(Case scenario, CaseRecord data)
     {
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_SemPacked), $"Skipping case: {scenario} with any tags: Invalid_SemPacked");
+        var skipTags = CaseTag.Invalid_SemPacked;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var expected = !data.Tags.HasAny(CaseTag.Invalid_Kind);
+        var badTags = CaseTag.Invalid_Kind;
+        var expected = !data.Tags.HasAny(badTags);
+
         var semantic = new SemVersion(data.SemPacked);
 
         Assert.Equal(expected, VmVersion.IsValid(data.Kind, semantic));
@@ -76,9 +84,12 @@ public class Validation
     [ClassData(typeof(VersionData))]
     public void IsValid_KindSemantic_ReturnsExpected_Bool(Case scenario, CaseRecord data)
     {
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_SemPacked), $"Skipping case: {scenario} with any tags: Invalid_SemPacked");
+        var skipTags = CaseTag.Invalid_SemPacked;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var expected = !data.Tags.HasAny(CaseTag.Invalid_Kind);
+        var badTags = CaseTag.Invalid_Kind;
+        var expected = !data.Tags.HasAny(badTags);
+
         var semantic = new SemVersion(data.SemPacked);
 
         Assert.Equal(expected, VmVersion.IsValid(data.K, semantic));

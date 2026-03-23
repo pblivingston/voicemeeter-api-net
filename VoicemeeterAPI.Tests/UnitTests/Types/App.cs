@@ -75,7 +75,8 @@ public class AppTests
     [MemberData(nameof(GetCaseData))]
     public void ParseBit_ReturnsExpected_App(Case scenario, CaseRecord data)
     {
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_String), $"Skipping case: {scenario} with any tags: Invalid_String");
+        var skipTags = CaseTag.Invalid_String;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var expected = Environment.Is64BitOperatingSystem ? data.App64 : data.App32;
 
@@ -86,7 +87,8 @@ public class AppTests
     [MemberData(nameof(GetCaseData))]
     public void ParseBit_ThrowsException_Argument(Case scenario, CaseRecord data)
     {
-        Assert.SkipUnless(data.Tags.HasAny(CaseTag.Invalid_String), $"Skipping case: {scenario} without any tags: Invalid_String");
+        var runTags = CaseTag.Invalid_String;
+        Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
         Assert.Throws<ArgumentException>(() => AppUtils.ParseBit(data.S));
     }

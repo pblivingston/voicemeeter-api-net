@@ -9,7 +9,8 @@ public class Validation
     [ClassData(typeof(VersionData))]
     public void IsValid_ReturnsExpected_True(Case scenario, CaseRecord data)
     {
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_SemPacked), $"Skipping case: {scenario} with any tags: Invalid_SemPacked");
+        var skipTags = CaseTag.Invalid_SemPacked;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = new SemVersion(data.SemPacked);
 
@@ -20,7 +21,8 @@ public class Validation
     [ClassData(typeof(VersionData))]
     public void IsValid_SemVersion_ReturnsExpected_True(Case scenario, CaseRecord data)
     {
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_SemPacked), $"Skipping case: {scenario} with any tags: Invalid_SemPacked");
+        var skipTags = CaseTag.Invalid_SemPacked;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = new SemVersion(data.SemPacked);
 
@@ -33,7 +35,8 @@ public class Validation
     {
         _ = scenario;
 
-        var expected = !data.Tags.HasAny(CaseTag.Invalid_SemPacked);
+        var badTags = CaseTag.Invalid_SemPacked;
+        var expected = !data.Tags.HasAny(badTags);
 
         Assert.Equal(expected, SemVersion.IsValid(data.SemPacked));
     }
@@ -44,7 +47,8 @@ public class Validation
     {
         _ = scenario;
 
-        var expected = !data.Tags.HasAny(CaseTag.Invalid_Sems);
+        var badTags = CaseTag.Invalid_Sems;
+        var expected = !data.Tags.HasAny(badTags);
 
         Assert.Equal(expected, SemVersion.IsValid(data.Major, data.Minor, data.Patch));
     }

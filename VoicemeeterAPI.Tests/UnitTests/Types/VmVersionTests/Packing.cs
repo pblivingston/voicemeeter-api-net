@@ -20,7 +20,8 @@ public class Packing
     {
         _ = scenario;
 
-        var shouldSucceed = !data.Tags.HasAny(CaseTag.Invalid_Parts);
+        var badTags = CaseTag.Invalid_Parts;
+        var shouldSucceed = !data.Tags.HasAny(badTags);
 
         var expected = shouldSucceed ? data.Packed : 0x0000_0000;
 
@@ -36,7 +37,8 @@ public class Packing
     [ClassData(typeof(VersionData))]
     public void Pack_Ints_ReturnsExpected_Packed(Case scenario, CaseRecord data)
     {
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_Parts), $"Skipping case: {scenario} with any tags: Invalid_Parts");
+        var skipTags = CaseTag.Invalid_Parts;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         Assert.Equal(data.Packed, VmVersion.Pack(data.Kind, data.Major, data.Minor, data.Patch));
     }
@@ -45,7 +47,8 @@ public class Packing
     [ClassData(typeof(VersionData))]
     public void Pack_Ints_ThrowsException_Argument(Case scenario, CaseRecord data)
     {
-        Assert.SkipUnless(data.Tags.HasAny(CaseTag.Invalid_Parts), $"Skipping case: {scenario} without any tags: Invalid_Parts");
+        var runTags = CaseTag.Invalid_Parts;
+        Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
         Assert.Throws<ArgumentException>(() => VmVersion.Pack(data.Kind, data.Major, data.Minor, data.Patch));
     }
@@ -56,7 +59,8 @@ public class Packing
     {
         _ = scenario;
 
-        var shouldSucceed = !data.Tags.HasAny(CaseTag.Invalid_Parts);
+        var badTags = CaseTag.Invalid_Parts;
+        var shouldSucceed = !data.Tags.HasAny(badTags);
 
         var expected = shouldSucceed ? data.Packed : 0x0000_0000;
 
@@ -72,7 +76,8 @@ public class Packing
     [ClassData(typeof(VersionData))]
     public void Pack_Kind_ReturnsExpected_Packed(Case scenario, CaseRecord data)
     {
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_Parts), $"Skipping case: {scenario} with any tags: Invalid_Parts");
+        var skipTags = CaseTag.Invalid_Parts;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         Assert.Equal(data.Packed, VmVersion.Pack(data.K, data.Major, data.Minor, data.Patch));
     }
@@ -81,7 +86,8 @@ public class Packing
     [ClassData(typeof(VersionData))]
     public void Pack_Kind_ThrowsException_Argument(Case scenario, CaseRecord data)
     {
-        Assert.SkipUnless(data.Tags.HasAny(CaseTag.Invalid_Parts), $"Skipping case: {scenario} without any tags: Invalid_Parts");
+        var runTags = CaseTag.Invalid_Parts;
+        Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
         Assert.Throws<ArgumentException>(() => VmVersion.Pack(data.K, data.Major, data.Minor, data.Patch));
     }
@@ -90,7 +96,8 @@ public class Packing
     [ClassData(typeof(VersionData))]
     public void RawPack_Semantic_ReturnsExpected_Packed(Case scenario, CaseRecord data)
     {
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_SemPacked), $"Skipping case: {scenario} with any tags: Invalid_SemPacked");
+        var skipTags = CaseTag.Invalid_SemPacked;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var semantic = new SemVersion(data.SemPacked);
 
@@ -101,9 +108,11 @@ public class Packing
     [ClassData(typeof(VersionData))]
     public void TryPack_Semantic_ReturnsExpected_Packed(Case scenario, CaseRecord data)
     {
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_SemPacked), $"Skipping case: {scenario} with any tags: Invalid_SemPacked");
+        var skipTags = CaseTag.Invalid_SemPacked;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var shouldSucceed = !data.Tags.HasAny(CaseTag.Invalid_Kind);
+        var badTags = CaseTag.Invalid_Kind;
+        var shouldSucceed = !data.Tags.HasAny(badTags);
 
         var expected = shouldSucceed ? data.Packed : 0x0000_0000;
 
@@ -121,7 +130,7 @@ public class Packing
     public void Pack_Semantic_ReturnsExpected_Packed(Case scenario, CaseRecord data)
     {
         var skipTags = CaseTag.Invalid_Kind | CaseTag.Invalid_SemPacked;
-        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: Invalid_Kind, Invalid_SemPacked");
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var semantic = new SemVersion(data.SemPacked);
 
@@ -132,8 +141,11 @@ public class Packing
     [ClassData(typeof(VersionData))]
     public void Pack_Semantic_ThrowsException_Argument(Case scenario, CaseRecord data)
     {
-        Assert.SkipUnless(data.Tags.HasAny(CaseTag.Invalid_Kind), $"Skipping case: {scenario} without any tags: Invalid_Kind");
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_SemPacked), $"Skipping case: {scenario} with any tags: Invalid_SemPacked");
+        var runTags = CaseTag.Invalid_Kind;
+        Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
+
+        var skipTags = CaseTag.Invalid_SemPacked;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var semantic = new SemVersion(data.SemPacked);
 
@@ -144,9 +156,11 @@ public class Packing
     [ClassData(typeof(VersionData))]
     public void TryPack_KindSemantic_ReturnsExpected_Packed(Case scenario, CaseRecord data)
     {
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_SemPacked), $"Skipping case: {scenario} with any tags: Invalid_SemPacked");
+        var skipTags = CaseTag.Invalid_SemPacked;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var shouldSucceed = !data.Tags.HasAny(CaseTag.Invalid_Kind);
+        var badTags = CaseTag.Invalid_Kind;
+        var shouldSucceed = !data.Tags.HasAny(badTags);
 
         var expected = shouldSucceed ? data.Packed : 0x0000_0000;
 
@@ -164,7 +178,7 @@ public class Packing
     public void Pack_KindSemantic_ReturnsExpected_Packed(Case scenario, CaseRecord data)
     {
         var skipTags = CaseTag.Invalid_Kind | CaseTag.Invalid_SemPacked;
-        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: Invalid_Kind, Invalid_SemPacked");
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var semantic = new SemVersion(data.SemPacked);
 
@@ -175,8 +189,11 @@ public class Packing
     [ClassData(typeof(VersionData))]
     public void Pack_KindSemantic_ThrowsException_Argument(Case scenario, CaseRecord data)
     {
-        Assert.SkipUnless(data.Tags.HasAny(CaseTag.Invalid_Kind), $"Skipping case: {scenario} without any tags: Invalid_Kind");
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_SemPacked), $"Skipping case: {scenario} with any tags: Invalid_SemPacked");
+        var runTags = CaseTag.Invalid_Kind;
+        Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
+
+        var skipTags = CaseTag.Invalid_SemPacked;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var semantic = new SemVersion(data.SemPacked);
 

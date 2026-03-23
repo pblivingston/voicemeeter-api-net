@@ -20,7 +20,8 @@ public class Packing
     {
         _ = scenario;
 
-        var shouldSucceed = !data.Tags.HasAny(CaseTag.Invalid_Sems);
+        var badTags = CaseTag.Invalid_Sems;
+        var shouldSucceed = !data.Tags.HasAny(badTags);
 
         var expected = shouldSucceed ? data.SemPacked : 0x0000_0000;
 
@@ -36,7 +37,8 @@ public class Packing
     [ClassData(typeof(VersionData))]
     public void Pack_ReturnsExpected_Packed(Case scenario, CaseRecord data)
     {
-        Assert.SkipWhen(data.Tags.HasAny(CaseTag.Invalid_Sems), $"Skipping case: {scenario} with any tags: Invalid_Sems");
+        var skipTags = CaseTag.Invalid_Sems;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         Assert.Equal(data.SemPacked, SemVersion.Pack(data.Major, data.Minor, data.Patch));
     }
@@ -45,7 +47,8 @@ public class Packing
     [ClassData(typeof(VersionData))]
     public void Pack_ThrowsException_Argument(Case scenario, CaseRecord data)
     {
-        Assert.SkipUnless(data.Tags.HasAny(CaseTag.Invalid_Sems), $"Skipping case: {scenario} without any tags: Invalid_Sems");
+        var runTags = CaseTag.Invalid_Sems;
+        Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
         Assert.Throws<ArgumentException>(() => SemVersion.Pack(data.Major, data.Minor, data.Patch));
     }
