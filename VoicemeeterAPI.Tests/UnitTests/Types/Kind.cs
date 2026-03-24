@@ -6,6 +6,15 @@ namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types;
 public class KindTests
 {
     [Theory]
+    [InlineData(typeof(int), true)]
+    [InlineData(typeof(Kind), true)]
+    [InlineData(typeof(float), false)]
+    public void IsKindType_ReturnsExpected_Bool(Type t, bool valid)
+    {
+        Assert.Equal(valid, KindUtils.IsKindType(t));
+    }
+
+    [Theory]
     [ClassData(typeof(KindData))]
     public void ToApp_ReturnsExpected_App(Case scenario, CaseRecord data)
     {
@@ -31,31 +40,7 @@ public class KindTests
     {
         _ = scenario;
 
-        Assert.Equal(data.Valid, KindUtils.IsValid(data.K));
-    }
-
-    [Fact]
-    public void IsValid_ReturnsExpected_False()
-    {
-        float example = 123.45f;
-        Assert.False(KindUtils.IsValid(example));
-    }
-
-    [Theory]
-    [InlineData(typeof(int), true)]
-    [InlineData(typeof(Kind), true)]
-    [InlineData(typeof(float), false)]
-    public void IsKindType_ReturnsExpected_Bool(Type t, bool valid)
-    {
-        Assert.Equal(valid, KindUtils.IsKindType(t));
-    }
-
-    [Fact]
-    public void ValidateKindType_ThrowsException_NotSupported()
-    {
-        var example = typeof(float);
-
-        Assert.Throws<NotSupportedException>(() => KindUtils.ValidateKindType(example));
+        Assert.Equal(data.Valid, data.K.IsValid());
     }
 }
 

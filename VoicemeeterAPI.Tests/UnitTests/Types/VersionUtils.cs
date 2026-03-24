@@ -6,6 +6,15 @@ namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types;
 public class VersionUtilsTests
 {
     [Theory]
+    [InlineData(typeof(VmVersion), true)]
+    [InlineData(typeof(SemVersion), true)]
+    [InlineData(typeof(Type), false)]
+    public void IsVersionType_ReturnsExpected_Bool(Type type, bool expected)
+    {
+        Assert.Equal(expected, VersionUtils.IsVersionType(type));
+    }
+
+    [Theory]
     [ClassData(typeof(VersionData))]
     public void IsValid_ReturnsExpected_Bool(Case scenario, CaseRecord data)
     {

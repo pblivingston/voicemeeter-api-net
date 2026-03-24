@@ -7,41 +7,8 @@ namespace PBLivingston.VoicemeeterAPI.Types;
 
 public static class VersionUtils
 {
-    #region Type Validation
-
     public static bool IsVersionType(Type t)
         => t == typeof(SemVersion) || t == typeof(VmVersion);
-
-    public static bool IsVersionType<T>() where T : struct, IVersion<T>
-        => IsVersionType(typeof(T));
-
-    public static bool TryGetVersionType<T>(out Type t) where T : struct, IVersion<T>
-    {
-        t = typeof(Type);
-        if (!IsVersionType<T>()) return false;
-        t = typeof(T);
-        return true;
-    }
-
-    public static Type GetVersionType<T>() where T : struct, IVersion<T>
-        => TryGetVersionType<T>(out Type t) ? t
-        : throw new NotSupportedException($"Type '{t.Name}' is not supported. Use SemVersion or VmVersion.");
-
-    /// <summary>
-    ///   Simply throws if the given type is not supported.
-    /// </summary>
-    /// <param name="t"></param>
-    /// <exception cref="NotSupportedException"></exception>
-    public static void ValidateVersionType(Type t)
-    { if (!IsVersionType(t)) throw new NotSupportedException($"Type '{t.Name}' is not supported. Use SemVersion or VmVersion."); }
-
-    /// <inheritdoc cref="ValidateVersionType(Type)"/>
-    public static void ValidateVersionType<T>() where T : struct, IVersion<T>
-        => ValidateVersionType(typeof(T));
-
-    #endregion
-
-    #region Helpers
 
     public static bool IsValid(int maj, int min, int pat)
         => maj.InByte()
@@ -97,6 +64,4 @@ public static class VersionUtils
     public static int Parse(string s)
         => TryParse(s, out int packed) ? packed
         : throw new ArgumentException(nameof(s));
-
-    #endregion
 }
