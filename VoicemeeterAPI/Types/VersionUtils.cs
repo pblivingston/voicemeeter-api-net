@@ -69,19 +69,14 @@ public static class VersionUtils
         var l = parts.Length;
         if (l is not (3 or 4)) return false;
 
+        var k = 0;
+        if (l == 4 && !(int.TryParse(parts[0], out k) && KindUtils.IsValid(k))) return false;
         if (!int.TryParse(parts[l - 3], out int m)) return false;
         if (!int.TryParse(parts[l - 2], out int n)) return false;
         if (!int.TryParse(parts[l - 1], out int p)) return false;
         if (!IsValid(m, n, p)) return false;
 
-        if (l == 4)
-        {
-            if (!(int.TryParse(parts[0], out int k) && KindUtils.IsValid(k)))
-                return false;
-            kind = k;
-        }
-
-        maj = m; min = n; pat = p;
+        kind = k; maj = m; min = n; pat = p;
         return true;
     }
 

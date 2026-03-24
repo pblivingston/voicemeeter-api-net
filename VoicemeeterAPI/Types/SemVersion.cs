@@ -136,8 +136,10 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
 
     public static bool TryParse(string s, out int maj, out int min, out int pat)
     {
-        if (!VersionUtils.TryParse(s, out int k, out maj, out min, out pat)) return false;
+        maj = 0; min = 0; pat = 0;
+        if (!VersionUtils.TryParse(s, out int k, out int m, out int n, out int p)) return false;
         if (k is not 0) return false;
+        maj = m; min = n; pat = p;
         return true;
     }
 
@@ -147,11 +149,24 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
             throw new ArgumentException(nameof(s));
     }
 
+    public static bool TryParse(string s, out int packed)
+    {
+        packed = 0;
+        if (!TryParse(s, out int m, out int n, out int p)) return false;
+        packed = RawPack(m, n, p);
+        return true;
+    }
+
+    public static void Parse(string s, out int packed)
+    {
+        if (!TryParse(s, out packed))
+            throw new ArgumentException(nameof(s));
+    }
+
     public static bool TryParse(string s, out SemVersion sem)
     {
         sem = default;
-        if (!VersionUtils.TryParse(s, out int packed)) return false;
-        if (!IsValid(packed)) return false;
+        if (!TryParse(s, out int packed)) return false;
         sem = new(packed);
         return true;
     }

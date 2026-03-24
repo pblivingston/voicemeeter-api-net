@@ -47,7 +47,7 @@ public class VersionUtilsTests
     [ClassData(typeof(VersionData))]
     public void TryParse_Parts_ReturnsExpected_Parts_Vm(Case scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.PartsIn;
+        var skipTags = CaseTag.PartsIn | CaseTag.Three_String;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var badTags = CaseTag.Invalid_String;
@@ -71,7 +71,7 @@ public class VersionUtilsTests
     [ClassData(typeof(VersionData))]
     public void TryParse_Parts_ReturnsExpected_Parts_Sem(Case scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.SemsIn;
+        var skipTags = CaseTag.SemsIn | CaseTag.Four_SemString;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var badTags = CaseTag.Invalid_SemString;
@@ -115,6 +115,9 @@ public class VersionUtilsTests
         var runTags = CaseTag.Invalid_String;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
+        var skipTags = CaseTag.Three_String;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
+
         Assert.Throws<ArgumentException>(() => VersionUtils.Parse(data.String, out int _, out int _, out int _, out int _));
     }
 
@@ -142,6 +145,9 @@ public class VersionUtilsTests
         var runTags = CaseTag.Invalid_SemString;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
+        var skipTags = CaseTag.Four_SemString;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
+
         Assert.Throws<ArgumentException>(() => VersionUtils.Parse(data.SemString, out int _, out int _, out int _, out int _));
     }
 
@@ -149,7 +155,8 @@ public class VersionUtilsTests
     [ClassData(typeof(VersionData))]
     public void TryParse_Packed_ReturnsExpected_Packed_Vm(Case scenario, CaseRecord data)
     {
-        _ = scenario;
+        var skipTags = CaseTag.Three_String;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var badTags = CaseTag.Invalid_String;
         var shouldSucceed = !data.Tags.HasAny(badTags);
@@ -168,7 +175,8 @@ public class VersionUtilsTests
     [ClassData(typeof(VersionData))]
     public void TryParse_Packed_ReturnsExpected_Packed_Sem(Case scenario, CaseRecord data)
     {
-        _ = scenario;
+        var skipTags = CaseTag.Four_SemString;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var badTags = CaseTag.Invalid_SemString;
         var shouldSucceed = !data.Tags.HasAny(badTags);
@@ -200,6 +208,9 @@ public class VersionUtilsTests
         var runTags = CaseTag.Invalid_String;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
+        var skipTags = CaseTag.Three_String;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
+
         Assert.Throws<ArgumentException>(() => VersionUtils.Parse(data.String));
     }
 
@@ -219,6 +230,9 @@ public class VersionUtilsTests
     {
         var runTags = CaseTag.Invalid_SemString;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
+
+        var skipTags = CaseTag.Four_SemString;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         Assert.Throws<ArgumentException>(() => VersionUtils.Parse(data.SemString));
     }

@@ -66,6 +66,29 @@ public class VersionData : TheoryData<VersionData.Case, VersionData.CaseRecord>
             CaseTag.Invalid_Strings |
             CaseTag.PartsIn
         ));
+        Add(Case.ZeroedSems, new(
+            1, 0, 0, 0, Kind.Standard,
+            0x0100_0000, 0x0000_0000,
+            "1.0.0.0", "0.0.0",
+            CaseTag.Invalid_Sems |
+            CaseTag.Invalid_Packs |
+            CaseTag.Invalid_Strings
+        ));
+        Add(Case.ZeroedKind, new(
+            0, 1, 2, 3, Kind.None,
+            0x0001_0203, 0x0001_0203,
+            "0.1.2.3", "1.2.3",
+            CaseTag.Invalid_Kind |
+            CaseTag.Invalid_Packed |
+            CaseTag.Invalid_String
+        ));
+        Add(Case.MinorSpill, new(
+            1, 0, 0, 258, Kind.Standard,
+            0x0100_0102, 0x0000_0102,
+            "1.0.1.2", "0.1.2",
+            CaseTag.Invalid_Sems |
+            CaseTag.SemsIn
+        ));
         Add(Case.ValidKindSpill, new(
             2, 257, 1, 1, Kind.Banana,
             0x0301_0101, 0x0101_0101,
@@ -84,26 +107,57 @@ public class VersionData : TheoryData<VersionData.Case, VersionData.CaseRecord>
             CaseTag.Invalid_SemString |
             CaseTag.PartsIn
         ));
-        Add(Case.BadStrings, new(
+        Add(Case.LongStrings, new(
             1, 3, 5, 7, Kind.Standard,
             0x0103_0507, 0x0003_0507,
-            "1.3.5.7.9", "Invalid",
+            "1.3.5.7.9", "3.5.7.9",
+            CaseTag.Invalid_Strings |
+            CaseTag.Four_SemString
+        ));
+        Add(Case.ShortStrings, new(
+            2, 4, 6, 8, Kind.Banana,
+            0x0204_0608, 0x0004_0608,
+            "4.6.8", "4.6",
+            CaseTag.Invalid_Strings |
+            CaseTag.Three_String
+        ));
+        Add(Case.IncompatStrings, new(
+            3, 255, 255, 255, Kind.Potato,
+            0x03FF_FFFF, 0x00FF_FFFF,
+            "Not.A.Version.String", "NotAVersionString",
             CaseTag.Invalid_Strings
         ));
-        Add(Case.ZeroedSems, new(
-            1, 0, 0, 0, Kind.Standard,
-            0x0100_0000, 0x0000_0000,
-            "1.0.0.0", "0.0.0",
-            CaseTag.Invalid_Sems |
+        Add(Case.EmptyStrings, new(
+            0, 0, 0, 0, Kind.None,
+            0x0000_0000, 0x0000_0000,
+            "", "",
+            CaseTag.Invalid_Parts |
             CaseTag.Invalid_Packs |
             CaseTag.Invalid_Strings
         ));
-        Add(Case.MinorSpill, new(
-            1, 0, 0, 258, Kind.Standard,
-            0x0100_0102, 0x0000_0102,
-            "1.0.1.2", "0.1.2",
-            CaseTag.Invalid_Sems |
-            CaseTag.SemsIn
+        Add(Case.BadKindString, new(
+            3, 9, 27, 81, Kind.Potato,
+            0x0309_1B51, 0x0009_1B51,
+            "Three.9.27.81", "9.27.81",
+            CaseTag.Invalid_String
+        ));
+        Add(Case.BadMajorString, new(
+            1, 1, 2, 3, Kind.Standard,
+            0x0101_0203, 0x0001_0203,
+            "1.One.2.3", "One.2.3",
+            CaseTag.Invalid_Strings
+        ));
+        Add(Case.BadMinorString, new(
+            2, 5, 8, 10, Kind.Banana,
+            0x0205_080A, 0x0005_080A,
+            "2.5.Eight.10", "5.Eight.10",
+            CaseTag.Invalid_Strings
+        ));
+        Add(Case.BadPatchString, new(
+            3, 6, 9, 12, Kind.Potato,
+            0x0306_090C, 0x0006_090C,
+            "3.6.9.Twelve", "6.9.Twelve",
+            CaseTag.Invalid_Strings
         ));
     }
 
@@ -130,8 +184,12 @@ public class VersionData : TheoryData<VersionData.Case, VersionData.CaseRecord>
         MinimumValid, MaximumValid,
         ZeroedBytes, MaxedBytes,
         NegativeKind, NegativeSems,
+        ZeroedSems, ZeroedKind, MinorSpill,
         ValidKindSpill, InvalidKindSpill,
-        BadStrings, ZeroedSems, MinorSpill
+        LongStrings, ShortStrings,
+        IncompatStrings, EmptyStrings,
+        BadKindString, BadMajorString,
+        BadMinorString, BadPatchString
     }
 
     [Flags]
@@ -146,9 +204,12 @@ public class VersionData : TheoryData<VersionData.Case, VersionData.CaseRecord>
         Invalid_SemString = 1 << 5,
         KindIn = 1 << 10,
         SemsIn = 1 << 11,
+        Three_String = 1 << 12,
+        Four_SemString = 1 << 13,
         Invalid_Parts = Invalid_Kind | Invalid_Sems,
         Invalid_Packs = Invalid_Packed | Invalid_SemPacked,
         Invalid_Strings = Invalid_String | Invalid_SemString,
-        PartsIn = KindIn | SemsIn
+        PartsIn = KindIn | SemsIn,
+        Mismatch_Strings = Three_String | Four_SemString
     }
 }

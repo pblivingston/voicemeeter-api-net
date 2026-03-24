@@ -252,44 +252,81 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 
     public override string ToString() => $"{V1}.{V2}.{V3}.{V4}";
 
-    public static bool TryParse<T>(string s, out T kind, out int maj, out int min, out int pat)
-        where T : unmanaged
+    public static bool TryParse(string s, out int kind, out int maj, out int min, out int pat)
     {
-        kind = default;
-        if (!VersionUtils.TryParse(s, out int k, out maj, out min, out pat)) return false;
-        kind = (T)(object)k;
+        maj = 0; min = 0; pat = 0;
+        if (!VersionUtils.TryParse(s, out kind, out int m, out int n, out int p)) return false;
+        if (kind is 0) return false;
+        maj = m; min = n; pat = p;
         return true;
     }
 
-    public static void Parse<T>(string s, out T kind, out int maj, out int min, out int pat)
-        where T : unmanaged
+    public static void Parse(string s, out int kind, out int maj, out int min, out int pat)
     {
         if (!TryParse(s, out kind, out maj, out min, out pat))
             throw new ArgumentException(nameof(s));
     }
 
-    public static bool TryParse<T>(string s, out T kind, out SemVersion sem)
-        where T : unmanaged
+    public static bool TryParse(string s, out Kind kind, out int maj, out int min, out int pat)
     {
-        kind = default; sem = default;
-        if (!TryParse(s, out int k, out int maj, out int min, out int pat)) return false;
-        kind = (T)(object)k;
-        sem = new(maj, min, pat);
+        kind = default;
+        if (!TryParse(s, out int k, out maj, out min, out pat)) return false;
+        kind = (Kind)k;
         return true;
     }
 
-    public static void Parse<T>(string s, out T kind, out SemVersion sem)
-        where T : unmanaged
+    public static void Parse(string s, out Kind kind, out int maj, out int min, out int pat)
+    {
+        if (!TryParse(s, out kind, out maj, out min, out pat))
+            throw new ArgumentException(nameof(s));
+    }
+
+    public static bool TryParse(string s, out int kind, out SemVersion sem)
+    {
+        sem = default;
+        if (!TryParse(s, out kind, out int m, out int n, out int p)) return false;
+        sem = new(m, n, p);
+        return true;
+    }
+
+    public static void Parse(string s, out int kind, out SemVersion sem)
     {
         if (!TryParse(s, out kind, out sem))
+            throw new ArgumentException(nameof(s));
+    }
+
+    public static bool TryParse(string s, out Kind kind, out SemVersion sem)
+    {
+        kind = default;
+        if (!TryParse(s, out int k, out sem)) return false;
+        kind = (Kind)k;
+        return true;
+    }
+
+    public static void Parse(string s, out Kind kind, out SemVersion sem)
+    {
+        if (!TryParse(s, out kind, out sem))
+            throw new ArgumentException(nameof(s));
+    }
+
+    public static bool TryParse(string s, out int packed)
+    {
+        packed = 0;
+        if (!TryParse(s, out int k, out int m, out int n, out int p)) return false;
+        packed = RawPack(k, m, n, p);
+        return true;
+    }
+
+    public static void Parse(string s, out int packed)
+    {
+        if (!TryParse(s, out packed))
             throw new ArgumentException(nameof(s));
     }
 
     public static bool TryParse(string s, out VmVersion vm)
     {
         vm = default;
-        if (!VersionUtils.TryParse(s, out int packed)) return false;
-        if (!IsValid(packed)) return false;
+        if (!TryParse(s, out int packed)) return false;
         vm = new(packed);
         return true;
     }
