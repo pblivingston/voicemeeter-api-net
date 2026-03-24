@@ -3,7 +3,7 @@ using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
 
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VmVersionTests;
 
-public class StringRepresentationTests
+public class StringRepresentation
 {
     [Theory]
     [ClassData(typeof(VersionData))]
