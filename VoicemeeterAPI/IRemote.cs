@@ -17,7 +17,7 @@ public interface IRemote : IDisposable
     ///   Gets the current <see cref="LoginResponse"/> login status of the <see cref="IRemote"/> instance.
     /// </summary>
     /// <remarks>
-    ///   Initially set to <see cref="LoginResponse.Unknown"/> until a successful login attempt is made.
+    ///   Initially set to <see cref="LoginResponse.LoggedOut"/> until a successful login attempt is made.
     /// </remarks>
     LoginResponse LoginStatus { get; }
 

@@ -28,9 +28,9 @@ public enum LoginResponse
     NoClient = -1,
     Ok = 0,
     VoicemeeterNotRunning = 1,
-    LoggedOut,
-    Timeout,
-    Unknown
+    LoggedOut = 2,
+    Unknown = 3,
+    Timeout
 }
 
 /// <summary>

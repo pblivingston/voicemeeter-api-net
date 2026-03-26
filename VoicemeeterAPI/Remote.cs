@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using System;
+using System.Runtime.CompilerServices;
 using AtgDev.Utils.Native;
 using AtgDev.Voicemeeter;
 using AtgDev.Voicemeeter.Utils;
+using PBLivingston.VoicemeeterAPI.Messages;
 using PBLivingston.VoicemeeterAPI.Types;
 
 namespace PBLivingston.VoicemeeterAPI;
@@ -32,7 +34,7 @@ public sealed partial class Remote : IRemote
     private bool _isDisposed = false;
 
     /// <inheritdoc/>
-    public LoginResponse LoginStatus { get; private set; } = LoginResponse.Unknown;
+    public LoginResponse LoginStatus { get; private set; } = LoginResponse.LoggedOut;
     /// <inheritdoc/>
     public bool LoggedIn => LoginStatus is LoginResponse.Ok or LoginResponse.VoicemeeterNotRunning;
 
@@ -85,5 +87,23 @@ public sealed partial class Remote : IRemote
         _vmrApi.Dispose();
 
         _isDisposed = true;
+    }
+
+    private void LoginGuard(LoginResponse requiredStatus = LoginResponse.Ok, [CallerMemberName] string methodName = "")
+    {
+        if (_isDisposed)
+            throw new ObjectDisposedException(nameof(Remote), $"Called method: {methodName}");
+
+        if (methodName == nameof(Login) && LoginStatus != LoginResponse.LoggedOut)
+            throw new RemoteAccessException(methodName, LoginStatus);
+
+        if (methodName == nameof(Logout) && LoginStatus == LoginResponse.LoggedOut)
+        {
+            RemoteInfo.Write("Already logged out.");
+            return;
+        }
+
+        if (LoginStatus > requiredStatus)
+            throw new RemoteAccessException(methodName, LoginStatus);
     }
 }

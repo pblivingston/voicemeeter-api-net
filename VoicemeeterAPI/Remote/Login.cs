@@ -16,9 +16,7 @@ partial class Remote
     /// <inheritdoc/>
     public void Login()
     {
-        if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
-
-        if (LoggedIn) throw new RemoteAccessException(nameof(Login), LoginStatus);
+        LoginGuard(requiredStatus: LoginResponse.LoggedOut);
 
         RemoteInfo.Write("Logging in...");
 
@@ -49,13 +47,7 @@ partial class Remote
     /// <inheritdoc/>
     public void Logout()
     {
-        if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
-
-        if (LoginStatus is LoginResponse.LoggedOut)
-        {
-            RemoteInfo.Write("Already logged out.");
-            return;
-        }
+        LoginGuard(requiredStatus: LoginResponse.Unknown);
 
         var timeout = TimeSpan.FromMilliseconds(1000);
         var stopwatch = Stopwatch.StartNew();
@@ -88,7 +80,7 @@ partial class Remote
     /// <inheritdoc cref="IRemote.Run{T}(T)"/>
     public void Run(int app)
     {
-        if (!LoggedIn) throw new RemoteAccessException(nameof(Run), LoginStatus);
+        LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
         app = AppUtils.BitAdjust(app);
 

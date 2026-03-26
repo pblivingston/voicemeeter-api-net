@@ -1,7 +1,6 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using System;
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Messages;
 
@@ -14,10 +13,7 @@ partial class Remote
     /// <inheritdoc/>
     public bool ButtonsDirty()
     {
-        if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
-
-        if (LoginStatus is not LoginResponse.Ok)
-            throw new RemoteAccessException(nameof(ButtonsDirty), LoginStatus);
+        LoginGuard();
 
         var result = (Response)_vmrApi.MacroButtonIsDirty();
 

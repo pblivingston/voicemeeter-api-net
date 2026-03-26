@@ -14,10 +14,7 @@ partial class Remote
     /// <inheritdoc/>
     public bool ParamsDirty()
     {
-        if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
-
-        if (LoginStatus is not LoginResponse.Ok)
-            throw new RemoteAccessException(nameof(ParamsDirty), LoginStatus);
+        LoginGuard();
 
         var result = (Response)_vmrApi.IsParametersDirty();
 
@@ -36,10 +33,7 @@ partial class Remote
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
     public void GetParam(string param, out float value)
     {
-        if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
-
-        if (LoginStatus is not LoginResponse.Ok)
-            throw new RemoteAccessException(nameof(ParamsDirty), LoginStatus);
+        LoginGuard();
 
         var result = (Response)_vmrApi.GetParameter(param, out value);
 
@@ -68,10 +62,7 @@ partial class Remote
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
     public void GetParam(string param, out string value)
     {
-        if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
-
-        if (LoginStatus is not LoginResponse.Ok)
-            throw new RemoteAccessException(nameof(ParamsDirty), LoginStatus);
+        LoginGuard();
 
         var result = (Response)_vmrApi.GetParameter(param, out value);
 

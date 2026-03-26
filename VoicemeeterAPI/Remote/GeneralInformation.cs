@@ -1,7 +1,6 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using System;
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Messages;
 
@@ -14,9 +13,7 @@ partial class Remote
     /// <inheritdoc/>
     public Kind GetKind()
     {
-        if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
-
-        if (!LoggedIn) throw new RemoteAccessException(nameof(GetKind), LoginStatus);
+        LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
         var result = (InfoResponse)_vmrApi.GetVoicemeeterType(out int k);
         var kind = (Kind)k;
@@ -49,9 +46,7 @@ partial class Remote
     /// <inheritdoc/>
     public VmVersion GetVersion()
     {
-        if (_isDisposed) throw new ObjectDisposedException(nameof(Remote));
-
-        if (!LoggedIn) throw new RemoteAccessException(nameof(GetVersion), LoginStatus);
+        LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
         var result = (InfoResponse)_vmrApi.GetVoicemeeterVersion(out int v);
         var version = (VmVersion)v;
