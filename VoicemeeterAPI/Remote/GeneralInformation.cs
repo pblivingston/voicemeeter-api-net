@@ -17,26 +17,20 @@ partial class Remote
 
         var result = (InfoResponse)_vmrApi.GetVoicemeeterType(out int k);
         var kind = (Kind)k;
-        if (result != InfoResponse.Ok || kind < Kind.Standard || kind > Kind.Potato)
-            throw new RemoteException($"GetKind failed - {result}; returned kind: {kind}");
 
-        LoginStatus = LoginResponse.Ok;
-        return kind;
-    }
+        if (result == InfoResponse.Ok && kind.IsValid())
+        {
+            LoginStatus = LoginResponse.Ok;
+            return kind;
+        }
 
-    /// <inheritdoc/>
-    public bool TryGetKind(out Kind kind)
-    {
-        try
+        if (result == InfoResponse.NoServer)
         {
-            kind = GetKind();
-            return true;
+            LoginStatus = LoginResponse.VoicemeeterNotRunning;
+            return Kind.None;
         }
-        catch (RemoteException)
-        {
-            kind = NoKind;
-            return false;
-        }
+
+        throw new RemoteException($"GetKind failed - {result}; returned kind: {kind}");
     }
 
     #endregion
@@ -49,27 +43,20 @@ partial class Remote
         LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
         var result = (InfoResponse)_vmrApi.GetVoicemeeterVersion(out int v);
-        var version = (VmVersion)v;
-        if (result != InfoResponse.Ok || !version.IsValid())
-            throw new RemoteException($"GetVersion failed - {result}; returned version: {version}");
 
-        LoginStatus = LoginResponse.Ok;
-        return version;
-    }
+        if (result == InfoResponse.Ok && VmVersion.IsValid(v))
+        {
+            LoginStatus = LoginResponse.Ok;
+            return (VmVersion)v;
+        }
 
-    /// <inheritdoc/>
-    public bool TryGetVersion(out VmVersion vm)
-    {
-        try
+        if (result == InfoResponse.NoServer)
         {
-            vm = GetVersion();
-            return true;
+            LoginStatus = LoginResponse.VoicemeeterNotRunning;
+            return default;
         }
-        catch (RemoteException)
-        {
-            vm = new(NoKind, 0, 0, 0);
-            return false;
-        }
+
+        throw new RemoteException($"GetVersion failed - {result}; returned version: {VersionUtils.ToString(v)}");
     }
 
     #endregion

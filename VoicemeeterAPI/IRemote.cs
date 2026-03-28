@@ -93,7 +93,7 @@ public interface IRemote : IDisposable
     /// </exception>
     /// <exception cref="ObjectDisposedException"></exception>
     /// <exception cref="RemoteAccessException">
-    ///   Throws if <see cref="LoginStatus"/> is <see cref="LoginResponse.Unknown"/>.
+    ///   Throws if not <see cref="LoggedIn"/>.
     /// </exception>
     /// <exception cref="RunException">
     ///   Throws if the API call returns an error or the process times out.
@@ -145,25 +145,6 @@ public interface IRemote : IDisposable
     Kind GetKind();
 
     /// <summary>
-    ///   Attempts to get the running Voicemeeter kind.
-    /// </summary>
-    /// <param name="kind">
-    ///   If <see cref="GetKind()"/> throws
-    ///   <list type="bullet">
-    ///     <item><description>
-    ///       <see cref="Kind.None"/> when <see cref="LoginStatus"/> is <see cref="LoginResponse.VoicemeeterNotRunning"/>
-    ///     </description></item>
-    ///     <item><description>
-    ///       <see cref="Kind.Unknown"/> otherwise
-    ///     </description></item>
-    ///   </list>
-    /// </param>
-    /// <returns>
-    ///   False if <see cref="GetKind()"/> throws a <see cref="RemoteException"/>
-    /// </returns>
-    bool TryGetKind(out Kind kind);
-
-    /// <summary>
     ///   Gets the currently running Voicemeeter version.
     /// </summary>
     /// <returns><see cref="VmVersion"/></returns>
@@ -187,23 +168,6 @@ public interface IRemote : IDisposable
     ///   </list>
     /// </remarks>
     VmVersion GetVersion();
-
-    /// <summary>
-    ///   Attempts to get the running Voicemeeter version.
-    /// </summary>
-    /// <param name="vm">
-    ///   If <see cref="GetVersion()"/> throws
-    ///   <list type="bullet">
-    ///     <item><description>
-    ///       "0.0.0.0" when <see cref="LoginStatus"/> is <see cref="LoginResponse.VoicemeeterNotRunning"/>
-    ///     </description></item>
-    ///     <item><description>
-    ///       "255.0.0.0" otherwise
-    ///     </description></item>
-    ///   </list>
-    /// </param>
-    /// <returns>False if <see cref="GetVersion()"/> throws a <see cref="RemoteException"/></returns>
-    bool TryGetVersion(out VmVersion vm);
 
     #endregion
 

@@ -88,7 +88,7 @@ partial class Remote
     /// <inheritdoc cref="IRemote.Run{T}(T)"/>
     public void Run(int app)
     {
-        LoginGuard(requiredStatus: LoginResponse.LoggedOut);
+        LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
         app = AppUtils.BitAdjust(app);
 
@@ -150,7 +150,8 @@ partial class Remote
     {
         var timeout = TimeSpan.FromMilliseconds(ms);
         var stopwatch = Stopwatch.StartNew();
-        Exception? lastException = null;
+        var kind = Kind.None;
+        VmVersion version = default;
 
         RemoteInfo.Write("Waiting for running Voicemeeter...");
 
@@ -158,18 +159,19 @@ partial class Remote
         {
             Thread.Sleep(100);
 
-            try
+            kind = GetKind();
+            version = GetVersion();
+
+            if (kind.IsValid() && version.IsValid())
             {
-                RemoteInfo.Write($"Voicemeeter {GetKind()} v{GetVersion()} is running.");
-                lastException = null;
+                RemoteInfo.Write($"Voicemeeter {kind} v{version} is running.");
                 break;
             }
-            catch (RemoteException ex) { lastException = ex; }
         }
 
-        if (lastException != null)
+        if (!kind.IsValid() || !version.IsValid())
         {
-            RemoteWarning.Write($"Timed out waiting for Voicemeeter. Last caught: \"{lastException.Message}\"");
+            RemoteWarning.Write("Timed out waiting for Voicemeeter.");
             return false;
         }
 
