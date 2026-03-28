@@ -20,6 +20,9 @@ partial class Remote
 
         RemoteInfo.Write("Logging in...");
 
+        if (LoginStatus < LoginResponse.LoggedOut)
+            throw new RemoteException($"Already logged in ({LoginStatus}). Login may only be called once per session.");
+
         LoginStatus = (LoginResponse)_vmrApi.Login();
 
         switch (LoginStatus)
@@ -49,19 +52,25 @@ partial class Remote
     {
         LoginGuard(requiredStatus: LoginResponse.Unknown);
 
+        RemoteInfo.Write("Logging out...");
+
+        if (LoginStatus == LoginResponse.LoggedOut)
+        {
+            RemoteWarning.Write("Already logged out.");
+            return;
+        }
+
         var timeout = TimeSpan.FromMilliseconds(1000);
         var stopwatch = Stopwatch.StartNew();
-        int result = -1;
-
-        RemoteInfo.Write("Logging out...");
+        var result = LoginResponse.Unknown;
 
         while (stopwatch.Elapsed < timeout)
         {
             Thread.Sleep(100);
 
-            result = _vmrApi.Logout();
+            result = (LoginResponse)_vmrApi.Logout();
 
-            if (result == (int)LoginResponse.Ok)
+            if (result == LoginResponse.Ok)
             {
                 RemoteInfo.Write("Logout successful.");
                 LoginStatus = LoginResponse.LoggedOut;

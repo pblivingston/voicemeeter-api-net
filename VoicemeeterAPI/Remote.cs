@@ -94,15 +94,6 @@ public sealed partial class Remote : IRemote
         if (_isDisposed)
             throw new ObjectDisposedException(nameof(Remote), $"Called method: {methodName}");
 
-        if (methodName == nameof(Login) && LoginStatus != LoginResponse.LoggedOut)
-            throw new RemoteAccessException(methodName, LoginStatus);
-
-        if (methodName == nameof(Logout) && LoginStatus == LoginResponse.LoggedOut)
-        {
-            RemoteInfo.Write("Already logged out.");
-            return;
-        }
-
         if (LoginStatus > requiredStatus)
             throw new RemoteAccessException(methodName, LoginStatus);
     }
