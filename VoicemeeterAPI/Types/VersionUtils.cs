@@ -27,6 +27,12 @@ public static class VersionUtils
         pat = packed & 0xFF;
     }
 
+    public static string ToString(int packed)
+    {
+        RawUnpack(packed, out int kind, out int maj, out int min, out int pat);
+        return $"{kind}.{maj}.{min}.{pat}";
+    }
+
     public static bool TryParse(string s, out int kind, out int maj, out int min, out int pat)
     {
         kind = 0; maj = 0; min = 0; pat = 0;

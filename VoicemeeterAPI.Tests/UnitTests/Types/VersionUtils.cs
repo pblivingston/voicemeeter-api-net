@@ -54,6 +54,16 @@ public class VersionUtilsTests
 
     [Theory]
     [ClassData(typeof(VersionData))]
+    public void ToString_ReturnsExpected_String(Case scenario, CaseRecord data)
+    {
+        var skipTags = CaseTag.Incompat_Strings;
+        Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
+
+        Assert.Equal(data.String, VersionUtils.ToString(data.Packed));
+    }
+
+    [Theory]
+    [ClassData(typeof(VersionData))]
     public void TryParse_Parts_ReturnsExpected_Parts_Vm(Case scenario, CaseRecord data)
     {
         var skipTags = CaseTag.PartsIn | CaseTag.Three_String;
