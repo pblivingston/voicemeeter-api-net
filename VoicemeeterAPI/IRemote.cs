@@ -36,6 +36,9 @@ public interface IRemote : IDisposable
     /// </summary>
     /// <exception cref="ObjectDisposedException"></exception>
     /// <exception cref="RemoteAccessException">
+    ///   Throws if <see cref="LoginStatus"/> is <see cref="LoginResponse.Unknown"/>.
+    /// </exception>
+    /// <exception cref="RemoteException">
     ///   Throws if <see cref="LoggedIn"/>.
     /// </exception>
     /// <exception cref="LoginException">
@@ -90,7 +93,7 @@ public interface IRemote : IDisposable
     /// </exception>
     /// <exception cref="ObjectDisposedException"></exception>
     /// <exception cref="RemoteAccessException">
-    ///   Throws if not <see cref="LoggedIn"/>.
+    ///   Throws if <see cref="LoginStatus"/> is <see cref="LoginResponse.Unknown"/>.
     /// </exception>
     /// <exception cref="RunException">
     ///   Throws if the API call returns an error or the process times out.

@@ -20,8 +20,7 @@ partial class Remote
 
         RemoteInfo.Write("Logging in...");
 
-        if (LoginStatus < LoginResponse.LoggedOut)
-            throw new RemoteException($"Already logged in ({LoginStatus}). Login may only be called once per session.");
+        if (LoggedIn) throw new RemoteException($"Already logged in ({LoginStatus}). Login may only be called once per session.");
 
         LoginStatus = (LoginResponse)_vmrApi.Login();
 
@@ -89,7 +88,7 @@ partial class Remote
     /// <inheritdoc cref="IRemote.Run{T}(T)"/>
     public void Run(int app)
     {
-        LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
+        LoginGuard(requiredStatus: LoginResponse.LoggedOut);
 
         app = AppUtils.BitAdjust(app);
 
