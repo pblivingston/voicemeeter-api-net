@@ -19,7 +19,8 @@ partial class Remote
 
         RemoteInfo.Write("Logging in...");
 
-        if (LoggedIn) throw new RemoteException($"Already logged in ({LoginStatus}). Login may only be called once per session.");
+        if (LoggedIn)
+            throw new RemoteException($"Already logged in - LoginStatus: {LoginStatus}.");
 
         LoginStatus = (LoginResponse)_vmrApi.Login();
 
@@ -53,10 +54,7 @@ partial class Remote
         RemoteInfo.Write("Logging out...");
 
         if (LoginStatus == LoginResponse.LoggedOut)
-        {
-            RemoteWarning.Write("Already logged out.");
-            return;
-        }
+            throw new RemoteException("Already logged out.");
 
         bool Attempt(out LoginResponse response)
         {
@@ -104,10 +102,12 @@ partial class Remote
     }
 
     /// <inheritdoc cref="IRemote.Run{T}(T, int, int)"/>
-    public void Run(App app, int timeoutMs = 2000, int sleepMs = 100) => Run((int)app, timeoutMs, sleepMs);
+    public void Run(App app, int timeoutMs = 2000, int sleepMs = 100)
+        => Run((int)app, timeoutMs, sleepMs);
 
     /// <inheritdoc cref="IRemote.Run{T}(T, int, int)"/>
-    public void Run(Kind kind, int timeoutMs = 2000, int sleepMs = 100) => Run((int)kind, timeoutMs, sleepMs);
+    public void Run(Kind kind, int timeoutMs = 2000, int sleepMs = 100)
+        => Run((int)kind, timeoutMs, sleepMs);
 
     /// <inheritdoc cref="IRemote.Run{T}(T, int, int)"/>
     public void Run(string app, int timeoutMs = 2000, int sleepMs = 100)

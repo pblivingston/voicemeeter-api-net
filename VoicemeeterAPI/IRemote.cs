@@ -67,13 +67,13 @@ public interface IRemote : IDisposable
     /// </summary>
     /// <param name="timeoutMs">Time to wait before giving up logout attempts.</param>
     /// <param name="sleepMs">Time between logout attempts.</param>
-    /// <exception cref="ObjectDisposedException">
-    ///   Only throws on disposed instances to allow multiple logout attempts.
+    /// <exception cref="ObjectDisposedException"></exception>
+    /// <exception cref="RemoteException">
+    ///   Throws if <see cref="LoginStatus"/> is already <see cref="LoginResponse.LoggedOut"/>.
     /// </exception>
     /// <remarks>
     ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.LoggedOut"/> on successful logout.</para>
     ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.Unknown"/> if logout times out.</para>
-    ///   <para>Does nothing if <see cref="LoginStatus"/> is already <see cref="LoginResponse.LoggedOut"/>.</para>
     ///   <para>Calls:</para>
     ///   <list type="bullet">
     ///     <item><description>

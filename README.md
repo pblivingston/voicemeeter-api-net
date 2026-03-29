@@ -9,6 +9,8 @@ This library is meant to ease interaction with Voicemeeter. It provides:
 
 Notable changes will be documented in the [CHANGELOG](CHANGELOG.md).
 
+Although this library may function in its current state, it is still in early development and not currently intended for use.
+
 ## Prerequisites
 
 - [Voicemeeter](https://voicemeeter.com/) must be installed on the target machine.
@@ -30,37 +32,13 @@ Voicemeeter December 2025 release:
 - .NET Framework 4.6.1+
 - .NET 5.0+
 
-## Usage
+## Features
 
 ### Remote
 
 The `Remote` class provides access to the Voicemeeter Remote API.
 
-Optional parameter:
-
-- `apiWrapper`: an instance of `AtgDev.Voicemeeter.RemoteApiWrapper`
-
-  or
-
-- `dllPath`: a custom path string to the Voicemeeter Remote DLL
-
-The following properties are available:
-
-- `LoginStatus => LoginResponse`: `Ok, VoicemeeterNotRunning, LoggedOut, Unknown`
-- `LoggedIn => bool`: `LoginStatus` is `Ok` or `VoicemeeterNotRunning`
-
-The following methods are available (see below for details):
-
-- `Login() => void`
-- `Logout() => void`
-- `Run<T>(T app) => void`
-- `GetKind() => Kind`
-- `TryGetKind(out Kind k) => bool`
-- `GetVersion() => VmVersion`
-- `TryGetVersion(out VmVersion vm) => bool`
-- `ParamsDirty() => bool`
-- `GetParam(param, out value) => void`
-- `ButtonsDirty() => bool`
+#### Usage
 
 `Login()` must be called before any other methods, and `Logout()` should be called when finished.
 
@@ -82,70 +60,12 @@ finally
 }
 ```
 
-#### Login()
+#### Highlights
 
-Opens communication pipe with VoicemeeterRemote. Updates `LoginStatus` on successful login.
-
-Throws if the pipe is already open or the API response is an error.
-
-If API response is `Ok`, waits for the running Voicemeeter instance to be detected.
-
-#### Logout()
-
-Closes communication pipe with VoicemeeterRemote. Updates `LoginStatus` on timeout or successful logout.
-
-Does nothing if the pipe is already closed.
-
-#### Run(app)
-
-Launches the specified application.
-
-- `app`: `int`, `App`, `Kind`, or `string` representing the application to launch
-
-Throws if not logged in or API response is an error.
-
-If `app` is a Voicemeeter application (e.g. `3`, `App.Bananax64`, `Kind.Potato`, `"Standard"`, etc.), automatically adjusts for OS bitness where necessary and waits for the process to start.
-
-#### GetKind()
-
-Returns the currently running Voicemeeter `Kind`. Possible values: `Standard, Banana, Potato`.
-
-Ensures `LoginStatus` is `Ok` if the call is successful.
-
-Throws if not logged in or API response is an error.
-
-If calling `TryGetKind(out Kind k)` and `GetKind()` throws, returns false and sets `k` to either `None` (`VoicemeeterNotRunning`) or `Unknown`.
-
-#### GetVersion()
-
-Returns the currently running Voicemeeter `VmVersion`.
-
-Ensures `LoginStatus` is `Ok` if the call is successful.
-
-Throws if not logged in or API response is an error.
-
-If calling `TryGetVersion(out VmVersion vm)` and `GetVersion()` throws, returns false and sets `vm` to a new `VmVersion` either `"0.0.0.0"` (`VoicemeeterNotRunning`) or `"255.0.0.0"`.
-
-#### ParamsDirty()
-
-Checks if parameters have changed.
-
-Throws if `LoginStatus` is not `Ok` or API response is an error.
-
-#### GetParam(param, out value)
-
-Gets the requested Voicemeeter parameter.
-
-- `param`: requested parameter string
-- `out value`: `float`, `int`, `bool`, or `string` depending on the requested Voicemeeter parameter
-
-Throws if `LoginStatus` is not `Ok` or API response is an error.
-
-#### ButtonsDirty()
-
-Checks if any button status has changed.
-
-Throws if `LoginStatus` is not `Ok` or API response is an error.
+- If Voicemeeter is running, `Remote.Login()` ensures the running instance can be reached.
+- `Remote.Run(app)` can be used with `App` or `Kind` enums, strings, or integers and handles OS bitness and process-start polling automatically.
+- `Remote.GetVersion()` returns a `VmVersion` struct backed by the 32-bit integer returned by the API, providing easy comparison, string representation, access to individual version components, etc.
+- All `Remote` methods are protected by a state-aware `LoginGuard()` to prevent ghost API calls.
 
 ## Licensing
 
