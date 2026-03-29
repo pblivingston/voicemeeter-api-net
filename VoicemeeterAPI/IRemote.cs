@@ -34,6 +34,8 @@ public interface IRemote : IDisposable
     /// <summary>
     ///   Opens communication pipe with VoicemeeterRemote.
     /// </summary>
+    /// <param name="timeoutMs">Time to wait for a running Voicemeeter instance to be detected.</param>
+    /// <param name="sleepMs">Time between attempts checking for a running Voicemeeter instance.</param>
     /// <exception cref="ObjectDisposedException"></exception>
     /// <exception cref="RemoteAccessException">
     ///   Throws if <see cref="LoginStatus"/> is <see cref="LoginResponse.Unknown"/>.
@@ -58,11 +60,13 @@ public interface IRemote : IDisposable
     ///   </list>
     /// </remarks>
     /// <inheritdoc cref="IRemote" path="/example"/>
-    void Login();
+    void Login(int timeoutMs = 2000, int sleepMs = 100);
 
     /// <summary>
     ///   Closes communication pipe with VoicemeeterRemote.
     /// </summary>
+    /// <param name="timeoutMs">Time to wait before giving up logout attempts.</param>
+    /// <param name="sleepMs">Time between logout attempts.</param>
     /// <exception cref="ObjectDisposedException">
     ///   Only throws on disposed instances to allow multiple logout attempts.
     /// </exception>
@@ -81,13 +85,15 @@ public interface IRemote : IDisposable
     ///   </list>
     /// </remarks>
     /// <inheritdoc cref="IRemote" path="/example"/>
-    void Logout();
+    void Logout(int timeoutMs = 1000, int sleepMs = 100);
 
     /// <summary>
     ///   Runs the specified <see cref="App"/>.
     /// </summary>
     /// <typeparam name="T">int, <see cref="App"/>, <see cref="Kind"/>, or string</typeparam>
     /// <param name="app"></param>
+    /// <param name="timeoutMs">Time to wait for a Voicemeeter app to start.</param>
+    /// <param name="sleepMs">Time between attempts checking for a running Voicemeeter instance.</param>
     /// <exception cref="ArgumentException">
     ///   Throws if the given type is not supported or parsing a given string fails.
     /// </exception>
@@ -113,7 +119,7 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    void Run<T>(T app) where T : notnull;
+    void Run<T>(T app, int timeoutMs = 2000, int sleepMs = 100) where T : notnull;
 
     #endregion
 

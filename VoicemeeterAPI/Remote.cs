@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using AtgDev.Utils.Native;
 using AtgDev.Voicemeeter;
 using AtgDev.Voicemeeter.Utils;
@@ -96,5 +98,17 @@ public sealed partial class Remote : IRemote
 
         if (LoginStatus > requiredStatus)
             throw new RemoteAccessException(methodName, LoginStatus);
+    }
+
+    private bool Retry(Func<bool> action, int timeoutMs = 1000, int sleepMs = 100)
+    {
+        var timeout = TimeSpan.FromMilliseconds(timeoutMs);
+        var stopwatch = Stopwatch.StartNew();
+        while (stopwatch.Elapsed < timeout)
+        {
+            if (action()) return true;
+            Thread.Sleep(sleepMs);
+        }
+        return false;
     }
 }
