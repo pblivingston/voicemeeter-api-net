@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using AtgDev.Voicemeeter;
+using PBLivingston.VoicemeeterAPI.Types;
 
 namespace PBLivingston.VoicemeeterAPI;
 
@@ -19,24 +20,24 @@ internal sealed class Wrapper(RemoteApiWrapper remoteApiWrapper) : IWrapper
     public void Dispose() => _remoteApiWrapper.Dispose();
 
     /// <inheritdoc/>
-    public int Login() => _remoteApiWrapper.Login();
+    public LoginResponse Login() => (LoginResponse)_remoteApiWrapper.Login();
     /// <inheritdoc/>
-    public int Logout() => _remoteApiWrapper.Logout();
+    public LoginResponse Logout() => (LoginResponse)_remoteApiWrapper.Logout();
     /// <inheritdoc/>
-    public int RunVoicemeeter(int app) => _remoteApiWrapper.RunVoicemeeter(app);
+    public RunResponse RunVoicemeeter(int app) => (RunResponse)_remoteApiWrapper.RunVoicemeeter(app);
 
     /// <inheritdoc/>
-    public int GetVoicemeeterType(out int type) => _remoteApiWrapper.GetVoicemeeterType(out type);
+    public InfoResponse GetVoicemeeterType(out int type) => (InfoResponse)_remoteApiWrapper.GetVoicemeeterType(out type);
     /// <inheritdoc/>
-    public int GetVoicemeeterVersion(out int version) => _remoteApiWrapper.GetVoicemeeterVersion(out version);
+    public InfoResponse GetVoicemeeterVersion(out int version) => (InfoResponse)_remoteApiWrapper.GetVoicemeeterVersion(out version);
 
     /// <inheritdoc/>
-    public int IsParametersDirty() => _remoteApiWrapper.IsParametersDirty();
+    public Response IsParametersDirty() => (Response)_remoteApiWrapper.IsParametersDirty();
     /// <inheritdoc/>
-    public int GetParameter(string param, out float value) => _remoteApiWrapper.GetParameter(param, out value);
+    public Response GetParameter(string param, out float value) => (Response)_remoteApiWrapper.GetParameter(param, out value);
     /// <inheritdoc/>
-    public int GetParameter(string param, out string value) => _remoteApiWrapper.GetParameter(param, out value);
+    public Response GetParameter(string param, out string value) => (Response)_remoteApiWrapper.GetParameter(param, out value);
 
     /// <inheritdoc/>
-    public int MacroButtonIsDirty() => _remoteApiWrapper.MacroButtonIsDirty();
+    public Response MacroButtonIsDirty() => (Response)_remoteApiWrapper.MacroButtonIsDirty();
 }

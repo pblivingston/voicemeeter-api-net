@@ -15,7 +15,7 @@ partial class Remote
     {
         LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
-        var result = (InfoResponse)_vmrApi.GetVoicemeeterType(out int k);
+        var result = _vmrApi.GetVoicemeeterType(out int k);
         var kind = (Kind)k;
 
         if (result == InfoResponse.Ok && kind.IsValid())
@@ -42,7 +42,7 @@ partial class Remote
     {
         LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
-        var result = (InfoResponse)_vmrApi.GetVoicemeeterVersion(out int v);
+        var result = _vmrApi.GetVoicemeeterVersion(out int v);
 
         if (result == InfoResponse.Ok && VmVersion.IsValid(v))
         {

@@ -16,7 +16,7 @@ partial class Remote
     {
         LoginGuard();
 
-        var result = (Response)_vmrApi.IsParametersDirty();
+        var result = _vmrApi.IsParametersDirty();
 
         return result switch
         {
@@ -35,7 +35,7 @@ partial class Remote
     {
         LoginGuard();
 
-        var result = (Response)_vmrApi.GetParameter(param, out value);
+        var result = _vmrApi.GetParameter(param, out value);
 
         if (result != Response.Ok)
             throw new RemoteException($"GetParam failed - {result}; requested param: {param}, returned value: {value}");
@@ -64,7 +64,7 @@ partial class Remote
     {
         LoginGuard();
 
-        var result = (Response)_vmrApi.GetParameter(param, out value);
+        var result = _vmrApi.GetParameter(param, out value);
 
         if (result != Response.Ok)
             throw new RemoteException($"GetParam failed - {result}; requested param: {param}, returned value: {value}");

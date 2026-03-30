@@ -22,7 +22,7 @@ partial class Remote
         if (LoggedIn)
             throw new RemoteException($"Already logged in - LoginStatus: {LoginStatus}.");
 
-        LoginStatus = (LoginResponse)_vmrApi.Login();
+        LoginStatus = _vmrApi.Login();
 
         switch (LoginStatus)
         {
@@ -58,7 +58,7 @@ partial class Remote
 
         bool Attempt(out LoginResponse response)
         {
-            response = (LoginResponse)_vmrApi.Logout();
+            response = _vmrApi.Logout();
 
             if (response == LoginResponse.Ok)
             {
@@ -90,7 +90,7 @@ partial class Remote
 
         RemoteInfo.Write($"Running application: {(App)app}...");
 
-        var result = (RunResponse)_vmrApi.RunVoicemeeter(app);
+        var result = _vmrApi.RunVoicemeeter(app);
 
         if (result != RunResponse.Ok) throw new RunException(result, (App)app);
 

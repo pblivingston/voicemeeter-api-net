@@ -15,7 +15,7 @@ partial class Remote
     {
         LoginGuard();
 
-        var result = (Response)_vmrApi.MacroButtonIsDirty();
+        var result = _vmrApi.MacroButtonIsDirty();
 
         return result switch
         {

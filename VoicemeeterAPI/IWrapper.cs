@@ -3,6 +3,7 @@
 
 using System;
 using AtgDev.Voicemeeter;
+using PBLivingston.VoicemeeterAPI.Types;
 
 namespace PBLivingston.VoicemeeterAPI;
 
@@ -11,25 +12,25 @@ namespace PBLivingston.VoicemeeterAPI;
 /// </summary>
 internal interface IWrapper : IDisposable
 {
-    /// <inheritdoc cref="RemoteApiWrapper.Login()"/>
-    int Login();
-    /// <inheritdoc cref="RemoteApiWrapper.Logout()"/>
-    int Logout();
-    /// <inheritdoc cref="RemoteApiWrapper.RunVoicemeeter(int)"/>
-    int RunVoicemeeter(int app);
+    /// <inheritdoc cref="RemoteApiWrapper.Login()" path="/summary"/>
+    LoginResponse Login();
+    /// <inheritdoc cref="RemoteApiWrapper.Logout()" path="/summary"/>
+    LoginResponse Logout();
+    /// <inheritdoc cref="RemoteApiWrapper.RunVoicemeeter(int)" path="/summary"/>
+    RunResponse RunVoicemeeter(int app);
 
-    /// <inheritdoc cref="RemoteApiWrapper.GetVoicemeeterType(out int)"/>
-    int GetVoicemeeterType(out int type);
-    /// <inheritdoc cref="RemoteApiWrapper.GetVoicemeeterVersion(out int)"/>
-    int GetVoicemeeterVersion(out int version);
+    /// <inheritdoc cref="RemoteApiWrapper.GetVoicemeeterType(out int)" path="/summary"/>
+    InfoResponse GetVoicemeeterType(out int type);
+    /// <inheritdoc cref="RemoteApiWrapper.GetVoicemeeterVersion(out int)" path="/summary"/>
+    InfoResponse GetVoicemeeterVersion(out int version);
 
-    /// <inheritdoc cref="RemoteApiWrapper.IsParametersDirty()"/>
-    int IsParametersDirty();
-    /// <inheritdoc cref="RemoteApiWrapper.GetParameter(string, out float)"/>
-    int GetParameter(string param, out float value);
-    /// <inheritdoc cref="RemoteApiWrapper.GetParameter(string, out string)"/>
-    int GetParameter(string param, out string value);
+    /// <inheritdoc cref="RemoteApiWrapper.IsParametersDirty()" path="/summary"/>
+    Response IsParametersDirty();
+    /// <inheritdoc cref="RemoteApiWrapper.GetParameter(string, out float)" path="/summary"/>
+    Response GetParameter(string param, out float value);
+    /// <inheritdoc cref="RemoteApiWrapper.GetParameter(string, out string)" path="/summary"/>
+    Response GetParameter(string param, out string value);
 
-    /// <inheritdoc cref="RemoteApiWrapper.MacroButtonIsDirty()"/>
-    int MacroButtonIsDirty();
+    /// <inheritdoc cref="RemoteApiWrapper.MacroButtonIsDirty()" path="/summary"/>
+    Response MacroButtonIsDirty();
 }
