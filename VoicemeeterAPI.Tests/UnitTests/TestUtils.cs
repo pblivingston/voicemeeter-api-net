@@ -50,3 +50,15 @@ public abstract record SerializableRecord : IXunitSerializable
         }
     }
 }
+
+public abstract class MockRemote
+{
+    internal readonly Mock<IWrapper> MockWrapper;
+    protected readonly Remote Remote;
+
+    protected MockRemote()
+    {
+        MockWrapper = new Mock<IWrapper>();
+        Remote = new Remote(MockWrapper.Object);
+    }
+}
