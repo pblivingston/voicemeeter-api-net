@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Xunit.Sdk;
+using PBLivingston.VoicemeeterAPI.Types;
 
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests;
 
@@ -60,5 +61,14 @@ public abstract class MockRemote
     {
         MockWrapper = new Mock<IWrapper>();
         Remote = new Remote(MockWrapper.Object);
+    }
+
+    protected void MockOkLogin(int kind, int version)
+    {
+        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.Ok);
+        MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
+        MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
+
+        Remote.Login();
     }
 }

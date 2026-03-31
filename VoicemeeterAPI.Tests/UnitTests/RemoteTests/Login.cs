@@ -74,11 +74,7 @@ public class Login : MockRemote
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
 
-        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.Ok);
-        MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
-        MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
-
-        Remote.Login();
+        MockOkLogin(kind, version);
 
         var ex = Assert.Throws<RemoteException>(() => Remote.Login());
         Assert.Equal($"[VoicemeeterAPI] Remote Error: Already logged in - LoginStatus: {Remote.LoginStatus}.", ex.Message);
@@ -91,12 +87,10 @@ public class Login : MockRemote
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
 
-        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.Ok);
-        MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
-        MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
         MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
 
-        Remote.Login();
+        MockOkLogin(kind, version);
+
         Remote.Logout(timeoutMs: 10);
 
         var ex = Assert.Throws<RemoteAccessException>(() => Remote.Login());
@@ -127,14 +121,10 @@ public class Login : MockRemote
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
 
-        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.Ok);
-        MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
-        MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
-        MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Ok);
-        MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Ok);
         MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
 
-        Remote.Login();
+        MockOkLogin(kind, version);
+
         Remote.Logout();
 
         Assert.Equal(LoginResponse.LoggedOut, Remote.LoginStatus);
@@ -147,14 +137,10 @@ public class Login : MockRemote
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
 
-        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.Ok);
-        MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
-        MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
-        MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Ok);
-        MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Ok);
         MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
 
-        Remote.Login();
+        MockOkLogin(kind, version);
+
         Remote.Logout(timeoutMs: 10);
 
         Assert.Equal(LoginResponse.Unknown, Remote.LoginStatus);
