@@ -77,7 +77,7 @@ public class Login : MockRemote
         MockOkLogin(kind, version);
 
         var ex = Assert.Throws<RemoteException>(() => Remote.Login());
-        Assert.Equal($"[VoicemeeterAPI] Remote Error: Already logged in - LoginStatus: {Remote.LoginStatus}.", ex.Message);
+        Assert.Equal($"[VoicemeeterAPI] Remote Error: Already logged in - LoginStatus: Ok", ex.Message);
         MockWrapper.Verify(w => w.Login(), Times.Once);
     }
 
@@ -151,7 +151,7 @@ public class Login : MockRemote
     public void Logout_ThrowsException_Remote_WhenAlreadyLoggedOut()
     {
         var ex = Assert.Throws<RemoteException>(() => Remote.Logout());
-        Assert.Equal("[VoicemeeterAPI] Remote Error: Already logged out.", ex.Message);
+        Assert.Equal("[VoicemeeterAPI] Remote Error: Already logged out", ex.Message);
         MockWrapper.Verify(w => w.Logout(), Times.Never);
     }
 

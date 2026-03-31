@@ -20,7 +20,7 @@ partial class Remote
         RemoteInfo.Write("Logging in...");
 
         if (LoggedIn)
-            throw new RemoteException($"Already logged in - LoginStatus: {LoginStatus}.");
+            throw new RemoteException($"Already logged in - LoginStatus: {LoginStatus}");
 
         LoginStatus = _vmrApi.Login();
 
@@ -30,11 +30,11 @@ partial class Remote
                 if (!WaitForRunning(timeoutMs, sleepMs))
                     throw new LoginException(LoginResponse.Timeout);
 
-                RemoteInfo.Write("Login successful.");
+                RemoteInfo.Write("Login successful");
                 return;
 
             case LoginResponse.VoicemeeterNotRunning:
-                RemoteWarning.Write("Login successful but Voicemeeter is not running.");
+                RemoteWarning.Write("Login successful but Voicemeeter is not running");
                 return;
 
             default:
@@ -54,7 +54,7 @@ partial class Remote
         RemoteInfo.Write("Logging out...");
 
         if (LoginStatus == LoginResponse.LoggedOut)
-            throw new RemoteException("Already logged out.");
+            throw new RemoteException("Already logged out");
 
         bool Attempt(out LoginResponse response)
         {
@@ -62,7 +62,7 @@ partial class Remote
 
             if (response == LoginResponse.Ok)
             {
-                RemoteInfo.Write("Logout successful.");
+                RemoteInfo.Write("Logout successful");
                 LoginStatus = LoginResponse.LoggedOut;
                 return true;
             }
@@ -73,7 +73,7 @@ partial class Remote
         var result = LoginResponse.Unknown;
         if (Retry(() => Attempt(out result), timeoutMs, sleepMs)) return;
 
-        RemoteWarning.Write($"Logout timed out; last result: {result}.");
+        RemoteWarning.Write($"Logout timed out; last result: {result}");
         LoginStatus = LoginResponse.Unknown;
     }
 
@@ -155,7 +155,7 @@ partial class Remote
 
             if (kind.IsValid() && version.IsValid())
             {
-                RemoteInfo.Write($"Voicemeeter {kind} v{version} is running.");
+                RemoteInfo.Write($"Voicemeeter {kind} v{version} is running");
                 return true;
             }
 
@@ -168,7 +168,7 @@ partial class Remote
             return true;
         }
 
-        RemoteWarning.Write("Timed out waiting for Voicemeeter.");
+        RemoteWarning.Write("Timed out waiting for Voicemeeter");
         return false;
     }
 
