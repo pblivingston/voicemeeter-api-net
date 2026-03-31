@@ -17,6 +17,24 @@ public class AppTests
 
     [Theory]
     [ClassData(typeof(AppData))]
+    public void BitAdjust_ReturnsExpected_App32Bit(Case scenario, CaseRecord data)
+    {
+        _ = scenario;
+
+        Assert.Equal((int)data.App32, AppUtils.BitAdjust((int)data.App, false));
+    }
+
+    [Theory]
+    [ClassData(typeof(AppData))]
+    public void BitAdjust_ReturnsExpected_App64Bit(Case scenario, CaseRecord data)
+    {
+        _ = scenario;
+
+        Assert.Equal((int)data.App64, AppUtils.BitAdjust((int)data.App, true));
+    }
+
+    [Theory]
+    [ClassData(typeof(AppData))]
     public void BitAdjust_ReturnsExpected_App(Case scenario, CaseRecord data)
     {
         _ = scenario;

@@ -6,7 +6,7 @@ using System;
 namespace PBLivingston.VoicemeeterAPI.Types;
 
 /// <summary>
-///   Applications that can be run with <see cref="Remote.Run(App)"/>.
+///   Applications that can be run with <see cref="Remote.Run(App, int , int)"/>.
 /// </summary>
 public enum App
 {
@@ -55,13 +55,20 @@ public static class AppUtils
     ///   If the given app is a Voicemeeter app, adjusts to the correct bit version based on the current operating system.
     /// </summary>
     /// <param name="app"></param>
+    /// <param name="is64Bit">Defaults to OS bitness</param>
     /// <returns>The given app if not a Voicemeeter app or already correct</returns>
-    public static int BitAdjust(int app)
-        => app is > 0 and <= 3 && Environment.Is64BitOperatingSystem ? app + 3 // Adjust for 64-bit OS
-        : app is > 3 and <= 6 && !Environment.Is64BitOperatingSystem ? app - 3 // Adjust for 32-bit OS
-        : app;
+    public static int BitAdjust(int app, bool? is64Bit = null)
+    {
+        var is64 = is64Bit ?? Environment.Is64BitOperatingSystem;
+        return app switch
+        {
+            > 0 and <= 3 when is64 => app + 3, // Adjust for 64-bit OS
+            > 3 and <= 6 when !is64 => app - 3, // Adjust for 32-bit OS
+            _ => app
+        };
+    }
 
-    /// <inheritdoc cref="BitAdjust(int)"/>
+    /// <inheritdoc cref="BitAdjust(int, bool?)"/>
     public static App BitAdjust(App app) => (App)BitAdjust((int)app);
 
     /// <summary>
