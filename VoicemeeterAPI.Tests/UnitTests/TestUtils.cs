@@ -68,6 +68,8 @@ public abstract class MockRemote
         MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
+        MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Ok);
+        MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Ok);
 
         Remote.Login();
     }

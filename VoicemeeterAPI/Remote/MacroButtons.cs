@@ -21,7 +21,7 @@ partial class Remote
         {
             Response.Ok => false,
             Response.Dirty => true,
-            _ => throw new RemoteException($"ButtonDirty failed - {result}")
+            _ => throw new RemoteException($"ButtonsDirty failed - {result}")
         };
     }
 
