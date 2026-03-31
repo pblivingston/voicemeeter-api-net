@@ -13,7 +13,7 @@ public class MacroButtons : MockRemote
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
 
-        MockOkLogin(kind, version);
+        MockLogin_Ok(kind, version);
 
         MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Ok);
 
@@ -29,7 +29,7 @@ public class MacroButtons : MockRemote
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
 
-        MockOkLogin(kind, version);
+        MockLogin_Ok(kind, version);
 
         MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Dirty);
 
@@ -45,7 +45,7 @@ public class MacroButtons : MockRemote
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
 
-        MockOkLogin(kind, version);
+        MockLogin_Ok(kind, version);
 
         MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Error);
 
@@ -57,15 +57,7 @@ public class MacroButtons : MockRemote
     [Fact]
     public void ButtonsDirty_ThrowsException_RemoteAccess_WhenLoginStatusNotOk()
     {
-        var kind = (int)Kind.None;
-        var version = 0;
-
-        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.VoicemeeterNotRunning);
-        MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.NoServer);
-        MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.NoServer);
-
-        Remote.Login(timeoutMs: 10);
-        Assert.Equal(LoginResponse.VoicemeeterNotRunning, Remote.LoginStatus);
+        MockLogin_VoicemeeterNotRunning();
 
         var ex = Assert.Throws<RemoteAccessException>(() => Remote.ButtonsDirty());
         Assert.Multiple(

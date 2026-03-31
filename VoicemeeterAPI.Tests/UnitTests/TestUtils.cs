@@ -63,7 +63,7 @@ public abstract class MockRemote
         Remote = new Remote(MockWrapper.Object);
     }
 
-    protected void MockOkLogin(int kind, int version)
+    protected void MockLogin_Ok(int kind, int version)
     {
         MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
@@ -72,5 +72,14 @@ public abstract class MockRemote
         MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Ok);
 
         Remote.Login();
+        Assert.Equal(LoginResponse.Ok, Remote.LoginStatus);
+    }
+
+    protected void MockLogin_VoicemeeterNotRunning()
+    {
+        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.VoicemeeterNotRunning);
+
+        Remote.Login();
+        Assert.Equal(LoginResponse.VoicemeeterNotRunning, Remote.LoginStatus);
     }
 }

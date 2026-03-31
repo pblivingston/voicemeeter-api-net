@@ -12,11 +12,9 @@ public class GeneralInformation : MockRemote
     {
         var kind = (int)Kind.Banana;
 
-        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.VoicemeeterNotRunning);
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
 
-        Remote.Login();
-        Assert.Equal(LoginResponse.VoicemeeterNotRunning, Remote.LoginStatus);
+        MockLogin_VoicemeeterNotRunning();
 
         var result = Remote.GetKind();
 
@@ -33,7 +31,7 @@ public class GeneralInformation : MockRemote
         var kind = (int)Kind.Banana;
         var version = 0x0201_0202;
 
-        MockOkLogin(kind, version);
+        MockLogin_Ok(kind, version);
 
         var noKind = (int)Kind.None;
         MockWrapper.Setup(w => w.GetVoicemeeterType(out noKind)).Returns(InfoResponse.NoServer);
@@ -53,7 +51,7 @@ public class GeneralInformation : MockRemote
         var kind = (int)Kind.Banana;
         var version = 0x0201_0202;
 
-        MockOkLogin(kind, version);
+        MockLogin_Ok(kind, version);
 
         var noKind = (int)Kind.None;
         MockWrapper.Setup(w => w.GetVoicemeeterType(out noKind)).Returns(InfoResponse.NoClient);
@@ -90,11 +88,9 @@ public class GeneralInformation : MockRemote
     {
         var version = 0x0201_0202;
 
-        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.VoicemeeterNotRunning);
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
 
-        Remote.Login();
-        Assert.Equal(LoginResponse.VoicemeeterNotRunning, Remote.LoginStatus);
+        MockLogin_VoicemeeterNotRunning();
 
         var result = Remote.GetVersion();
 
@@ -111,7 +107,7 @@ public class GeneralInformation : MockRemote
         var kind = (int)Kind.Banana;
         var version = 0x0201_0202;
 
-        MockOkLogin(kind, version);
+        MockLogin_Ok(kind, version);
 
         var noVersion = 0;
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out noVersion)).Returns(InfoResponse.NoServer);
@@ -131,7 +127,7 @@ public class GeneralInformation : MockRemote
         var kind = (int)Kind.Banana;
         var version = 0x0201_0202;
 
-        MockOkLogin(kind, version);
+        MockLogin_Ok(kind, version);
 
         var noVersion = 0;
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out noVersion)).Returns(InfoResponse.NoClient);

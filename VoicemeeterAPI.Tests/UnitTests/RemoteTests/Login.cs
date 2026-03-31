@@ -74,7 +74,7 @@ public class Login : MockRemote
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
 
-        MockOkLogin(kind, version);
+        MockLogin_Ok(kind, version);
 
         var ex = Assert.Throws<RemoteException>(() => Remote.Login());
         Assert.Equal($"[VoicemeeterAPI] Remote Error: Already logged in - LoginStatus: Ok", ex.Message);
@@ -89,7 +89,7 @@ public class Login : MockRemote
 
         MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
 
-        MockOkLogin(kind, version);
+        MockLogin_Ok(kind, version);
 
         Remote.Logout(timeoutMs: 10);
 
@@ -123,7 +123,7 @@ public class Login : MockRemote
 
         MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
 
-        MockOkLogin(kind, version);
+        MockLogin_Ok(kind, version);
 
         Remote.Logout();
 
@@ -139,7 +139,7 @@ public class Login : MockRemote
 
         MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
 
-        MockOkLogin(kind, version);
+        MockLogin_Ok(kind, version);
 
         Remote.Logout(timeoutMs: 10);
 
