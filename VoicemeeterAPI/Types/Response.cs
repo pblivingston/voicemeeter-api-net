@@ -19,7 +19,7 @@ public enum Response
 }
 
 /// <summary>
-///   Responses from <see cref="Remote.Login()"/> and <see cref="Remote.Logout()"/> for <see cref="LoginException"/>
+///   Responses from <see cref="Remote.Login(int, int)"/> and <see cref="Remote.Logout(int, int)"/> for <see cref="LoginException"/>
 ///   and values for <see cref="IRemote.LoginStatus"/>.
 /// </summary>
 public enum LoginResponse
@@ -34,7 +34,7 @@ public enum LoginResponse
 }
 
 /// <summary>
-///   Responses from <see cref="Remote.Run(int)"/> for <see cref="RunException"/>.
+///   Responses from <see cref="Remote.Run(int, int, int)"/> for <see cref="RunException"/>.
 /// </summary>
 public enum RunResponse
 {
