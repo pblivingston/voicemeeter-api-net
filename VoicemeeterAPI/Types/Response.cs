@@ -15,7 +15,8 @@ public enum Response
     NoServer = -2,
     Error = -1,
     Ok = 0,
-    Dirty
+    Dirty = 1,
+    TypeMismatch
 }
 
 /// <summary>

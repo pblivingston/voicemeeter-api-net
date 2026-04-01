@@ -38,6 +38,15 @@ internal sealed class RunException(RunResponse r, App a)
     public App App { get; } = a;
 }
 
+internal class GetParamException<T>(Response r, string p, T v, Type t)
+    : RemoteException($"GetParam failed - {r}; requested param: {p}, returned value: {v}, expected type: {t}")
+{
+    public Response Response { get; } = r;
+    public string Param { get; } = p;
+    public T Value { get; } = v;
+    public Type ExpectedType { get; } = t;
+}
+
 #endregion
 
 #region Voicemeeter Exceptions

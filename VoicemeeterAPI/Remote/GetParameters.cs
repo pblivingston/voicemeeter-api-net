@@ -38,21 +38,31 @@ partial class Remote
         var result = _vmrApi.GetParameter(param, out value);
 
         if (result != Response.Ok)
-            throw new RemoteException($"GetParam failed - {result}; requested param: {param}, returned value: {value}");
+            throw new GetParamException<float>(result, param, value, typeof(float));
     }
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
     public void GetParam(string param, out int value)
     {
         GetParam(param, out float val);
-        value = (int)val;
+
+        value = Convert.ToInt32(val);
+
+        if (Math.Abs(val - value) > 0.0001f || value < 0)
+            throw new GetParamException<float>(Response.TypeMismatch, param, val, typeof(int));
     }
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
     public void GetParam(string param, out bool value)
     {
         GetParam(param, out float val);
-        value = val != 0;
+
+        var v = Convert.ToInt32(val);
+
+        if (Math.Abs(val - v) > 0.0001f || v is not (0 or 1))
+            throw new GetParamException<float>(Response.TypeMismatch, param, val, typeof(bool));
+
+        value = v == 1;
     }
 
     #endregion
@@ -67,7 +77,7 @@ partial class Remote
         var result = _vmrApi.GetParameter(param, out value);
 
         if (result != Response.Ok)
-            throw new RemoteException($"GetParam failed - {result}; requested param: {param}, returned value: {value}");
+            throw new GetParamException<string>(result, param, value, typeof(string));
     }
 
     #endregion
@@ -103,6 +113,6 @@ partial class Remote
             return;
         }
 
-        throw new NotSupportedException($"'{nameof(value)}' type '{typeof(T)}' is not supported for GetParams.");
+        throw new NotSupportedException($"'{nameof(value)}' type '{typeof(T)}' is not supported for GetParams");
     }
 }
