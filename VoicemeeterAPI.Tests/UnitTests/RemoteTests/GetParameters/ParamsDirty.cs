@@ -1,14 +1,12 @@
 using PBLivingston.VoicemeeterAPI.Messages;
 using PBLivingston.VoicemeeterAPI.Types;
 
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests;
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;
 
-public class GetParameters : MockRemote
+public class ParamsDirty : MockRemote
 {
-    #region ParamsDirty
-
     [Fact]
-    public void ParamsDirty_ReturnsFalse_WhenResponseIsOk()
+    public void ReturnsFalse_WhenResponseIsOk()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
@@ -24,7 +22,7 @@ public class GetParameters : MockRemote
     }
 
     [Fact]
-    public void ParamsDirty_ReturnsTrue_WhenResponseIsDirty()
+    public void ReturnsTrue_WhenResponseIsDirty()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
@@ -40,7 +38,7 @@ public class GetParameters : MockRemote
     }
 
     [Fact]
-    public void ParamsDirty_ThrowsException_Remote_WhenUnexpectedResponse()
+    public void ThrowsException_Remote_WhenUnexpectedResponse()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
@@ -55,7 +53,7 @@ public class GetParameters : MockRemote
     }
 
     [Fact]
-    public void ParamsDirty_ThrowsException_RemoteAccess_WhenLoginStatusNotOk()
+    public void ThrowsException_RemoteAccess_WhenLoginStatusNotOk()
     {
         MockLogin_VoicemeeterNotRunning();
 
@@ -68,7 +66,7 @@ public class GetParameters : MockRemote
     }
 
     [Fact]
-    public void ParamsDirty_ThrowsException_ObjectDisposed_WhenRemoteIsDisposed()
+    public void ThrowsException_ObjectDisposed_WhenRemoteIsDisposed()
     {
         Remote.Dispose();
 
@@ -76,6 +74,4 @@ public class GetParameters : MockRemote
         Assert.Equal("Remote", ex.ObjectName);
         MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never);
     }
-
-    #endregion
 }

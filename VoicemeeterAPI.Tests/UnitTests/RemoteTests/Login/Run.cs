@@ -1,176 +1,12 @@
 using PBLivingston.VoicemeeterAPI.Messages;
 using PBLivingston.VoicemeeterAPI.Types;
 
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests;
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.Login;
 
-public class Login : MockRemote
+public class Run : MockRemote
 {
-    #region Login
-
     [Fact]
-    public void Login_UpdatesLoginStatus_Ok_WhenAllConditionsMet()
-    {
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-
-        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.Ok);
-        MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
-        MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
-
-        MockWrapper.SetupSequence(w => w.IsParametersDirty())
-            .Returns(Response.Dirty)
-            .Returns(Response.Ok);
-        MockWrapper.SetupSequence(w => w.MacroButtonIsDirty())
-            .Returns(Response.Dirty)
-            .Returns(Response.Ok);
-
-        Remote.Login();
-
-        Assert.Equal(LoginResponse.Ok, Remote.LoginStatus);
-        MockWrapper.Verify(w => w.Login(), Times.Once);
-    }
-
-    [Fact]
-    public void Login_UpdatesLoginStatus_VoicemeeterNotRunning_WhenVoicemeeterNotRunning()
-    {
-        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.VoicemeeterNotRunning);
-
-        Remote.Login();
-
-        Assert.Equal(LoginResponse.VoicemeeterNotRunning, Remote.LoginStatus);
-        MockWrapper.Verify(w => w.Login(), Times.Once);
-    }
-
-    [Theory]
-    [InlineData(LoginResponse.AlreadyLoggedIn)]
-    [InlineData(LoginResponse.NoClient)]
-    public void Login_ThrowsException_Login_WhenLoginFails(LoginResponse expectedResponse)
-    {
-        MockWrapper.Setup(w => w.Login()).Returns(expectedResponse);
-
-        var ex = Assert.Throws<LoginException>(() => Remote.Login());
-        Assert.Equal(expectedResponse, ex.Response);
-        MockWrapper.Verify(w => w.Login(), Times.Once);
-    }
-
-    [Fact]
-    public void Login_ThrowsException_Login_WhenWaitForRunningTimesOut()
-    {
-        var kind = (int)Kind.None;
-        var version = 0;
-
-        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.Ok);
-        MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.NoServer);
-        MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.NoServer);
-
-        var ex = Assert.Throws<LoginException>(() => Remote.Login(timeoutMs: 10));
-        Assert.Equal(LoginResponse.Timeout, ex.Response);
-        MockWrapper.Verify(w => w.Login(), Times.Once);
-    }
-
-    [Fact]
-    public void Login_ThrowsException_Remote_WhenAlreadyLoggedIn()
-    {
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-
-        MockLogin_Ok(kind, version);
-
-        var ex = Assert.Throws<RemoteException>(() => Remote.Login());
-        Assert.Equal($"[VoicemeeterAPI] Remote Error: Already logged in - LoginStatus: Ok", ex.Message);
-        MockWrapper.Verify(w => w.Login(), Times.Once);
-    }
-
-    [Fact]
-    public void Login_ThrowsException_RemoteAccess_WhenLoginStatusUnknown()
-    {
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-
-        MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
-
-        MockLogin_Ok(kind, version);
-
-        Remote.Logout(timeoutMs: 10);
-
-        var ex = Assert.Throws<RemoteAccessException>(() => Remote.Login());
-        Assert.Multiple(
-            () => Assert.Equal("Login", ex.Method),
-            () => Assert.Equal(LoginResponse.Unknown, ex.LoginStatus)
-        );
-        MockWrapper.Verify(w => w.Login(), Times.Once);
-    }
-
-    [Fact]
-    public void Login_ThrowsException_ObjectDisposed_WhenRemoteDisposed()
-    {
-        Remote.Dispose();
-
-        var ex = Assert.Throws<ObjectDisposedException>(() => Remote.Login());
-        Assert.Equal("Remote", ex.ObjectName);
-        MockWrapper.Verify(w => w.Login(), Times.Never);
-    }
-
-    #endregion
-
-    #region Logout
-
-    [Fact]
-    public void Logout_UpdatesLoginStatus_LoggedOut_WhenSuccessful()
-    {
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-
-        MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
-
-        MockLogin_Ok(kind, version);
-
-        Remote.Logout();
-
-        Assert.Equal(LoginResponse.LoggedOut, Remote.LoginStatus);
-        MockWrapper.Verify(w => w.Logout(), Times.Once);
-    }
-
-    [Fact]
-    public void Logout_UpdatesLoginStatus_Unknown_WhenTimesOut()
-    {
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-
-        MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
-
-        MockLogin_Ok(kind, version);
-
-        Remote.Logout(timeoutMs: 10);
-
-        Assert.Equal(LoginResponse.Unknown, Remote.LoginStatus);
-        MockWrapper.Verify(w => w.Logout(), Times.Once);
-    }
-
-    [Fact]
-    public void Logout_ThrowsException_Remote_WhenAlreadyLoggedOut()
-    {
-        var ex = Assert.Throws<RemoteException>(() => Remote.Logout());
-        Assert.Equal("[VoicemeeterAPI] Remote Error: Already logged out", ex.Message);
-        MockWrapper.Verify(w => w.Logout(), Times.Never);
-    }
-
-    [Fact]
-    public void Logout_ThrowsException_ObjectDisposed_WhenRemoteDisposed()
-    {
-        Remote.Dispose();
-
-        var ex = Assert.Throws<ObjectDisposedException>(() => Remote.Logout());
-        Assert.Equal("Remote", ex.ObjectName);
-        MockWrapper.Verify(w => w.Logout(), Times.Never);
-    }
-
-    #endregion
-
-    #region Run
-
-    [Fact]
-    public void Run_LaunchesApp_WhenValid()
+    public void LaunchesApp_WhenValid()
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
@@ -186,7 +22,7 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void Run_ThrowsException_Run_WhenUnknownApp()
+    public void ThrowsException_Run_WhenUnknownApp()
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
@@ -205,7 +41,7 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void Run_ThrowsException_Run_WhenUnexpectedResponse()
+    public void ThrowsException_Run_WhenUnexpectedResponse()
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
@@ -224,7 +60,7 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void Run_ThrowsException_RemoteAccess_WhenLoginStatusLoggedOut()
+    public void ThrowsException_RemoteAccess_WhenLoginStatusLoggedOut()
     {
         var app = (int)App.DeviceCheck;
 
@@ -237,7 +73,7 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void Run_ThrowsException_ObjectDisposed_WhenRemoteDisposed()
+    public void ThrowsException_ObjectDisposed_WhenRemoteDisposed()
     {
         var app = (int)App.BUSGEQ15;
 
@@ -249,7 +85,7 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void Run_App_Calls_ButtonsDirty_WhenAppIsMacroButtons()
+    public void App_Calls_ButtonsDirty_WhenAppIsMacroButtons()
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
@@ -270,7 +106,7 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void Run_Kind_UpdatesLoginStatus_Ok_WhenAllConditionsMet()
+    public void Kind_UpdatesLoginStatus_Ok_WhenAllConditionsMet()
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
@@ -296,7 +132,7 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void Run_Kind_ThrowsException_Run_WhenWaitForRunningTimesOut()
+    public void Kind_ThrowsException_Run_WhenWaitForRunningTimesOut()
     {
         var kind = (int)Kind.None;
         var version = 0;
@@ -317,7 +153,7 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void Run_String_ThrowsException_Argument_WhenInvalidString()
+    public void String_ThrowsException_Argument_WhenInvalidString()
     {
         var ex = Assert.Throws<ArgumentException>(() => Remote.Run("InvalidApp"));
         Assert.Equal("app", ex.ParamName);
@@ -325,7 +161,7 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void Run_GenericInt_Calls_CorrectOverload()
+    public void GenericInt_Calls_CorrectOverload()
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
@@ -341,7 +177,7 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void Run_GenericApp_Calls_CorrectOverload()
+    public void GenericApp_Calls_CorrectOverload()
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
@@ -357,7 +193,7 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void Run_GenericKind_Calls_CorrectOverload()
+    public void GenericKind_Calls_CorrectOverload()
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
@@ -377,7 +213,7 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void Run_GenericString_Calls_CorrectOverload()
+    public void GenericString_Calls_CorrectOverload()
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
@@ -393,12 +229,10 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void Run_Generic_ThrowsException_Argument_WhenInvalidType()
+    public void Generic_ThrowsException_Argument_WhenInvalidType()
     {
         var ex = Assert.Throws<ArgumentException>(() => ((IRemote)Remote).Run(10.0f));
         Assert.Equal("app", ex.ParamName);
         MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never);
     }
-
-    #endregion
 }

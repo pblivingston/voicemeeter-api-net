@@ -1,14 +1,12 @@
 using PBLivingston.VoicemeeterAPI.Messages;
 using PBLivingston.VoicemeeterAPI.Types;
 
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests;
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.MacroButtons;
 
-public class MacroButtons : MockRemote
+public class ButtonsDirty : MockRemote
 {
-    #region ButtonsDirty
-
     [Fact]
-    public void ButtonsDirty_ReturnsFalse_WhenResponseIsOk()
+    public void ReturnsFalse_WhenResponseIsOk()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
@@ -24,7 +22,7 @@ public class MacroButtons : MockRemote
     }
 
     [Fact]
-    public void ButtonsDirty_ReturnsTrue_WhenResponseIsDirty()
+    public void ReturnsTrue_WhenResponseIsDirty()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
@@ -40,7 +38,7 @@ public class MacroButtons : MockRemote
     }
 
     [Fact]
-    public void ButtonsDirty_ThrowsException_Remote_WhenUnexpectedResponse()
+    public void ThrowsException_Remote_WhenUnexpectedResponse()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
@@ -55,7 +53,7 @@ public class MacroButtons : MockRemote
     }
 
     [Fact]
-    public void ButtonsDirty_ThrowsException_RemoteAccess_WhenLoginStatusNotOk()
+    public void ThrowsException_RemoteAccess_WhenLoginStatusNotOk()
     {
         MockLogin_VoicemeeterNotRunning();
 
@@ -68,7 +66,7 @@ public class MacroButtons : MockRemote
     }
 
     [Fact]
-    public void ButtonsDirty_ThrowsException_ObjectDisposed_WhenRemoteDisposed()
+    public void ThrowsException_ObjectDisposed_WhenRemoteDisposed()
     {
         Remote.Dispose();
 
@@ -76,6 +74,4 @@ public class MacroButtons : MockRemote
         Assert.Equal("Remote", ex.ObjectName);
         MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Never);
     }
-
-    #endregion
 }
