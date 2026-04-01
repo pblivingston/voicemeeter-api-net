@@ -17,8 +17,10 @@ public class Logout : MockRemote
 
         Remote.Logout();
 
-        Assert.Equal(LoginResponse.LoggedOut, Remote.LoginStatus);
-        MockWrapper.Verify(w => w.Logout(), Times.Once);
+        Assert.Multiple(
+            () => Assert.Equal(LoginResponse.LoggedOut, Remote.LoginStatus),
+            () => MockWrapper.Verify(w => w.Logout(), Times.Once)
+        );
     }
 
     [Fact]
@@ -33,16 +35,21 @@ public class Logout : MockRemote
 
         Remote.Logout(timeoutMs: 10);
 
-        Assert.Equal(LoginResponse.Unknown, Remote.LoginStatus);
-        MockWrapper.Verify(w => w.Logout(), Times.Once);
+        Assert.Multiple(
+            () => Assert.Equal(LoginResponse.Unknown, Remote.LoginStatus),
+            () => MockWrapper.Verify(w => w.Logout(), Times.Once)
+        );
     }
 
     [Fact]
     public void ThrowsException_Remote_WhenAlreadyLoggedOut()
     {
         var ex = Assert.Throws<RemoteException>(() => Remote.Logout());
-        Assert.Equal("[VoicemeeterAPI] Remote Error: Already logged out", ex.Message);
-        MockWrapper.Verify(w => w.Logout(), Times.Never);
+
+        Assert.Multiple(
+            () => Assert.Equal("[VoicemeeterAPI] Remote Error: Already logged out", ex.Message),
+            () => MockWrapper.Verify(w => w.Logout(), Times.Never)
+        );
     }
 
     [Fact]
@@ -51,7 +58,10 @@ public class Logout : MockRemote
         Remote.Dispose();
 
         var ex = Assert.Throws<ObjectDisposedException>(() => Remote.Logout());
-        Assert.Equal("Remote", ex.ObjectName);
-        MockWrapper.Verify(w => w.Logout(), Times.Never);
+
+        Assert.Multiple(
+            () => Assert.Equal("Remote", ex.ObjectName),
+            () => MockWrapper.Verify(w => w.Logout(), Times.Never)
+        );
     }
 }

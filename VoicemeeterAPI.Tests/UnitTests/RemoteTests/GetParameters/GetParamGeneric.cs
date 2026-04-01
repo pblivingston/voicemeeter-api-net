@@ -19,8 +19,10 @@ public class GetParamGeneric : MockRemote
 
         ((IRemote)Remote).GetParam(param, out float result);
 
-        Assert.Equal(value, result);
-        MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once);
+        Assert.Multiple(
+            () => Assert.Equal(value, result),
+            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once)
+        );
     }
 
     [Fact]
@@ -38,8 +40,10 @@ public class GetParamGeneric : MockRemote
 
         ((IRemote)Remote).GetParam(param, out int result);
 
-        Assert.Equal(expected, result);
-        MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once);
+        Assert.Multiple(
+            () => Assert.Equal(expected, result),
+            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once)
+        );
     }
 
     [Fact]
@@ -57,8 +61,10 @@ public class GetParamGeneric : MockRemote
 
         ((IRemote)Remote).GetParam(param, out bool result);
 
-        Assert.Equal(expected, result);
-        MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once);
+        Assert.Multiple(
+            () => Assert.Equal(expected, result),
+            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once)
+        );
     }
 
     [Fact]
@@ -75,8 +81,10 @@ public class GetParamGeneric : MockRemote
 
         ((IRemote)Remote).GetParam(param, out string result);
 
-        Assert.Equal(value, result);
-        MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once);
+        Assert.Multiple(
+            () => Assert.Equal(value, result),
+            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once)
+        );
     }
 
     [Fact]
@@ -89,8 +97,11 @@ public class GetParamGeneric : MockRemote
         MockLogin_Ok(kind, version);
 
         var ex = Assert.Throws<NotSupportedException>(() => ((IRemote)Remote).GetParam(param, out DateTime _));
-        Assert.Equal($"'value' type '{typeof(DateTime)}' is not supported for GetParams", ex.Message);
-        MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<float>.IsAny), Times.Never);
-        MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never);
+
+        Assert.Multiple(
+            () => Assert.Equal($"'value' type '{typeof(DateTime)}' is not supported for GetParams", ex.Message),
+            () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<float>.IsAny), Times.Never),
+            () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never)
+        );
     }
 }

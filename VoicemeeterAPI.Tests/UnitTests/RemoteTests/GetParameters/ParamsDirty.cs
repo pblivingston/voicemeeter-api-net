@@ -17,8 +17,10 @@ public class ParamsDirty : MockRemote
 
         var result = Remote.ParamsDirty();
 
-        Assert.False(result);
-        MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2));
+        Assert.Multiple(
+            () => Assert.False(result),
+            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2))
+        );
     }
 
     [Fact]
@@ -33,8 +35,10 @@ public class ParamsDirty : MockRemote
 
         var result = Remote.ParamsDirty();
 
-        Assert.True(result);
-        MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2));
+        Assert.Multiple(
+            () => Assert.True(result),
+            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2))
+        );
     }
 
     [Fact]
@@ -48,8 +52,11 @@ public class ParamsDirty : MockRemote
         MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Error);
 
         var ex = Assert.Throws<RemoteException>(() => Remote.ParamsDirty());
-        Assert.Equal("[VoicemeeterAPI] Remote Error: ParamsDirty failed - Error", ex.Message);
-        MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2));
+
+        Assert.Multiple(
+            () => Assert.Equal("[VoicemeeterAPI] Remote Error: ParamsDirty failed - Error", ex.Message),
+            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2))
+        );
     }
 
     [Fact]
@@ -58,11 +65,12 @@ public class ParamsDirty : MockRemote
         MockLogin_VoicemeeterNotRunning();
 
         var ex = Assert.Throws<RemoteAccessException>(() => Remote.ParamsDirty());
+
         Assert.Multiple(
             () => Assert.Equal("ParamsDirty", ex.Method),
-            () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus)
+            () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
+            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never)
         );
-        MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never);
     }
 
     [Fact]
@@ -71,7 +79,10 @@ public class ParamsDirty : MockRemote
         Remote.Dispose();
 
         var ex = Assert.Throws<ObjectDisposedException>(() => Remote.ParamsDirty());
-        Assert.Equal("Remote", ex.ObjectName);
-        MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never);
+
+        Assert.Multiple(
+            () => Assert.Equal("Remote", ex.ObjectName),
+            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never)
+        );
     }
 }

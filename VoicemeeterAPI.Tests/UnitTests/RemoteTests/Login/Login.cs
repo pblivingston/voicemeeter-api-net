@@ -24,8 +24,10 @@ public class Login : MockRemote
 
         Remote.Login();
 
-        Assert.Equal(LoginResponse.Ok, Remote.LoginStatus);
-        MockWrapper.Verify(w => w.Login(), Times.Once);
+        Assert.Multiple(
+            () => Assert.Equal(LoginResponse.Ok, Remote.LoginStatus),
+            () => MockWrapper.Verify(w => w.Login(), Times.Once)
+        );
     }
 
     [Fact]
@@ -35,8 +37,10 @@ public class Login : MockRemote
 
         Remote.Login();
 
-        Assert.Equal(LoginResponse.VoicemeeterNotRunning, Remote.LoginStatus);
-        MockWrapper.Verify(w => w.Login(), Times.Once);
+        Assert.Multiple(
+            () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, Remote.LoginStatus),
+            () => MockWrapper.Verify(w => w.Login(), Times.Once)
+        );
     }
 
     [Theory]
@@ -47,8 +51,11 @@ public class Login : MockRemote
         MockWrapper.Setup(w => w.Login()).Returns(expectedResponse);
 
         var ex = Assert.Throws<LoginException>(() => Remote.Login());
-        Assert.Equal(expectedResponse, ex.Response);
-        MockWrapper.Verify(w => w.Login(), Times.Once);
+
+        Assert.Multiple(
+            () => Assert.Equal(expectedResponse, ex.Response),
+            () => MockWrapper.Verify(w => w.Login(), Times.Once)
+        );
     }
 
     [Fact]
@@ -62,8 +69,11 @@ public class Login : MockRemote
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.NoServer);
 
         var ex = Assert.Throws<LoginException>(() => Remote.Login(timeoutMs: 10));
-        Assert.Equal(LoginResponse.Timeout, ex.Response);
-        MockWrapper.Verify(w => w.Login(), Times.Once);
+
+        Assert.Multiple(
+            () => Assert.Equal(LoginResponse.Timeout, ex.Response),
+            () => MockWrapper.Verify(w => w.Login(), Times.Once)
+        );
     }
 
     [Fact]
@@ -75,8 +85,11 @@ public class Login : MockRemote
         MockLogin_Ok(kind, version);
 
         var ex = Assert.Throws<RemoteException>(() => Remote.Login());
-        Assert.Equal($"[VoicemeeterAPI] Remote Error: Already logged in - LoginStatus: Ok", ex.Message);
-        MockWrapper.Verify(w => w.Login(), Times.Once);
+
+        Assert.Multiple(
+            () => Assert.Equal($"[VoicemeeterAPI] Remote Error: Already logged in - LoginStatus: Ok", ex.Message),
+            () => MockWrapper.Verify(w => w.Login(), Times.Once)
+        );
     }
 
     [Fact]
@@ -92,11 +105,12 @@ public class Login : MockRemote
         Remote.Logout(timeoutMs: 10);
 
         var ex = Assert.Throws<RemoteAccessException>(() => Remote.Login());
+
         Assert.Multiple(
             () => Assert.Equal("Login", ex.Method),
-            () => Assert.Equal(LoginResponse.Unknown, ex.LoginStatus)
+            () => Assert.Equal(LoginResponse.Unknown, ex.LoginStatus),
+            () => MockWrapper.Verify(w => w.Login(), Times.Once)
         );
-        MockWrapper.Verify(w => w.Login(), Times.Once);
     }
 
     [Fact]
@@ -105,7 +119,10 @@ public class Login : MockRemote
         Remote.Dispose();
 
         var ex = Assert.Throws<ObjectDisposedException>(() => Remote.Login());
-        Assert.Equal("Remote", ex.ObjectName);
-        MockWrapper.Verify(w => w.Login(), Times.Never);
+
+        Assert.Multiple(
+            () => Assert.Equal("Remote", ex.ObjectName),
+            () => MockWrapper.Verify(w => w.Login(), Times.Never)
+        );
     }
 }

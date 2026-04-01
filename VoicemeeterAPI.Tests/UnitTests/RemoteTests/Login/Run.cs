@@ -33,11 +33,12 @@ public class Run : MockRemote
         MockLogin_Ok(kind, version);
 
         var ex = Assert.Throws<RunException>(() => Remote.Run(app));
+
         Assert.Multiple(
             () => Assert.Equal(app, (int)ex.App),
-            () => Assert.Equal(RunResponse.UnknownApp, ex.Response)
+            () => Assert.Equal(RunResponse.UnknownApp, ex.Response),
+            () => MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once)
         );
-        MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once);
     }
 
     [Fact]
@@ -52,11 +53,12 @@ public class Run : MockRemote
         MockLogin_Ok(kind, version);
 
         var ex = Assert.Throws<RunException>(() => Remote.Run(app));
+
         Assert.Multiple(
             () => Assert.Equal(app, (int)ex.App),
-            () => Assert.Equal(RunResponse.NotInstalled, ex.Response)
+            () => Assert.Equal(RunResponse.NotInstalled, ex.Response),
+            () => MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once)
         );
-        MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once);
     }
 
     [Fact]
@@ -65,11 +67,12 @@ public class Run : MockRemote
         var app = (int)App.DeviceCheck;
 
         var ex = Assert.Throws<RemoteAccessException>(() => Remote.Run(app));
+
         Assert.Multiple(
             () => Assert.Equal("Run", ex.Method),
-            () => Assert.Equal(LoginResponse.LoggedOut, ex.LoginStatus)
+            () => Assert.Equal(LoginResponse.LoggedOut, ex.LoginStatus),
+            () => MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Never)
         );
-        MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Never);
     }
 
     [Fact]
@@ -80,8 +83,11 @@ public class Run : MockRemote
         Remote.Dispose();
 
         var ex = Assert.Throws<ObjectDisposedException>(() => Remote.Run(app));
-        Assert.Equal("Remote", ex.ObjectName);
-        MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Never);
+
+        Assert.Multiple(
+            () => Assert.Equal("Remote", ex.ObjectName),
+            () => MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Never)
+        );
     }
 
     [Fact]
@@ -101,8 +107,10 @@ public class Run : MockRemote
 
         Remote.Run(app);
 
-        MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once);
-        MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(3));
+        Assert.Multiple(
+            () => MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once),
+            () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(3))
+        );
     }
 
     [Fact]
@@ -127,8 +135,10 @@ public class Run : MockRemote
 
         Remote.Run(Kind.Standard);
 
-        Assert.Equal(LoginResponse.Ok, Remote.LoginStatus);
-        MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once);
+        Assert.Multiple(
+            () => Assert.Equal(LoginResponse.Ok, Remote.LoginStatus),
+            () => MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once)
+        );
     }
 
     [Fact]
@@ -145,19 +155,23 @@ public class Run : MockRemote
         MockLogin_VoicemeeterNotRunning();
 
         var ex = Assert.Throws<RunException>(() => Remote.Run(Kind.Standard, timeoutMs: 10));
+
         Assert.Multiple(
             () => Assert.Equal(app, ex.App),
-            () => Assert.Equal(RunResponse.Timeout, ex.Response)
+            () => Assert.Equal(RunResponse.Timeout, ex.Response),
+            () => MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once)
         );
-        MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once);
     }
 
     [Fact]
     public void String_ThrowsException_Argument_WhenInvalidString()
     {
         var ex = Assert.Throws<ArgumentException>(() => Remote.Run("InvalidApp"));
-        Assert.Equal("app", ex.ParamName);
-        MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never);
+
+        Assert.Multiple(
+            () => Assert.Equal("app", ex.ParamName),
+            () => MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never)
+        );
     }
 
     [Fact]
@@ -232,7 +246,10 @@ public class Run : MockRemote
     public void Generic_ThrowsException_Argument_WhenInvalidType()
     {
         var ex = Assert.Throws<ArgumentException>(() => ((IRemote)Remote).Run(10.0f));
-        Assert.Equal("app", ex.ParamName);
-        MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never);
+
+        Assert.Multiple(
+            () => Assert.Equal("app", ex.ParamName),
+            () => MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never)
+        );
     }
 }

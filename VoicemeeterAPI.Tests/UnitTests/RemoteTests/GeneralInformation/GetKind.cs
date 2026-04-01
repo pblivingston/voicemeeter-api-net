@@ -18,9 +18,9 @@ public class GetKind : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(Kind.Banana, result),
-            () => Assert.Equal(LoginResponse.Ok, Remote.LoginStatus)
+            () => Assert.Equal(LoginResponse.Ok, Remote.LoginStatus),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterType(out kind), Times.Once)
         );
-        MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Once);
     }
 
     [Fact]
@@ -38,9 +38,9 @@ public class GetKind : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(Kind.None, result),
-            () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, Remote.LoginStatus)
+            () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, Remote.LoginStatus),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(2))
         );
-        MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(2));
     }
 
     [Fact]
@@ -55,16 +55,22 @@ public class GetKind : MockRemote
         MockWrapper.Setup(w => w.GetVoicemeeterType(out noKind)).Returns(InfoResponse.NoClient);
 
         var ex = Assert.Throws<RemoteException>(() => Remote.GetKind());
-        Assert.Equal("[VoicemeeterAPI] Remote Error: GetKind failed - NoClient; returned kind: None", ex.Message);
-        MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(2));
+
+        Assert.Multiple(
+            () => Assert.Equal("[VoicemeeterAPI] Remote Error: GetKind failed - NoClient; returned kind: None", ex.Message),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(2))
+        );
     }
 
     [Fact]
     public void ThrowsException_RemoteAccess_WhenLoginStatusLoggedOut()
     {
         var ex = Assert.Throws<RemoteAccessException>(() => Remote.GetKind());
-        Assert.Equal("[VoicemeeterAPI] Remote Error: Access to GetKind denied - LoginStatus: LoggedOut", ex.Message);
-        MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Never);
+
+        Assert.Multiple(
+            () => Assert.Equal("[VoicemeeterAPI] Remote Error: Access to GetKind denied - LoginStatus: LoggedOut", ex.Message),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Never)
+        );
     }
 
     [Fact]
@@ -73,7 +79,10 @@ public class GetKind : MockRemote
         Remote.Dispose();
 
         var ex = Assert.Throws<ObjectDisposedException>(() => Remote.GetKind());
-        Assert.Equal(nameof(Remote), ex.ObjectName);
-        MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Never);
+
+        Assert.Multiple(
+            () => Assert.Equal(nameof(Remote), ex.ObjectName),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Never)
+        );
     }
 }

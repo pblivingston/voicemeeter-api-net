@@ -17,8 +17,10 @@ public class ButtonsDirty : MockRemote
 
         var result = Remote.ButtonsDirty();
 
-        Assert.False(result);
-        MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(2));
+        Assert.Multiple(
+            () => Assert.False(result),
+            () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(2))
+        );
     }
 
     [Fact]
@@ -33,8 +35,10 @@ public class ButtonsDirty : MockRemote
 
         var result = Remote.ButtonsDirty();
 
-        Assert.True(result);
-        MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(2));
+        Assert.Multiple(
+            () => Assert.True(result),
+            () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(2))
+        );
     }
 
     [Fact]
@@ -48,8 +52,11 @@ public class ButtonsDirty : MockRemote
         MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Error);
 
         var ex = Assert.Throws<RemoteException>(() => Remote.ButtonsDirty());
-        Assert.Equal("[VoicemeeterAPI] Remote Error: ButtonsDirty failed - Error", ex.Message);
-        MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(2));
+
+        Assert.Multiple(
+            () => Assert.Equal("[VoicemeeterAPI] Remote Error: ButtonsDirty failed - Error", ex.Message),
+            () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(2))
+        );
     }
 
     [Fact]
@@ -58,11 +65,12 @@ public class ButtonsDirty : MockRemote
         MockLogin_VoicemeeterNotRunning();
 
         var ex = Assert.Throws<RemoteAccessException>(() => Remote.ButtonsDirty());
+
         Assert.Multiple(
             () => Assert.Equal("ButtonsDirty", ex.Method),
-            () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus)
+            () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
+            () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Never)
         );
-        MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Never);
     }
 
     [Fact]
@@ -71,7 +79,10 @@ public class ButtonsDirty : MockRemote
         Remote.Dispose();
 
         var ex = Assert.Throws<ObjectDisposedException>(() => Remote.ButtonsDirty());
-        Assert.Equal("Remote", ex.ObjectName);
-        MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Never);
+
+        Assert.Multiple(
+            () => Assert.Equal("Remote", ex.ObjectName),
+            () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Never)
+        );
     }
 }

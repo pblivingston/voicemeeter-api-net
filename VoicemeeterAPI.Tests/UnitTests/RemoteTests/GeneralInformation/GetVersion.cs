@@ -18,9 +18,9 @@ public class GetVersion : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal((VmVersion)version, result),
-            () => Assert.Equal(LoginResponse.Ok, Remote.LoginStatus)
+            () => Assert.Equal(LoginResponse.Ok, Remote.LoginStatus),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterVersion(out version), Times.Once)
         );
-        MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Once);
     }
 
     [Fact]
@@ -38,9 +38,9 @@ public class GetVersion : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(default, result),
-            () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, Remote.LoginStatus)
+            () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, Remote.LoginStatus),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Exactly(2))
         );
-        MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Exactly(2));
     }
 
     [Fact]
@@ -55,16 +55,22 @@ public class GetVersion : MockRemote
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out noVersion)).Returns(InfoResponse.NoClient);
 
         var ex = Assert.Throws<RemoteException>(() => Remote.GetVersion());
-        Assert.Equal("[VoicemeeterAPI] Remote Error: GetVersion failed - NoClient; returned version: 0.0.0.0", ex.Message);
-        MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Exactly(2));
+
+        Assert.Multiple(
+            () => Assert.Equal("[VoicemeeterAPI] Remote Error: GetVersion failed - NoClient; returned version: 0.0.0.0", ex.Message),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Exactly(2))
+        );
     }
 
     [Fact]
     public void ThrowsException_RemoteAccess_WhenLoginStatusLoggedOut()
     {
         var ex = Assert.Throws<RemoteAccessException>(() => Remote.GetVersion());
-        Assert.Equal("[VoicemeeterAPI] Remote Error: Access to GetVersion denied - LoginStatus: LoggedOut", ex.Message);
-        MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Never);
+
+        Assert.Multiple(
+            () => Assert.Equal("[VoicemeeterAPI] Remote Error: Access to GetVersion denied - LoginStatus: LoggedOut", ex.Message),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Never)
+        );
     }
 
     [Fact]
@@ -73,7 +79,10 @@ public class GetVersion : MockRemote
         Remote.Dispose();
 
         var ex = Assert.Throws<ObjectDisposedException>(() => Remote.GetVersion());
-        Assert.Equal(nameof(Remote), ex.ObjectName);
-        MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Never);
+
+        Assert.Multiple(
+            () => Assert.Equal(nameof(Remote), ex.ObjectName),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Never)
+        );
     }
 }
