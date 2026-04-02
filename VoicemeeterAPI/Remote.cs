@@ -40,9 +40,6 @@ public sealed partial class Remote : IRemote
     /// <inheritdoc/>
     public bool LoggedIn => LoginStatus is LoginResponse.Ok or LoginResponse.VoicemeeterNotRunning;
 
-    private Kind NoKind => LoginStatus is LoginResponse.VoicemeeterNotRunning
-        ? Kind.None : Kind.Unknown;
-
     /// <summary>
     ///   Initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="IWrapper"/>.
     /// </summary>
