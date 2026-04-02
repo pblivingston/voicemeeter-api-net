@@ -7,13 +7,12 @@ namespace PBLivingston.VoicemeeterAPI.Types;
 
 public static class VersionUtils
 {
-    public static bool IsVersionType(Type t)
-        => t == typeof(SemVersion) || t == typeof(VmVersion);
+    private static bool InByte(int value) => (uint)value <= 0xFF;
 
     public static bool IsValid(int maj, int min, int pat)
-        => maj.InByte()
-        && min.InByte()
-        && pat.InByte()
+        => InByte(maj)
+        && InByte(min)
+        && InByte(pat)
         && (maj | min | pat) > 0;
 
     public static int RawPack(int kind, int maj, int min, int pat)

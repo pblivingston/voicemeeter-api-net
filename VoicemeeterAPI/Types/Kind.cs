@@ -1,8 +1,6 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using System;
-
 namespace PBLivingston.VoicemeeterAPI.Types;
 
 /// <summary>
@@ -28,9 +26,6 @@ public static class KindExt
 
 public static class KindUtils
 {
-    public static bool IsKindType(Type t)
-        => t == typeof(int) || t == typeof(Kind);
-
     /// <summary>
     ///   Converts given Voicemeeter <see cref="Kind"/> to an OS-biased Voicemeeter <see cref="App"/>.
     /// </summary>
