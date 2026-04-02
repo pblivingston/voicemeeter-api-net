@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Messages;
+using PBLivingston.VoicemeeterAPI.Exceptions;
 
 namespace PBLivingston.VoicemeeterAPI;
 

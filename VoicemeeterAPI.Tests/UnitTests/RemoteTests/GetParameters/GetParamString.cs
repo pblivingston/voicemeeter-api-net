@@ -1,4 +1,4 @@
-using PBLivingston.VoicemeeterAPI.Messages;
+using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using PBLivingston.VoicemeeterAPI.Types;
-using PBLivingston.VoicemeeterAPI.Messages;
+using PBLivingston.VoicemeeterAPI.Exceptions;
 
 namespace PBLivingston.VoicemeeterAPI;
 

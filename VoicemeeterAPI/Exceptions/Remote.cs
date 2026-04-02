@@ -4,14 +4,7 @@
 using System;
 using PBLivingston.VoicemeeterAPI.Types;
 
-namespace PBLivingston.VoicemeeterAPI.Messages;
-
-internal abstract class VmApiException(string m)
-    : Exception($"[VoicemeeterAPI] {m}")
-{
-}
-
-#region Remote Exceptions
+namespace PBLivingston.VoicemeeterAPI.Exceptions;
 
 internal class RemoteException(string m)
     : VmApiException($"Remote Error: {m}")
@@ -46,14 +39,3 @@ internal class GetParamException<T>(Response r, string p, T v, Type t)
     public T Value { get; } = v;
     public Type ExpectedType { get; } = t;
 }
-
-#endregion
-
-#region Voicemeeter Exceptions
-
-internal class VoicemeeterException(string m)
-    : VmApiException($"Voicemeeter Error: {m}")
-{
-}
-
-#endregion
