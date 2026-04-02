@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using System;
+using PBLivingston.VoicemeeterAPI.Exceptions;
+using PBLivingston.VoicemeeterAPI.Utilities;
 
 namespace PBLivingston.VoicemeeterAPI.Types;
 
@@ -58,7 +60,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     {
         if (typeof(T) == typeof(int)) { kind = (T)(object)V0; }
         else if (typeof(T) == typeof(Kind)) { kind = (T)(object)((IVersion)this).K; }
-        else throw new NotSupportedException($"Type {typeof(T).Name} is not supported. Use int or Kind.");
+        else throw new TypeNotSupportedException<T>(nameof(kind), SupportedTypes.KindTypes);
 
         sem = this;
     }
@@ -68,7 +70,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     {
         if (typeof(T) == typeof(int)) { kind = (T)(object)V0; }
         else if (typeof(T) == typeof(Kind)) { kind = (T)(object)((IVersion)this).K; }
-        else throw new NotSupportedException($"Type {typeof(T).Name} is not supported. Use int or Kind.");
+        else throw new TypeNotSupportedException<T>(nameof(kind), SupportedTypes.KindTypes);
 
         Deconstruct(out maj, out min, out pat);
     }

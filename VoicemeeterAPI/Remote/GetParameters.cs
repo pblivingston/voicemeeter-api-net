@@ -4,6 +4,7 @@
 using System;
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Exceptions;
+using PBLivingston.VoicemeeterAPI.Utilities;
 
 namespace PBLivingston.VoicemeeterAPI;
 
@@ -113,6 +114,6 @@ partial class Remote
             return;
         }
 
-        throw new NotSupportedException($"'{nameof(value)}' type '{typeof(T)}' is not supported for GetParams");
+        throw new TypeNotSupportedException<T>(nameof(value), SupportedTypes.ParamTypes);
     }
 }

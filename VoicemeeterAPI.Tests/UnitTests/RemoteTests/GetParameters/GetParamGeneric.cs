@@ -1,4 +1,6 @@
+using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
+using PBLivingston.VoicemeeterAPI.Utilities;
 
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;
 
@@ -87,7 +89,7 @@ public class GetParamGeneric : MockRemote
     }
 
     [Fact]
-    public void ThrowsException_NotSupported_WhenTypeNotSupported()
+    public void ThrowsException_TypeNotSupported_WhenTypeNotSupported()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
@@ -95,10 +97,13 @@ public class GetParamGeneric : MockRemote
 
         MockLogin_Ok(kind, version);
 
-        var ex = Assert.Throws<NotSupportedException>(() => ((IRemote)Remote).GetParam(param, out DateTime _));
+        var ex = Assert.Throws<TypeNotSupportedException<DateTime>>(() => ((IRemote)Remote).GetParam(param, out DateTime _));
 
         Assert.Multiple(
-            () => Assert.Equal($"'value' type '{typeof(DateTime)}' is not supported for GetParams", ex.Message),
+            () => Assert.Equal($"GetParam", ex.Method),
+            () => Assert.Equal($"value", ex.Param),
+            () => Assert.Equal(typeof(DateTime), ex.Type),
+            () => Assert.Equal(SupportedTypes.ParamTypes, ex.Supported),
             () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<float>.IsAny), Times.Never),
             () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never)
         );

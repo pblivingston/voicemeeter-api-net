@@ -1,5 +1,6 @@
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
+using PBLivingston.VoicemeeterAPI.Utilities;
 
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.Login;
 
@@ -243,12 +244,15 @@ public class Run : MockRemote
     }
 
     [Fact]
-    public void Generic_ThrowsException_Argument_WhenInvalidType()
+    public void Generic_ThrowsException_TypeNotSupported_WhenInvalidType()
     {
-        var ex = Assert.Throws<ArgumentException>(() => ((IRemote)Remote).Run(10.0f));
+        var ex = Assert.Throws<TypeNotSupportedException<float>>(() => ((IRemote)Remote).Run(10.0f));
 
         Assert.Multiple(
-            () => Assert.Equal("app", ex.ParamName),
+            () => Assert.Equal("Run", ex.Method),
+            () => Assert.Equal("app", ex.Param),
+            () => Assert.Equal(typeof(float), ex.Type),
+            () => Assert.Equal(SupportedTypes.RunTypes, ex.Supported),
             () => MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never)
         );
     }

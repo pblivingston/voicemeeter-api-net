@@ -1,4 +1,6 @@
+using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
+using PBLivingston.VoicemeeterAPI.Utilities;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
 
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.SemVersionTests;
@@ -91,18 +93,32 @@ public class Deconstruction
     }
 
     [Fact]
-    public void Deconstructor_GenericParts_ThrowsException_NotSupported()
+    public void Deconstructor_GenericParts_ThrowsException_TypeNotSupported()
     {
         var version = new SemVersion(0x0004_0608);
 
-        Assert.Throws<NotSupportedException>(() => ((IVersion)version).Deconstruct(out bool _, out int _, out int _, out int _));
+        var ex = Assert.Throws<TypeNotSupportedException<bool>>(() => ((IVersion)version).Deconstruct(out bool _, out int _, out int _, out int _));
+
+        Assert.Multiple(
+            () => Assert.Equal("Deconstruct", ex.Method),
+            () => Assert.Equal("kind", ex.Param),
+            () => Assert.Equal(typeof(bool), ex.Type),
+            () => Assert.Equal(SupportedTypes.KindTypes, ex.Supported)
+        );
     }
 
     [Fact]
-    public void Deconstructor_GenericSemantic_ThrowsException_NotSupported()
+    public void Deconstructor_GenericSemantic_ThrowsException_TypeNotSupported()
     {
         var version = new SemVersion(0x0004_0608);
 
-        Assert.Throws<NotSupportedException>(() => ((IVersion)version).Deconstruct(out float _, out SemVersion _));
+        var ex = Assert.Throws<TypeNotSupportedException<float>>(() => ((IVersion)version).Deconstruct(out float _, out SemVersion _));
+
+        Assert.Multiple(
+            () => Assert.Equal("Deconstruct", ex.Method),
+            () => Assert.Equal("kind", ex.Param),
+            () => Assert.Equal(typeof(float), ex.Type),
+            () => Assert.Equal(SupportedTypes.KindTypes, ex.Supported)
+        );
     }
 }

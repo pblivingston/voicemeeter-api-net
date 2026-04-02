@@ -6,6 +6,7 @@ using System.Threading;
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Messages;
 using PBLivingston.VoicemeeterAPI.Exceptions;
+using PBLivingston.VoicemeeterAPI.Utilities;
 
 namespace PBLivingston.VoicemeeterAPI;
 
@@ -137,7 +138,7 @@ partial class Remote
                 Run(s, timeoutMs, sleepMs);
                 break;
             default:
-                throw new ArgumentException("Object must be int, App, Kind, or string", nameof(app));
+                throw new TypeNotSupportedException<T>(nameof(app), SupportedTypes.RunTypes);
         }
     }
 
