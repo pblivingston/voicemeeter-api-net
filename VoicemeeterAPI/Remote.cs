@@ -53,6 +53,14 @@ public sealed partial class Remote : IRemote
     /// <inheritdoc/>
     public ConnectionStateRecord ConnectionState => new(LoginStatus, RunningKind, RunningVersion);
 
+    /// <inheritdoc/>
+    public event Action<ConnectionStateRecord>? OnConnectionStateChanged;
+
+    /// <inheritdoc/>
+    public event Action? OnParamsDirty;
+    /// <inheritdoc/>
+    public event Action? OnButtonsDirty;
+
     /// <summary>
     ///   Initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="IWrapper"/>.
     /// </summary>

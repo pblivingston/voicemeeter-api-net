@@ -51,9 +51,24 @@ public interface IRemote : IDisposable
     VmVersion RunningVersion { get; }
 
     /// <summary>
-    ///   Returns a record of the current <see cref="LoginStatus"/>, <see cref="RunningKind"/>, and <see cref="RunningVersion"/>
+    ///   Returns a record of the current <see cref="LoginStatus"/>, <see cref="RunningKind"/>, and <see cref="RunningVersion"/>.
     /// </summary>
     ConnectionStateRecord ConnectionState { get; }
+
+    /// <summary>
+    ///   Triggered when <see cref="LoginStatus"/>, <see cref="RunningKind"/>, or <see cref="RunningVersion"/> have changed.
+    /// </summary>
+    event Action<ConnectionStateRecord> OnConnectionStateChanged;
+
+    /// <summary>
+    ///   Triggered when <see cref="ParamsDirty()"/> returns true.
+    /// </summary>
+    event Action OnParamsDirty;
+
+    /// <summary>
+    ///   Triggered when <see cref="ButtonsDirty()"/> returns true.
+    /// </summary>
+    event Action OnButtonsDirty;
 
     #region Login
 
