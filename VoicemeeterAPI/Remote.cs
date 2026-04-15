@@ -57,6 +57,7 @@ public sealed partial class Remote : IRemote
     ///   Initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="IWrapper"/>.
     /// </summary>
     /// <param name="wrapper"><see cref="IWrapper"/></param>
+    /// <param name="logger"></param>
     /// <exception cref="ArgumentNullException"></exception>
     internal Remote(IWrapper wrapper, ILogger<Remote>? logger = null)
     {
@@ -65,30 +66,31 @@ public sealed partial class Remote : IRemote
     }
 
     /// <summary>
+    ///   Initializes a new instance of <see cref="Remote"/> class with a new <see cref="RemoteApiWrapper"/> using the default DLL path.
+    /// </summary>
+    /// <param name="logger"></param>
+    /// <remarks>
+    ///   Uses <see cref="PathHelper.GetDllPath()"/> to determine the default path.
+    /// </remarks>
+    public Remote(ILogger<Remote>? logger = null)
+        : this(new Wrapper(new RemoteApiWrapper(PathHelper.GetDllPath())), logger)
+    { }
+
+    /// <summary>
     ///   Initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="RemoteApiWrapper"/>.
     /// </summary>
     /// <param name="apiWrapper"></param>
-    public Remote(RemoteApiWrapper apiWrapper, ILogger<Remote>? logger = null) : this(new Wrapper(apiWrapper), logger)
-    {
-    }
+    /// <param name="logger"></param>
+    public Remote FromAtgWrapper(RemoteApiWrapper apiWrapper, ILogger<Remote>? logger = null)
+        => new(new Wrapper(apiWrapper), logger);
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="Remote"/> class with a new <see cref="RemoteApiWrapper"/> using the specified DLL path.
     /// </summary>
     /// <param name="dllPath"></param>
-    public Remote(string dllPath, ILogger<Remote>? logger = null) : this(new RemoteApiWrapper(dllPath), logger)
-    {
-    }
-
-    /// <summary>
-    ///   Initializes a new instance of <see cref="Remote"/> class with a new <see cref="RemoteApiWrapper"/> using the default DLL path.
-    /// </summary>
-    /// <remarks>
-    ///   Uses <see cref="PathHelper.GetDllPath()"/> to determine the default path.
-    /// </remarks>
-    public Remote(ILogger<Remote>? logger = null) : this(new RemoteApiWrapper(PathHelper.GetDllPath()), logger)
-    {
-    }
+    /// <param name="logger"></param>
+    public Remote FromDllPath(string dllPath, ILogger<Remote>? logger = null)
+        => FromAtgWrapper(new RemoteApiWrapper(dllPath), logger);
 
     /// <summary>
     ///   Calls <see cref="DllWrapperBase.Dispose()"/> when the <see cref="Remote"/> instance is disposed.
@@ -96,6 +98,8 @@ public sealed partial class Remote : IRemote
     public void Dispose()
     {
         if (_isDisposed) return;
+
+        if (LoggedIn) Logout();
 
         _vmrApi.Dispose();
 
