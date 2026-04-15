@@ -62,10 +62,12 @@ partial class Remote
         {
             response = _vmrApi.Logout();
 
-            if (response == LoginResponse.Ok)
+            LoginStatus = response is LoginResponse.Ok
+                ? LoginResponse.LoggedOut : LoginResponse.Unknown;
+
+            if (LoginStatus == LoginResponse.LoggedOut)
             {
                 RemoteInfo.Write("Logout successful");
-                LoginStatus = LoginResponse.LoggedOut;
                 return true;
             }
 
@@ -76,7 +78,6 @@ partial class Remote
         if (Retry(() => Attempt(out result), timeoutMs, sleepMs)) return;
 
         RemoteWarning.Write($"Logout timed out; last result: {result}");
-        LoginStatus = LoginResponse.Unknown;
     }
 
     #endregion
