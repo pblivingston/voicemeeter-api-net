@@ -14,7 +14,7 @@ namespace PBLivingston.VoicemeeterAPI;
 public interface IRemote : IDisposable
 {
     /// <summary>
-    ///   Gets the current <see cref="LoginResponse"/> login status of the <see cref="IRemote"/> instance.
+    ///   Returns the current login status of the <see cref="IRemote"/> instance.
     /// </summary>
     /// <remarks>
     ///   Initially set to <see cref="LoginResponse.LoggedOut"/> until a successful login attempt is made.
@@ -28,6 +28,32 @@ public interface IRemote : IDisposable
     ///   `true` if <see cref="LoginStatus"/> is <see cref="LoginResponse.Ok"/> or <see cref="LoginResponse.VoicemeeterNotRunning"/>, otherwise `false`.
     /// </remarks>
     bool LoggedIn { get; }
+
+    /// <summary>
+    ///   Simplifies <see cref="LoginStatus"/> checks.
+    /// </summary>
+    /// <remarks>
+    ///   `true` if <see cref="LoginStatus"/> is <see cref="LoginResponse.Ok"/>, otherwise `false`.
+    /// </remarks>
+    bool Connected { get; }
+
+    /// <summary>
+    ///   Returns the currently running Voicemeeter Kind.
+    /// </summary>
+    /// <remarks>
+    ///   Standard, Banana, Potato
+    /// </remarks>
+    Kind RunningKind { get; }
+
+    /// <summary>
+    ///   Returns the currently running Voicemeeter version.
+    /// </summary>
+    VmVersion RunningVersion { get; }
+
+    /// <summary>
+    ///   Returns a record of the current <see cref="LoginStatus"/>, <see cref="RunningKind"/>, and <see cref="RunningVersion"/>
+    /// </summary>
+    ConnectionStateRecord ConnectionState { get; }
 
     #region Login
 

@@ -8,6 +8,8 @@ using System.Threading;
 using AtgDev.Utils.Native;
 using AtgDev.Voicemeeter;
 using AtgDev.Voicemeeter.Utils;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 
@@ -33,28 +35,40 @@ namespace PBLivingston.VoicemeeterAPI;
 public sealed partial class Remote : IRemote
 {
     private readonly IWrapper _vmrApi;
+    private readonly ILogger<Remote> _logger;
     private bool _isDisposed = false;
 
     /// <inheritdoc/>
     public LoginResponse LoginStatus { get; private set; } = LoginResponse.LoggedOut;
     /// <inheritdoc/>
-    public bool LoggedIn => LoginStatus is LoginResponse.Ok or LoginResponse.VoicemeeterNotRunning;
+    public bool LoggedIn => LoginStatus < LoginResponse.LoggedOut;
+    /// <inheritdoc/>
+    public bool Connected => LoginStatus == LoginResponse.Ok;
+
+    /// <inheritdoc/>
+    public Kind RunningKind { get; private set; } = Kind.None;
+    /// <inheritdoc/>
+    public VmVersion RunningVersion { get; private set; } = default;
+
+    /// <inheritdoc/>
+    public ConnectionStateRecord ConnectionState => new(LoginStatus, RunningKind, RunningVersion);
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="IWrapper"/>.
     /// </summary>
     /// <param name="wrapper"><see cref="IWrapper"/></param>
     /// <exception cref="ArgumentNullException"></exception>
-    internal Remote(IWrapper wrapper)
+    internal Remote(IWrapper wrapper, ILogger<Remote>? logger = null)
     {
         _vmrApi = wrapper ?? throw new ArgumentNullException(nameof(wrapper));
+        _logger = logger ?? NullLogger<Remote>.Instance;
     }
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="RemoteApiWrapper"/>.
     /// </summary>
     /// <param name="apiWrapper"></param>
-    public Remote(RemoteApiWrapper apiWrapper) : this(new Wrapper(apiWrapper))
+    public Remote(RemoteApiWrapper apiWrapper, ILogger<Remote>? logger = null) : this(new Wrapper(apiWrapper), logger)
     {
     }
 
@@ -62,7 +76,7 @@ public sealed partial class Remote : IRemote
     ///   Initializes a new instance of the <see cref="Remote"/> class with a new <see cref="RemoteApiWrapper"/> using the specified DLL path.
     /// </summary>
     /// <param name="dllPath"></param>
-    public Remote(string dllPath) : this(new RemoteApiWrapper(dllPath))
+    public Remote(string dllPath, ILogger<Remote>? logger = null) : this(new RemoteApiWrapper(dllPath), logger)
     {
     }
 
@@ -72,7 +86,7 @@ public sealed partial class Remote : IRemote
     /// <remarks>
     ///   Uses <see cref="PathHelper.GetDllPath()"/> to determine the default path.
     /// </remarks>
-    public Remote() : this(new RemoteApiWrapper(PathHelper.GetDllPath()))
+    public Remote(ILogger<Remote>? logger = null) : this(new RemoteApiWrapper(PathHelper.GetDllPath()), logger)
     {
     }
 
