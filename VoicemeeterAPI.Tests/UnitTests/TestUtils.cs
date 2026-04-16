@@ -65,21 +65,39 @@ public abstract class MockRemote
 
     protected void MockLogin_Ok(int kind, int version)
     {
-        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.Ok);
+        var loginStatus = LoginResponse.Ok;
+        var expectedState = new ConnectionStateRecord(loginStatus, (Kind)kind, (VmVersion)version);
+
+        MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
         MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Ok);
         MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Ok);
 
-        Remote.Login();
-        Assert.Equal(LoginResponse.Ok, Remote.LoginStatus);
+        var result = Remote.Login();
+
+        Assert.Multiple(
+            () => Assert.Equal(loginStatus, result),
+            () => Assert.Equal(expectedState, Remote.ConnectionState),
+            () => Assert.True(Remote.LoggedIn),
+            () => Assert.True(Remote.Connected)
+        );
     }
 
     protected void MockLogin_VoicemeeterNotRunning()
     {
-        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.VoicemeeterNotRunning);
+        var loginStatus = LoginResponse.VoicemeeterNotRunning;
+        var expectedState = new ConnectionStateRecord(loginStatus, Kind.None, default);
 
-        Remote.Login();
-        Assert.Equal(LoginResponse.VoicemeeterNotRunning, Remote.LoginStatus);
+        MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
+
+        var result = Remote.Login();
+
+        Assert.Multiple(
+            () => Assert.Equal(loginStatus, result),
+            () => Assert.Equal(expectedState, Remote.ConnectionState),
+            () => Assert.True(Remote.LoggedIn),
+            () => Assert.False(Remote.Connected)
+        );
     }
 }

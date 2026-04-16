@@ -115,10 +115,11 @@ public class Run : MockRemote
     }
 
     [Fact]
-    public void Kind_UpdatesLoginStatus_Ok_WhenAllConditionsMet()
+    public void Kind_UpdatesConnectionState_Ok_WhenAllConditionsMet()
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
+        var expectedState = new ConnectionStateRecord(LoginResponse.Ok, (Kind)kind, (VmVersion)version);
         var app = Environment.Is64BitProcess ? App.Standardx64 : App.Standard;
 
         MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
@@ -137,7 +138,7 @@ public class Run : MockRemote
         Remote.Run(Kind.Standard);
 
         Assert.Multiple(
-            () => Assert.Equal(LoginResponse.Ok, Remote.LoginStatus),
+            () => Assert.Equal(expectedState, Remote.ConnectionState),
             () => MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once)
         );
     }

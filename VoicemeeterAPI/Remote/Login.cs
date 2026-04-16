@@ -15,7 +15,7 @@ partial class Remote
     #region Login
 
     /// <inheritdoc/>
-    public void Login(int timeoutMs = 2000, int sleepMs = 100)
+    public LoginResponse Login(int timeoutMs = 2000, int sleepMs = 100)
     {
         LoginGuard(requiredStatus: LoginResponse.LoggedOut);
 
@@ -33,15 +33,17 @@ partial class Remote
                     throw new LoginException(LoginResponse.Timeout);
 
                 RemoteInfo.Write("Login successful");
-                return;
+                break;
 
             case LoginResponse.VoicemeeterNotRunning:
                 RemoteWarning.Write("Login successful but Voicemeeter is not running");
-                return;
+                break;
 
             default:
                 throw new LoginException(LoginStatus);
         }
+
+        return LoginStatus;
     }
 
     #endregion
@@ -49,7 +51,7 @@ partial class Remote
     #region Logout
 
     /// <inheritdoc/>
-    public void Logout(int timeoutMs = 1000, int sleepMs = 100)
+    public LoginResponse Logout(int timeoutMs = 1000, int sleepMs = 100)
     {
         LoginGuard(requiredStatus: LoginResponse.Unknown);
 
@@ -75,9 +77,10 @@ partial class Remote
         }
 
         var result = LoginResponse.Unknown;
-        if (Retry(() => Attempt(out result), timeoutMs, sleepMs)) return;
+        if (!Retry(() => Attempt(out result), timeoutMs, sleepMs))
+            RemoteWarning.Write($"Logout timed out; last result: {result}");
 
-        RemoteWarning.Write($"Logout timed out; last result: {result}");
+        return LoginStatus;
     }
 
     #endregion
@@ -153,12 +156,11 @@ partial class Remote
 
         bool Attempt()
         {
-            var kind = GetKind();
-            var version = GetVersion();
+            GetVersion();
 
-            if (kind.IsValid() && version.IsValid())
+            if (RunningKind.IsValid() && RunningVersion.IsValid())
             {
-                RemoteInfo.Write($"Voicemeeter {kind} v{version} is running");
+                RemoteInfo.Write($"Voicemeeter {RunningKind} v{RunningVersion} is running");
                 return true;
             }
 

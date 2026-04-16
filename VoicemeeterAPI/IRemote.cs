@@ -101,7 +101,7 @@ public interface IRemote : IDisposable
     ///   </list>
     /// </remarks>
     /// <inheritdoc cref="IRemote" path="/example"/>
-    void Login(int timeoutMs = 2000, int sleepMs = 100);
+    LoginResponse Login(int timeoutMs = 2000, int sleepMs = 100);
 
     /// <summary>
     ///   Closes communication pipe with VoicemeeterRemote.
@@ -126,7 +126,7 @@ public interface IRemote : IDisposable
     ///   </list>
     /// </remarks>
     /// <inheritdoc cref="IRemote" path="/example"/>
-    void Logout(int timeoutMs = 1000, int sleepMs = 100);
+    LoginResponse Logout(int timeoutMs = 1000, int sleepMs = 100);
 
     /// <summary>
     ///   Runs the specified <see cref="App"/>.

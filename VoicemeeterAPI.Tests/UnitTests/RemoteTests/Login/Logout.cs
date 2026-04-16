@@ -6,37 +6,43 @@ namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.Login;
 public class Logout : MockRemote
 {
     [Fact]
-    public void UpdatesLoginStatus_LoggedOut_WhenSuccessful()
+    public void UpdatesConnectionState_LoggedOut_WhenSuccessful()
     {
+        var loginStatus = LoginResponse.LoggedOut;
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
+        var expectedState = new ConnectionStateRecord(loginStatus, (Kind)kind, (VmVersion)version);
 
         MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
 
         MockLogin_Ok(kind, version);
 
-        Remote.Logout();
+        var result = Remote.Logout();
 
         Assert.Multiple(
-            () => Assert.Equal(LoginResponse.LoggedOut, Remote.LoginStatus),
+            () => Assert.Equal(loginStatus, result),
+            () => Assert.Equal(expectedState, Remote.ConnectionState),
             () => MockWrapper.Verify(w => w.Logout(), Times.Once)
         );
     }
 
     [Fact]
-    public void UpdatesLoginStatus_Unknown_WhenTimesOut()
+    public void UpdatesConnectionState_Unknown_WhenTimesOut()
     {
+        var loginStatus = LoginResponse.Unknown;
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
+        var expectedState = new ConnectionStateRecord(loginStatus, (Kind)kind, (VmVersion)version);
 
         MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
 
         MockLogin_Ok(kind, version);
 
-        Remote.Logout(timeoutMs: 10);
+        var result = Remote.Logout(timeoutMs: 10);
 
         Assert.Multiple(
-            () => Assert.Equal(LoginResponse.Unknown, Remote.LoginStatus),
+            () => Assert.Equal(loginStatus, result),
+            () => Assert.Equal(expectedState, Remote.ConnectionState),
             () => MockWrapper.Verify(w => w.Logout(), Times.Once)
         );
     }
@@ -62,6 +68,25 @@ public class Logout : MockRemote
         Assert.Multiple(
             () => Assert.Equal("Remote", ex.ObjectName),
             () => MockWrapper.Verify(w => w.Logout(), Times.Never)
+        );
+    }
+
+    [Fact]
+    public void CalledByDispose_WhenStillLoggedIn()
+    {
+        var kind = Kind.Standard;
+        var version = 0x0101_0202;
+        var expectedState = new ConnectionStateRecord(LoginResponse.LoggedOut, kind, (VmVersion)version);
+
+        MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
+
+        MockLogin_Ok((int)kind, version);
+
+        Remote.Dispose();
+
+        Assert.Multiple(
+            () => Assert.Equal(expectedState, Remote.ConnectionState),
+            () => MockWrapper.Verify(w => w.Logout(), Times.Once)
         );
     }
 }

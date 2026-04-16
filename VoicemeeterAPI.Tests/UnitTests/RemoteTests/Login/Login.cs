@@ -6,12 +6,14 @@ namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.Login;
 public class Login : MockRemote
 {
     [Fact]
-    public void UpdatesLoginStatus_Ok_WhenAllConditionsMet()
+    public void UpdatesConnectionState_Ok_WhenAllConditionsMet()
     {
+        var loginStatus = LoginResponse.Ok;
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
+        var expectedState = new ConnectionStateRecord(loginStatus, (Kind)kind, (VmVersion)version);
 
-        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.Ok);
+        MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
 
@@ -22,23 +24,28 @@ public class Login : MockRemote
             .Returns(Response.Dirty)
             .Returns(Response.Ok);
 
-        Remote.Login();
+        var result = Remote.Login();
 
         Assert.Multiple(
-            () => Assert.Equal(LoginResponse.Ok, Remote.LoginStatus),
+            () => Assert.Equal(loginStatus, result),
+            () => Assert.Equal(expectedState, Remote.ConnectionState),
             () => MockWrapper.Verify(w => w.Login(), Times.Once)
         );
     }
 
     [Fact]
-    public void UpdatesLoginStatus_VoicemeeterNotRunning_WhenVoicemeeterNotRunning()
+    public void UpdatesConnectionState_VoicemeeterNotRunning_WhenVoicemeeterNotRunning()
     {
-        MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.VoicemeeterNotRunning);
+        var loginStatus = LoginResponse.VoicemeeterNotRunning;
+        var expectedState = new ConnectionStateRecord(loginStatus, Kind.None, default);
 
-        Remote.Login();
+        MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
+
+        var result = Remote.Login();
 
         Assert.Multiple(
-            () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, Remote.LoginStatus),
+            () => Assert.Equal(loginStatus, result),
+            () => Assert.Equal(expectedState, Remote.ConnectionState),
             () => MockWrapper.Verify(w => w.Login(), Times.Once)
         );
     }

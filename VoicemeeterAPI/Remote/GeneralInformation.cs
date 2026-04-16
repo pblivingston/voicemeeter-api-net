@@ -10,8 +10,8 @@ partial class Remote
 {
     #region Get Voicemeeter Kind
 
-    /// <inheritdoc/>
-    public Kind GetKind()
+    /// <inheritdoc cref="IRemote.GetKind()"/>
+    internal Kind GetKind(bool nested = false)
     {
         LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
@@ -20,25 +20,41 @@ partial class Remote
 
         if (result == InfoResponse.Ok && kind.IsValid())
         {
-            LoginStatus = LoginResponse.Ok;
-            return kind;
-        }
+            if (LoginStatus != LoginResponse.Ok)
+                LoginStatus = LoginResponse.Ok;
 
-        if (result == InfoResponse.NoServer)
+            if (RunningKind != kind)
+                RunningKind = kind;
+        }
+        else if (result == InfoResponse.NoServer)
         {
-            LoginStatus = LoginResponse.VoicemeeterNotRunning;
-            return Kind.None;
+            if (LoginStatus != LoginResponse.VoicemeeterNotRunning)
+                LoginStatus = LoginResponse.VoicemeeterNotRunning;
+
+            if (RunningKind != Kind.None)
+                RunningKind = Kind.None;
+        }
+        else throw new RemoteException($"GetKind failed - {result}; returned kind: {kind}");
+
+        if (RunningKind != RunningVersion.K)
+        {
+            if (nested) throw new RemoteException($"RunningKind '{RunningKind}' and RunningVersion '{RunningVersion}' do not match");
+
+            GetVersion(true);
         }
 
-        throw new RemoteException($"GetKind failed - {result}; returned kind: {kind}");
+        return RunningKind;
     }
+
+    /// <inheritdoc/>
+    public Kind GetKind() => GetKind(false);
 
     #endregion
 
     #region Get Voicemeeter Version
 
-    /// <inheritdoc/>
-    public VmVersion GetVersion()
+    /// <inheritdoc cref="IRemote.GetVersion()"/>
+    internal VmVersion GetVersion(bool nested)
     {
         LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
@@ -46,18 +62,34 @@ partial class Remote
 
         if (result == InfoResponse.Ok && VmVersion.IsValid(v))
         {
-            LoginStatus = LoginResponse.Ok;
-            return (VmVersion)v;
-        }
+            if (LoginStatus != LoginResponse.Ok)
+                LoginStatus = LoginResponse.Ok;
 
-        if (result == InfoResponse.NoServer)
+            if (RunningVersion.Packed != v)
+                RunningVersion = (VmVersion)v;
+        }
+        else if (result == InfoResponse.NoServer)
         {
-            LoginStatus = LoginResponse.VoicemeeterNotRunning;
-            return default;
+            if (LoginStatus != LoginResponse.VoicemeeterNotRunning)
+                LoginStatus = LoginResponse.VoicemeeterNotRunning;
+
+            if (RunningVersion != default)
+                RunningVersion = default;
+        }
+        else throw new RemoteException($"GetVersion failed - {result}; returned version: {VersionUtils.ToString(v)}");
+
+        if (RunningVersion.K != RunningKind)
+        {
+            if (nested) throw new RemoteException($"RunningVersion '{RunningVersion}' and RunningKind '{RunningKind}' do not match");
+
+            GetKind(true);
         }
 
-        throw new RemoteException($"GetVersion failed - {result}; returned version: {VersionUtils.ToString(v)}");
+        return RunningVersion;
     }
+
+    /// <inheritdoc/>
+    public VmVersion GetVersion() => GetVersion(false);
 
     #endregion
 }
