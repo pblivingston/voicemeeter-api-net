@@ -37,6 +37,7 @@ public sealed partial class Remote : IRemote
     private readonly IWrapper _vmrApi;
     private readonly ILogger<Remote> _logger;
     private bool _isDisposed = false;
+    private ConnectionStateRecord _lastState = new(LoginResponse.LoggedOut, Kind.None, default);
 
     /// <inheritdoc/>
     public LoginResponse LoginStatus { get; private set; } = LoginResponse.LoggedOut;

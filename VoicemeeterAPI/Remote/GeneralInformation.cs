@@ -20,19 +20,13 @@ partial class Remote
 
         if (result == InfoResponse.Ok && kind.IsValid())
         {
-            if (LoginStatus != LoginResponse.Ok)
-                LoginStatus = LoginResponse.Ok;
-
-            if (RunningKind != kind)
-                RunningKind = kind;
+            LoginStatus = LoginResponse.Ok;
+            RunningKind = kind;
         }
         else if (result == InfoResponse.NoServer)
         {
-            if (LoginStatus != LoginResponse.VoicemeeterNotRunning)
-                LoginStatus = LoginResponse.VoicemeeterNotRunning;
-
-            if (RunningKind != Kind.None)
-                RunningKind = Kind.None;
+            LoginStatus = LoginResponse.VoicemeeterNotRunning;
+            RunningKind = Kind.None;
         }
         else throw new RemoteException($"GetKind failed - {result}; returned kind: {kind}");
 
@@ -41,6 +35,13 @@ partial class Remote
             if (nested) throw new RemoteException($"RunningKind '{RunningKind}' and RunningVersion '{RunningVersion}' do not match");
 
             GetVersion(true);
+        }
+
+        var currentState = ConnectionState;
+        if (_lastState != currentState && !nested)
+        {
+            // dispatch
+            _lastState = currentState;
         }
 
         return RunningKind;
@@ -62,19 +63,13 @@ partial class Remote
 
         if (result == InfoResponse.Ok && VmVersion.IsValid(v))
         {
-            if (LoginStatus != LoginResponse.Ok)
-                LoginStatus = LoginResponse.Ok;
-
-            if (RunningVersion.Packed != v)
-                RunningVersion = (VmVersion)v;
+            LoginStatus = LoginResponse.Ok;
+            RunningVersion = (VmVersion)v;
         }
         else if (result == InfoResponse.NoServer)
         {
-            if (LoginStatus != LoginResponse.VoicemeeterNotRunning)
-                LoginStatus = LoginResponse.VoicemeeterNotRunning;
-
-            if (RunningVersion != default)
-                RunningVersion = default;
+            LoginStatus = LoginResponse.VoicemeeterNotRunning;
+            RunningVersion = default;
         }
         else throw new RemoteException($"GetVersion failed - {result}; returned version: {VersionUtils.ToString(v)}");
 
@@ -83,6 +78,13 @@ partial class Remote
             if (nested) throw new RemoteException($"RunningVersion '{RunningVersion}' and RunningKind '{RunningKind}' do not match");
 
             GetKind(true);
+        }
+
+        var currentState = ConnectionState;
+        if (_lastState != currentState && !nested)
+        {
+            // dispatch
+            _lastState = currentState;
         }
 
         return RunningVersion;

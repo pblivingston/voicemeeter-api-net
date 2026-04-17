@@ -43,6 +43,13 @@ partial class Remote
                 throw new LoginException(LoginStatus);
         }
 
+        var currentState = ConnectionState;
+        if (_lastState != currentState)
+        {
+            // dispatch
+            _lastState = currentState;
+        }
+
         return LoginStatus;
     }
 
@@ -80,6 +87,13 @@ partial class Remote
         if (!Retry(() => Attempt(out result), timeoutMs, sleepMs))
             RemoteWarning.Write($"Logout timed out; last result: {result}");
 
+        var currentState = ConnectionState;
+        if (_lastState != currentState)
+        {
+            // dispatch
+            _lastState = currentState;
+        }
+
         return LoginStatus;
     }
 
@@ -100,8 +114,19 @@ partial class Remote
 
         if (result != RunResponse.Ok) throw new RunException(result, (App)app);
 
-        if (app <= (int)App.Potatox64 && !WaitForRunning(timeoutMs, sleepMs))
-            throw new RunException(RunResponse.Timeout, (App)app);
+        if (app <= (int)App.Potatox64)
+        {
+            if (!WaitForRunning(timeoutMs, sleepMs))
+                throw new RunException(RunResponse.Timeout, (App)app);
+
+            var currentState = ConnectionState;
+            if (_lastState != currentState)
+            {
+                // dispatch
+                _lastState = currentState;
+            }
+        }
+
 
         if (app == (int)App.MacroButtons)
             while (ButtonsDirty()) Thread.Yield();
@@ -156,11 +181,12 @@ partial class Remote
 
         bool Attempt()
         {
-            GetVersion();
+            var kind = GetKind(true);
+            var version = GetVersion(true);
 
-            if (RunningKind.IsValid() && RunningVersion.IsValid())
+            if (kind.IsValid() && version.IsValid() && kind == version.K)
             {
-                RemoteInfo.Write($"Voicemeeter {RunningKind} v{RunningVersion} is running");
+                RemoteInfo.Write($"Voicemeeter {kind} v{version} is running");
                 return true;
             }
 
