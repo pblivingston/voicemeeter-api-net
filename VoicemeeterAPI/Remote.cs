@@ -37,7 +37,7 @@ public sealed partial class Remote : IRemote
     private readonly IWrapper _vmrApi;
     private readonly ILogger<Remote> _logger;
     private bool _isDisposed = false;
-    private ConnectionStateRecord _lastState = new(LoginResponse.LoggedOut, Kind.None, default);
+    private ConnectionStateEventArgs _lastState = new(LoginResponse.LoggedOut, Kind.None, default);
 
     /// <inheritdoc/>
     public LoginResponse LoginStatus { get; private set; } = LoginResponse.LoggedOut;
@@ -52,15 +52,15 @@ public sealed partial class Remote : IRemote
     public VmVersion RunningVersion { get; private set; } = default;
 
     /// <inheritdoc/>
-    public ConnectionStateRecord ConnectionState => new(LoginStatus, RunningKind, RunningVersion);
+    public ConnectionStateEventArgs ConnectionState => new(LoginStatus, RunningKind, RunningVersion);
 
     /// <inheritdoc/>
-    public event Action<ConnectionStateRecord>? OnConnectionStateChanged;
+    public event EventHandler<ConnectionStateEventArgs>? ConnectionStateChanged;
 
     /// <inheritdoc/>
-    public event Action? OnParamsDirty;
+    public event EventHandler? ParamsDirty;
     /// <inheritdoc/>
-    public event Action? OnButtonsDirty;
+    public event EventHandler? ButtonsDirty;
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="IWrapper"/>.

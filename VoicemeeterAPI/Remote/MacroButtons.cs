@@ -11,7 +11,7 @@ partial class Remote
     #region MacroButton Is Dirty
 
     /// <inheritdoc/>
-    public bool ButtonsDirty()
+    public bool IsButtonsDirty()
     {
         LoginGuard();
 

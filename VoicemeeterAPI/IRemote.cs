@@ -51,24 +51,24 @@ public interface IRemote : IDisposable
     VmVersion RunningVersion { get; }
 
     /// <summary>
-    ///   Returns a record of the current <see cref="LoginStatus"/>, <see cref="RunningKind"/>, and <see cref="RunningVersion"/>.
+    ///   Contains the current <see cref="LoginStatus"/>, <see cref="RunningKind"/>, and <see cref="RunningVersion"/>.
     /// </summary>
-    ConnectionStateRecord ConnectionState { get; }
+    ConnectionStateEventArgs ConnectionState { get; }
 
     /// <summary>
     ///   Triggered when <see cref="LoginStatus"/>, <see cref="RunningKind"/>, or <see cref="RunningVersion"/> have changed.
     /// </summary>
-    event Action<ConnectionStateRecord> OnConnectionStateChanged;
+    event EventHandler<ConnectionStateEventArgs> ConnectionStateChanged;
 
     /// <summary>
     ///   Triggered when <see cref="ParamsDirty()"/> returns true.
     /// </summary>
-    event Action OnParamsDirty;
+    event EventHandler ParamsDirty;
 
     /// <summary>
     ///   Triggered when <see cref="ButtonsDirty()"/> returns true.
     /// </summary>
-    event Action OnButtonsDirty;
+    event EventHandler ButtonsDirty;
 
     #region Login
 
@@ -242,7 +242,7 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    bool ParamsDirty();
+    bool IsParamsDirty();
 
     /// <summary>
     ///   Gets the requested Voicemeeter parameter.
@@ -304,7 +304,7 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    bool ButtonsDirty();
+    bool IsButtonsDirty();
 
     #endregion
 }

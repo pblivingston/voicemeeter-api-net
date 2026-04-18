@@ -13,7 +13,7 @@ partial class Remote
     #region Is Parameters Dirty
 
     /// <inheritdoc/>
-    public bool ParamsDirty()
+    public bool IsParamsDirty()
     {
         LoginGuard();
 

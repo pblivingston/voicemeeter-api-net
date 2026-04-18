@@ -129,7 +129,7 @@ partial class Remote
 
 
         if (app == (int)App.MacroButtons)
-            while (ButtonsDirty()) Thread.Yield();
+            while (IsButtonsDirty()) Thread.Yield();
     }
 
     /// <inheritdoc cref="IRemote.Run{T}(T, int, int)"/>
@@ -195,7 +195,7 @@ partial class Remote
 
         if (Retry(Attempt, timeoutMs, sleepMs))
         {
-            while (ParamsDirty() || ButtonsDirty()) Thread.Yield();
+            while (IsParamsDirty() || IsButtonsDirty()) Thread.Yield();
             return true;
         }
 
