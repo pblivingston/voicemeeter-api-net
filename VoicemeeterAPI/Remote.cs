@@ -36,6 +36,7 @@ public sealed partial class Remote : IRemote
 {
     private readonly IWrapper _vmrApi;
     private readonly ILogger<Remote> _logger;
+    private readonly Guid _remoteGuid = new();
     private bool _isDisposed = false;
     private ConnectionStateEventArgs _lastState = new(LoginResponse.LoggedOut, Kind.None, default);
 
@@ -114,6 +115,10 @@ public sealed partial class Remote : IRemote
 
         _isDisposed = true;
     }
+
+    private IDisposable? BeginInstanceScope() => _logger.BeginScope("Instance: {GUID}", _remoteGuid);
+
+    private IDisposable? BeginMethodScope(string methodName) => _logger.BeginScope("Method: {MethodName}", methodName);
 
     private void LoginGuard(LoginResponse requiredStatus = LoginResponse.Ok, [CallerMemberName] string methodName = "")
     {
