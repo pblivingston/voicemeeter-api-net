@@ -1,7 +1,6 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using System;
 using Microsoft.Extensions.Logging;
 using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.EventManagement.Logging;

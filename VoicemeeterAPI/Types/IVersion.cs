@@ -1,8 +1,6 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using System;
-
 namespace PBLivingston.VoicemeeterAPI.Types;
 
 public interface IVersion<T> : IEquatable<T>, IComparable<T>, IVersion

@@ -1,10 +1,8 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using AtgDev.Utils.Native;
 using AtgDev.Voicemeeter;
 using AtgDev.Voicemeeter.Utils;
