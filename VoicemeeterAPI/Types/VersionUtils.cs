@@ -1,6 +1,8 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
+
 namespace PBLivingston.VoicemeeterAPI.Types;
 
 public static class VersionUtils
@@ -53,7 +55,7 @@ public static class VersionUtils
     public static void Parse(string s, out int kind, out int maj, out int min, out int pat)
     {
         if (!TryParse(s, out kind, out maj, out min, out pat))
-            throw new ArgumentException(nameof(s));
+            throw new CannotParseAsPartsException(s, nameof(s));
     }
 
     public static bool TryParse(string s, out int packed)
@@ -66,5 +68,5 @@ public static class VersionUtils
 
     public static int Parse(string s)
         => TryParse(s, out int packed) ? packed
-        : throw new ArgumentException(nameof(s));
+        : throw new CannotParseAsPartsException(s, nameof(s));
 }

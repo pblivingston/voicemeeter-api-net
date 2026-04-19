@@ -1,3 +1,4 @@
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
 
@@ -120,7 +121,7 @@ public class VersionUtilsTests
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Parse_Parts_ThrowsException_Argument_Vm(Case scenario, CaseRecord data)
+    public void Parse_Parts_ThrowsException_CannotParseAsParts_Vm(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_String;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
@@ -128,7 +129,9 @@ public class VersionUtilsTests
         var skipTags = CaseTag.Three_String;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        Assert.Throws<ArgumentException>(() => VersionUtils.Parse(data.String, out int _, out int _, out int _, out int _));
+        var ex = Assert.Throws<CannotParseAsPartsException>(() => VersionUtils.Parse(data.String, out int _, out int _, out int _, out int _));
+
+        Assert.Equal(data.String, ex.ActualValue);
     }
 
     [Theory]
@@ -150,7 +153,7 @@ public class VersionUtilsTests
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Parse_Parts_ThrowsException_Argument_Sem(Case scenario, CaseRecord data)
+    public void Parse_Parts_ThrowsException_CannotParseAsParts_Sem(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_SemString;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
@@ -158,7 +161,9 @@ public class VersionUtilsTests
         var skipTags = CaseTag.Four_SemString;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        Assert.Throws<ArgumentException>(() => VersionUtils.Parse(data.SemString, out int _, out int _, out int _, out int _));
+        var ex = Assert.Throws<CannotParseAsPartsException>(() => VersionUtils.Parse(data.SemString, out int _, out int _, out int _, out int _));
+
+        Assert.Equal(data.SemString, ex.ActualValue);
     }
 
     [Theory]
@@ -213,7 +218,7 @@ public class VersionUtilsTests
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Parse_Packed_ThrowsException_Argument_Vm(Case scenario, CaseRecord data)
+    public void Parse_Packed_ThrowsException_CannotParseAsParts_Vm(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_String;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
@@ -221,7 +226,9 @@ public class VersionUtilsTests
         var skipTags = CaseTag.Three_String;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        Assert.Throws<ArgumentException>(() => VersionUtils.Parse(data.String));
+        var ex = Assert.Throws<CannotParseAsPartsException>(() => VersionUtils.Parse(data.String));
+
+        Assert.Equal(data.String, ex.ActualValue);
     }
 
     [Theory]
@@ -244,6 +251,8 @@ public class VersionUtilsTests
         var skipTags = CaseTag.Four_SemString;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        Assert.Throws<ArgumentException>(() => VersionUtils.Parse(data.SemString));
+        var ex = Assert.Throws<CannotParseAsPartsException>(() => VersionUtils.Parse(data.SemString));
+
+        Assert.Equal(data.SemString, ex.ActualValue);
     }
 }
