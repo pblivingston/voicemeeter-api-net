@@ -24,10 +24,10 @@ internal static partial class GeneralLog
     public static partial void TypeNotSupported(ILogger logger, string typeName, string methodName, string paramName, string supportedTypes);
 
     [LoggerMessage(
-        EventId = (int)Event.CannotParseString,
-        EventName = nameof(Event.CannotParseString),
+        EventId = (int)Event.CannotParseAsType,
+        EventName = nameof(Event.CannotParseAsType),
         Level = LogLevel.Error,
-        Message = "'{Value}' is not a valid {EnumName}."
+        Message = "'{Value}' is not a valid {TypeName}."
     )]
-    public static partial void CannotParseString(ILogger logger, string value, string enumName);
+    public static partial void CannotParseAsType(ILogger logger, string value, string typeName);
 }

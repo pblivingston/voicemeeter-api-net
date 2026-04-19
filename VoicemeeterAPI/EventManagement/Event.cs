@@ -9,7 +9,7 @@ internal enum Event
 
     BitAdjust = 100, // debug AFTER - include before/after values
     TypeNotSupported, // error + throw
-    CannotParseString, // error + throw
+    CannotParseAsType, // error + throw
 
 
     // 1000-1999 Remote

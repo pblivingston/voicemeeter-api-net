@@ -5,13 +5,18 @@ using PBLivingston.VoicemeeterAPI.Types;
 
 namespace PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 
-internal class AccessDeniedException(LoginResponse loginStatus)
-    : VmApiException($"LoginStatus: {loginStatus}")
+public class RemoteException(string message)
+    : VmApiException(message)
+{ }
+
+public class AccessDeniedException(LoginResponse loginStatus)
+    : RemoteException($"LoginStatus: {loginStatus}")
 {
     public LoginResponse LoginStatus { get; } = loginStatus;
 }
 
-internal class RemoteException<T> : VmApiException
+public class RemoteException<T> : RemoteException
+    where T : unmanaged
 {
     public T Response { get; }
 
@@ -28,22 +33,23 @@ internal class RemoteException<T> : VmApiException
     }
 }
 
-internal class RunException(RunResponse response, App app)
+public class RunException(RunResponse response, App app)
     : RemoteException<RunResponse>(response, $"Requested application: {app}")
 {
     public App App { get; } = app;
 }
 
-internal class GetInfoException(InfoResponse response, int value)
-    : RemoteException<InfoResponse>(response, $"Returned value: {value}")
+public class GetInfoException(InfoResponse response, int returnedValue)
+    : RemoteException<InfoResponse>(response, $"Returned value: {returnedValue}")
 {
-    public int Value = value;
+    public int ReturnedValue = returnedValue;
 }
 
-internal class GetParamException<T>(Response response, string vmParam, T value, Type expectedType)
-    : RemoteException<Response>(response, $"Requested Voicemeeter parameter: {vmParam}\r\nReturned value: {value}\r\nExpected type: {expectedType}")
+public class GetParamException<T>(Response response, string vmParam, T returnedValue, Type expectedType)
+    : RemoteException<Response>(response, $"Requested Voicemeeter parameter: {vmParam}\r\nReturned value: {returnedValue}\r\nExpected type: {expectedType}")
+    where T : notnull
 {
     public string VmParam { get; } = vmParam;
-    public T Value { get; } = value;
+    public T ReturnedValue { get; } = returnedValue;
     public Type ExpectedType { get; } = expectedType;
 }

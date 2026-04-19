@@ -21,13 +21,13 @@ internal static class GeneralDispatch
     {
         GeneralLog.TypeNotSupported(logger, type.Name, methodName, paramName, SupportedTypes.ListString(supportedTypes));
 
-        throw new TypeNotSupportedException(type, paramName);
+        throw new TypeNotSupportedException(type, paramName, supportedTypes);
     }
 
-    public static void CannotParseString(ILogger logger, string value, Type enumType, string paramName)
+    public static void CannotParseAsType(ILogger logger, string value, Type type, string paramName)
     {
-        GeneralLog.CannotParseString(logger, value, enumType.Name);
+        GeneralLog.CannotParseAsType(logger, value, type.Name);
 
-        throw new ArgumentException($"Invalid string: {value}", paramName);
+        throw new CannotParseAsTypeException(value, type, paramName);
     }
 }

@@ -3,6 +3,6 @@
 
 namespace PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 
-internal class VoicemeeterException(string message)
+public class VoicemeeterException(string message)
     : VmApiException(message)
 { }
