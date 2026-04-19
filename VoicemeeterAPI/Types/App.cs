@@ -1,6 +1,8 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
+
 namespace PBLivingston.VoicemeeterAPI.Types;
 
 /// <summary>
@@ -88,7 +90,7 @@ public static class AppUtils
     /// </summary>
     /// <param name="s"></param>
     /// <returns></returns>
-    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="CannotParseAsTypeException"></exception>
     public static App ParseBit(string s) => TryParseBit(s, out App app) ? app
-        : throw new ArgumentException($"Invalid app: {s}", nameof(s));
+        : throw new CannotParseAsTypeException(s, typeof(App), nameof(s));
 }

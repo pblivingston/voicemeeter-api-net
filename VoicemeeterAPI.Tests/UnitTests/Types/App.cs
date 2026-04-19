@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.AppData;
 
@@ -78,12 +79,17 @@ public class AppTests
 
     [Theory]
     [ClassData(typeof(AppData))]
-    public void ParseBit_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void ParseBit_ThrowsException_CannotParseAsType(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_String;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => AppUtils.ParseBit(data.S));
+        var ex = Assert.Throws<CannotParseAsTypeException>(() => AppUtils.ParseBit(data.S));
+
+        Assert.Multiple(
+            () => Assert.Equal(data.S, ex.ActualValue),
+            () => Assert.Equal(typeof(App), ex.Type)
+        );
     }
 }
 
