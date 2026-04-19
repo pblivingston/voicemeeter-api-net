@@ -1,3 +1,4 @@
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
 
@@ -49,12 +50,14 @@ public class Construction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Constructor_Packed_ThrowsException_ArgumentOutOfRange(Case scenario, CaseRecord data)
+    public void Constructor_Packed_ThrowsException_SemPackedOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_SemPacked;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => new SemVersion(data.SemPacked));
+        var ex = Assert.Throws<SemPackedOutOfRangeException>(() => new SemVersion(data.SemPacked));
+
+        Assert.Equal(data.SemPacked, ex.ActualValue);
     }
 
     [Theory]
@@ -71,12 +74,18 @@ public class Construction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Constructor_Sems_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Constructor_Sems_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_Sems;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => new SemVersion(data.Major, data.Minor, data.Patch));
+        var ex = Assert.Throws<PartsOutOfRangeException>(() => new SemVersion(data.Major, data.Minor, data.Patch));
+
+        Assert.Multiple(
+            () => Assert.Equal(data.Major, ex.Major),
+            () => Assert.Equal(data.Minor, ex.Minor),
+            () => Assert.Equal(data.Patch, ex.Patch)
+        );
     }
 
     [Theory]

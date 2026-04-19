@@ -1,3 +1,4 @@
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
 
@@ -59,11 +60,13 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Unpack_ThrowsException_ArgumentOutOfRange(Case scenario, CaseRecord data)
+    public void Unpack_ThrowsException_SemPackedOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_SemPacked;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => SemVersion.Unpack(data.SemPacked, out int _, out int _, out int _));
+        var ex = Assert.Throws<SemPackedOutOfRangeException>(() => SemVersion.Unpack(data.SemPacked, out int _, out int _, out int _));
+
+        Assert.Equal(data.SemPacked, ex.ActualValue);
     }
 }

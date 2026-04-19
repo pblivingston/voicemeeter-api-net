@@ -1,3 +1,4 @@
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
 
@@ -45,11 +46,17 @@ public class Packing
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Pack_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Pack_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_Sems;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => SemVersion.Pack(data.Major, data.Minor, data.Patch));
+        var ex = Assert.Throws<PartsOutOfRangeException>(() => SemVersion.Pack(data.Major, data.Minor, data.Patch));
+
+        Assert.Multiple(
+            () => Assert.Equal(data.Major, ex.Major),
+            () => Assert.Equal(data.Minor, ex.Minor),
+            () => Assert.Equal(data.Patch, ex.Patch)
+        );
     }
 }

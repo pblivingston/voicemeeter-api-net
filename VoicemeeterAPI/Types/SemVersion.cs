@@ -1,7 +1,7 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using PBLivingston.VoicemeeterAPI.Exceptions;
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Utilities;
 
 namespace PBLivingston.VoicemeeterAPI.Types;
@@ -10,7 +10,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
 {
     /// <inheritdoc/>
     public int Packed { get; } = IsValid(packed) ? packed
-        : throw new ArgumentOutOfRangeException(nameof(packed));
+        : throw new SemPackedOutOfRangeException(nameof(packed), packed);
 
     // Parts
     private int V0 => (Packed >> 24) & 0xFF;
@@ -59,7 +59,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     {
         if (typeof(T) == typeof(int)) { kind = (T)(object)V0; }
         else if (typeof(T) == typeof(Kind)) { kind = (T)(object)((IVersion)this).K; }
-        else throw new TypeNotSupportedException<T>(nameof(kind), SupportedTypes.KindTypes);
+        else throw new TypeNotSupportedException(typeof(T), nameof(kind), SupportedTypes.KindTypes);
 
         sem = this;
     }
@@ -69,7 +69,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     {
         if (typeof(T) == typeof(int)) { kind = (T)(object)V0; }
         else if (typeof(T) == typeof(Kind)) { kind = (T)(object)((IVersion)this).K; }
-        else throw new TypeNotSupportedException<T>(nameof(kind), SupportedTypes.KindTypes);
+        else throw new TypeNotSupportedException(typeof(T), nameof(kind), SupportedTypes.KindTypes);
 
         Deconstruct(out maj, out min, out pat);
     }
@@ -106,7 +106,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
 
     public static int Pack(int maj, int min, int pat)
         => TryPack(maj, min, pat, out int packed) ? packed
-        : throw new ArgumentException($"Invalid Semantic version part(s): {nameof(maj)} = {maj}, {nameof(min)} = {min}, {nameof(pat)} = {pat}.");
+        : throw new PartsOutOfRangeException(maj, min, pat);
 
     #endregion
 
@@ -126,7 +126,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     public static void Unpack(int packed, out int maj, out int min, out int pat)
     {
         if (!TryUnpack(packed, out maj, out min, out pat))
-            throw new ArgumentOutOfRangeException(nameof(packed));
+            throw new SemPackedOutOfRangeException(nameof(packed), packed);
     }
 
     #endregion
@@ -147,7 +147,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     public static void Parse(string s, out int maj, out int min, out int pat)
     {
         if (!TryParse(s, out maj, out min, out pat))
-            throw new ArgumentException(nameof(s));
+            throw new CannotParseAsPartsException(s, nameof(s));
     }
 
     public static bool TryParse(string s, out int packed)
@@ -161,7 +161,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     public static void Parse(string s, out int packed)
     {
         if (!TryParse(s, out packed))
-            throw new ArgumentException(nameof(s));
+            throw new CannotParseAsPartsException(s, nameof(s));
     }
 
     public static bool TryParse(string s, out SemVersion sem)
@@ -174,7 +174,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
 
     public static SemVersion Parse(string s)
         => TryParse(s, out SemVersion sem) ? sem
-        : throw new ArgumentException(nameof(s));
+        : throw new CannotParseAsTypeException(s, typeof(SemVersion), nameof(s));
 
     #endregion
 

@@ -1,3 +1,4 @@
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
 
@@ -58,12 +59,14 @@ public class StringRepresentation
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Parse_Sems_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Parse_Sems_ThrowsException_CannotParseAsParts(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_SemString;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => SemVersion.Parse(data.SemString, out int _, out int _, out int _));
+        var ex = Assert.Throws<CannotParseAsPartsException>(() => SemVersion.Parse(data.SemString, out int _, out int _, out int _));
+
+        Assert.Equal(data.SemString, ex.ActualValue);
     }
 
     [Theory]
@@ -99,12 +102,14 @@ public class StringRepresentation
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Parse_SemPacked_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Parse_SemPacked_ThrowsException_CannotParseAsParts(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_SemString;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => SemVersion.Parse(data.SemString, out int _));
+        var ex = Assert.Throws<CannotParseAsPartsException>(() => SemVersion.Parse(data.SemString, out int _));
+
+        Assert.Equal(data.SemString, ex.ActualValue);
     }
 
     [Theory]
@@ -140,11 +145,16 @@ public class StringRepresentation
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Parse_SemVersion_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Parse_SemVersion_ThrowsException_CannotParseAsType(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_SemString;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => SemVersion.Parse(data.SemString));
+        var ex = Assert.Throws<CannotParseAsTypeException>(() => SemVersion.Parse(data.SemString));
+
+        Assert.Multiple(
+            () => Assert.Equal(data.SemString, ex.ActualValue),
+            () => Assert.Equal(typeof(SemVersion), ex.Type)
+        );
     }
 }
