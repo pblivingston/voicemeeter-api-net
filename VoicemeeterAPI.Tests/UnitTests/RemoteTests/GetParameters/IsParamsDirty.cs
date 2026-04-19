@@ -3,7 +3,7 @@ using PBLivingston.VoicemeeterAPI.Types;
 
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;
 
-public class ParamsDirty : MockRemote
+public class IsParamsDirty : MockRemote
 {
     [Fact]
     public void ReturnsFalse_WhenResponseIsOk()
@@ -15,7 +15,7 @@ public class ParamsDirty : MockRemote
 
         MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Ok);
 
-        var result = Remote.ParamsDirty();
+        var result = Remote.IsParamsDirty();
 
         Assert.Multiple(
             () => Assert.False(result),
@@ -33,7 +33,7 @@ public class ParamsDirty : MockRemote
 
         MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Dirty);
 
-        var result = Remote.ParamsDirty();
+        var result = Remote.IsParamsDirty();
 
         Assert.Multiple(
             () => Assert.True(result),
@@ -51,10 +51,10 @@ public class ParamsDirty : MockRemote
 
         MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Error);
 
-        var ex = Assert.Throws<RemoteException>(() => Remote.ParamsDirty());
+        var ex = Assert.Throws<RemoteException>(() => Remote.IsParamsDirty());
 
         Assert.Multiple(
-            () => Assert.Equal("[VoicemeeterAPI] Remote Error: ParamsDirty failed - Error", ex.Message),
+            () => Assert.Equal("[VoicemeeterAPI] Remote Error: IsParamsDirty failed - Error", ex.Message),
             () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2))
         );
     }
@@ -64,10 +64,10 @@ public class ParamsDirty : MockRemote
     {
         MockLogin_VoicemeeterNotRunning();
 
-        var ex = Assert.Throws<RemoteAccessException>(() => Remote.ParamsDirty());
+        var ex = Assert.Throws<RemoteAccessException>(() => Remote.IsParamsDirty());
 
         Assert.Multiple(
-            () => Assert.Equal("ParamsDirty", ex.Method),
+            () => Assert.Equal("IsParamsDirty", ex.Method),
             () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
             () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never)
         );
@@ -78,7 +78,7 @@ public class ParamsDirty : MockRemote
     {
         Remote.Dispose();
 
-        var ex = Assert.Throws<ObjectDisposedException>(() => Remote.ParamsDirty());
+        var ex = Assert.Throws<ObjectDisposedException>(() => Remote.IsParamsDirty());
 
         Assert.Multiple(
             () => Assert.Equal("Remote", ex.ObjectName),

@@ -11,7 +11,7 @@ public class ConnectionStateTests
     {
         _ = scenario;
 
-        ConnectionStateRecord state = new(data.LoginStatus, data.RunningKind, data.RunningVersion);
+        ConnectionStateEventArgs state = new(data.LoginStatus, data.RunningKind, data.RunningVersion);
 
         Assert.Multiple(
             () => Assert.Equal(data.LoginStatus, state.LoginStatus),
@@ -26,7 +26,7 @@ public class ConnectionStateTests
     {
         _ = scenario;
 
-        ConnectionStateRecord state = new(data.LoginStatus, data.RunningKind, data.RunningVersion);
+        ConnectionStateEventArgs state = new(data.LoginStatus, data.RunningKind, data.RunningVersion);
 
         Assert.Equal(data.LoggedIn, state.LoggedIn);
     }
@@ -37,7 +37,7 @@ public class ConnectionStateTests
     {
         _ = scenario;
 
-        ConnectionStateRecord state = new(data.LoginStatus, data.RunningKind, data.RunningVersion);
+        ConnectionStateEventArgs state = new(data.LoginStatus, data.RunningKind, data.RunningVersion);
 
         Assert.Equal(data.Connected, state.Connected);
     }

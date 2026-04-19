@@ -10,7 +10,7 @@ public class GetKind : MockRemote
     {
         var kind = (int)Kind.Banana;
         var version = 0x0201_0202;
-        var expectedState = new ConnectionStateRecord(LoginResponse.Ok, (Kind)kind, (VmVersion)version);
+        var expectedState = new ConnectionStateEventArgs(LoginResponse.Ok, (Kind)kind, (VmVersion)version);
 
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
@@ -31,7 +31,7 @@ public class GetKind : MockRemote
     {
         var kind = (int)Kind.Banana;
         var version = 0x0201_0202;
-        var expectedState = new ConnectionStateRecord(LoginResponse.VoicemeeterNotRunning, Kind.None, default);
+        var expectedState = new ConnectionStateEventArgs(LoginResponse.VoicemeeterNotRunning, Kind.None, default);
 
         MockLogin_Ok(kind, version);
 

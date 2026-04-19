@@ -11,7 +11,7 @@ public class Login : MockRemote
         var loginStatus = LoginResponse.Ok;
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var expectedState = new ConnectionStateRecord(loginStatus, (Kind)kind, (VmVersion)version);
+        var expectedState = new ConnectionStateEventArgs(loginStatus, (Kind)kind, (VmVersion)version);
 
         MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
@@ -37,7 +37,7 @@ public class Login : MockRemote
     public void UpdatesConnectionState_VoicemeeterNotRunning_WhenVoicemeeterNotRunning()
     {
         var loginStatus = LoginResponse.VoicemeeterNotRunning;
-        var expectedState = new ConnectionStateRecord(loginStatus, Kind.None, default);
+        var expectedState = new ConnectionStateEventArgs(loginStatus, Kind.None, default);
 
         MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
 

@@ -11,7 +11,7 @@ public class Logout : MockRemote
         var loginStatus = LoginResponse.LoggedOut;
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var expectedState = new ConnectionStateRecord(loginStatus, (Kind)kind, (VmVersion)version);
+        var expectedState = new ConnectionStateEventArgs(loginStatus, (Kind)kind, (VmVersion)version);
 
         MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
 
@@ -32,7 +32,7 @@ public class Logout : MockRemote
         var loginStatus = LoginResponse.Unknown;
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var expectedState = new ConnectionStateRecord(loginStatus, (Kind)kind, (VmVersion)version);
+        var expectedState = new ConnectionStateEventArgs(loginStatus, (Kind)kind, (VmVersion)version);
 
         MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
 
@@ -76,7 +76,7 @@ public class Logout : MockRemote
     {
         var kind = Kind.Standard;
         var version = 0x0101_0202;
-        var expectedState = new ConnectionStateRecord(LoginResponse.LoggedOut, kind, (VmVersion)version);
+        var expectedState = new ConnectionStateEventArgs(LoginResponse.LoggedOut, kind, (VmVersion)version);
 
         MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
 
