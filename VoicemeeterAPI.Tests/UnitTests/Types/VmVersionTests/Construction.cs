@@ -1,3 +1,4 @@
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
 
@@ -49,12 +50,14 @@ public class Construction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Constructor_Packed_ThrowsException_ArgumentOutOfRange(Case scenario, CaseRecord data)
+    public void Constructor_Packed_ThrowsException_VmPackedOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_Packed;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => new VmVersion(data.Packed));
+        var ex = Assert.Throws<VmPackedOutOfRangeException>(() => new VmVersion(data.Packed));
+
+        Assert.Equal(data.Packed, ex.ActualValue);
     }
 
     [Theory]
@@ -71,12 +74,19 @@ public class Construction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Constructor_Ints_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Constructor_Ints_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_Parts;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => new VmVersion(data.Kind, data.Major, data.Minor, data.Patch));
+        var ex = Assert.Throws<PartsOutOfRangeException<int>>(() => new VmVersion(data.Kind, data.Major, data.Minor, data.Patch));
+
+        Assert.Multiple(
+            () => Assert.Equal(data.Kind, ex.Kind),
+            () => Assert.Equal(data.Major, ex.Major),
+            () => Assert.Equal(data.Minor, ex.Minor),
+            () => Assert.Equal(data.Patch, ex.Patch)
+        );
     }
 
     [Theory]
@@ -93,12 +103,19 @@ public class Construction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Constructor_Kind_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Constructor_Kind_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_Parts;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => new VmVersion(data.K, data.Major, data.Minor, data.Patch));
+        var ex = Assert.Throws<PartsOutOfRangeException<Kind>>(() => new VmVersion(data.K, data.Major, data.Minor, data.Patch));
+
+        Assert.Multiple(
+            () => Assert.Equal(data.K, ex.Kind),
+            () => Assert.Equal(data.Major, ex.Major),
+            () => Assert.Equal(data.Minor, ex.Minor),
+            () => Assert.Equal(data.Patch, ex.Patch)
+        );
     }
 
     [Theory]
@@ -116,7 +133,7 @@ public class Construction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Constructor_SemVersion_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Constructor_SemVersion_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_Kind;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
@@ -126,7 +143,12 @@ public class Construction
 
         var sem = new SemVersion(data.SemPacked);
 
-        Assert.Throws<ArgumentException>(() => new VmVersion(data.Kind, sem));
+        var ex = Assert.Throws<PartsOutOfRangeException<int>>(() => new VmVersion(data.Kind, sem));
+
+        Assert.Multiple(
+            () => Assert.Equal(data.Kind, ex.Kind),
+            () => Assert.Equal(sem, ex.Semantic)
+        );
     }
 
     [Theory]
@@ -144,7 +166,7 @@ public class Construction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Constructor_KindSemVersion_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Constructor_KindSemVersion_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_Kind;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
@@ -154,6 +176,11 @@ public class Construction
 
         var sem = new SemVersion(data.SemPacked);
 
-        Assert.Throws<ArgumentException>(() => new VmVersion(data.K, sem));
+        var ex = Assert.Throws<PartsOutOfRangeException<Kind>>(() => new VmVersion(data.K, sem));
+
+        Assert.Multiple(
+            () => Assert.Equal(data.K, ex.Kind),
+            () => Assert.Equal(sem, ex.Semantic)
+        );
     }
 }

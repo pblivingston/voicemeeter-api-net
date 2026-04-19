@@ -1,7 +1,7 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using PBLivingston.VoicemeeterAPI.Exceptions;
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Utilities;
 
 namespace PBLivingston.VoicemeeterAPI.Types;
@@ -10,7 +10,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 {
     /// <inheritdoc/>
     public int Packed { get; } = IsValid(packed) ? packed
-        : throw new ArgumentOutOfRangeException(nameof(packed));
+        : throw new VmPackedOutOfRangeException(nameof(packed), packed);
 
     // Parts
     private int V1 => (Packed >> 24) & 0xFF;
@@ -40,7 +40,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     }
 
     public VmVersion(Kind k, int maj, int min, int pat)
-        : this((int)k, maj, min, pat)
+        : this(Pack(k, maj, min, pat))
     {
     }
 
@@ -50,7 +50,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     }
 
     public VmVersion(Kind k, SemVersion sem)
-        : this((int)k, sem)
+        : this(Pack(k, sem))
     {
     }
 
@@ -87,7 +87,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     {
         if (typeof(T) == typeof(int)) { kind = (T)(object)V1; }
         else if (typeof(T) == typeof(Kind)) { kind = (T)(object)K; }
-        else throw new TypeNotSupportedException<T>(nameof(kind), SupportedTypes.KindTypes);
+        else throw new TypeNotSupportedException(typeof(T), nameof(kind), SupportedTypes.KindTypes);
 
         maj = V2; min = V3; pat = V4;
     }
@@ -97,7 +97,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     {
         if (typeof(T) == typeof(int)) { kind = (T)(object)V1; }
         else if (typeof(T) == typeof(Kind)) { kind = (T)(object)K; }
-        else throw new TypeNotSupportedException<T>(nameof(kind), SupportedTypes.KindTypes);
+        else throw new TypeNotSupportedException(typeof(T), nameof(kind), SupportedTypes.KindTypes);
 
         sem = Semantic;
     }
@@ -152,10 +152,11 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 
     public static int Pack(int kind, int maj, int min, int pat)
         => TryPack(kind, maj, min, pat, out int packed) ? packed
-        : throw new ArgumentException($"Invalid Voicemeeter version part(s): {nameof(kind)} = {kind}, {nameof(maj)} = {maj}, {nameof(min)} = {min}, {nameof(pat)} = {pat}.");
+        : throw new PartsOutOfRangeException<int>(kind, maj, min, pat);
 
     public static int Pack(Kind kind, int maj, int min, int pat)
-        => Pack((int)kind, maj, min, pat);
+        => TryPack(kind, maj, min, pat, out int packed) ? packed
+        : throw new PartsOutOfRangeException<Kind>(kind, maj, min, pat);
 
     public static int RawPack(int kind, SemVersion sem)
         => (kind << 24) | sem.Packed;
@@ -173,10 +174,11 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 
     public static int Pack(int kind, SemVersion sem)
         => TryPack(kind, sem, out int packed) ? packed
-        : throw new ArgumentException($"Invalid Voicemeeter version part(s): {nameof(kind)} = {kind}, {nameof(sem)} = {sem}.");
+        : throw new PartsOutOfRangeException<int>(kind, sem);
 
     public static int Pack(Kind kind, SemVersion sem)
-        => Pack((int)kind, sem);
+        => TryPack(kind, sem, out int packed) ? packed
+        : throw new PartsOutOfRangeException<Kind>(kind, sem);
 
     #endregion
 
@@ -196,7 +198,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public static void Unpack(int packed, out int kind, out int maj, out int min, out int pat)
     {
         if (!TryUnpack(packed, out kind, out maj, out min, out pat))
-            throw new ArgumentOutOfRangeException(nameof(packed));
+            throw new VmPackedOutOfRangeException(nameof(packed), packed);
     }
 
     public static bool TryUnpack(int packed, out Kind kind, out int maj, out int min, out int pat)
@@ -210,7 +212,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public static void Unpack(int packed, out Kind kind, out int maj, out int min, out int pat)
     {
         if (!TryUnpack(packed, out kind, out maj, out min, out pat))
-            throw new ArgumentOutOfRangeException(nameof(packed));
+            throw new VmPackedOutOfRangeException(nameof(packed), packed);
     }
 
     public static void RawUnpack(int packed, out int kind, out SemVersion sem)
@@ -230,7 +232,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public static void Unpack(int packed, out int kind, out SemVersion sem)
     {
         if (!TryUnpack(packed, out kind, out sem))
-            throw new ArgumentOutOfRangeException(nameof(packed));
+            throw new VmPackedOutOfRangeException(nameof(packed), packed);
     }
 
     public static bool TryUnpack(int packed, out Kind kind, out SemVersion sem)
@@ -244,7 +246,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public static void Unpack(int packed, out Kind kind, out SemVersion sem)
     {
         if (!TryUnpack(packed, out kind, out sem))
-            throw new ArgumentOutOfRangeException(nameof(packed));
+            throw new VmPackedOutOfRangeException(nameof(packed), packed);
     }
 
     #endregion
@@ -265,7 +267,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public static void Parse(string s, out int kind, out int maj, out int min, out int pat)
     {
         if (!TryParse(s, out kind, out maj, out min, out pat))
-            throw new ArgumentException(nameof(s));
+            throw new CannotParseAsPartsException(s, nameof(s));
     }
 
     public static bool TryParse(string s, out Kind kind, out int maj, out int min, out int pat)
@@ -279,7 +281,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public static void Parse(string s, out Kind kind, out int maj, out int min, out int pat)
     {
         if (!TryParse(s, out kind, out maj, out min, out pat))
-            throw new ArgumentException(nameof(s));
+            throw new CannotParseAsPartsException(s, nameof(s));
     }
 
     public static bool TryParse(string s, out int kind, out SemVersion sem)
@@ -293,7 +295,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public static void Parse(string s, out int kind, out SemVersion sem)
     {
         if (!TryParse(s, out kind, out sem))
-            throw new ArgumentException(nameof(s));
+            throw new CannotParseAsPartsException(s, nameof(s));
     }
 
     public static bool TryParse(string s, out Kind kind, out SemVersion sem)
@@ -307,7 +309,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public static void Parse(string s, out Kind kind, out SemVersion sem)
     {
         if (!TryParse(s, out kind, out sem))
-            throw new ArgumentException(nameof(s));
+            throw new CannotParseAsPartsException(s, nameof(s));
     }
 
     public static bool TryParse(string s, out int packed)
@@ -321,7 +323,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public static void Parse(string s, out int packed)
     {
         if (!TryParse(s, out packed))
-            throw new ArgumentException(nameof(s));
+            throw new CannotParseAsPartsException(s, nameof(s));
     }
 
     public static bool TryParse(string s, out VmVersion vm)
@@ -334,7 +336,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 
     public static VmVersion Parse(string s)
         => TryParse(s, out VmVersion vm) ? vm
-        : throw new ArgumentException(nameof(s));
+        : throw new CannotParseAsTypeException(s, typeof(VmVersion), nameof(s));
 
     #endregion
 
@@ -356,7 +358,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public static explicit operator (int kind, SemVersion sem)(VmVersion vm) // VmVersion -> (int, SemVersion)
         => (vm.Kind, vm.Semantic);
     public static explicit operator VmVersion((int kind, SemVersion sem) t)  // (int, SemVersion) -> VmVersion
-        => new(t.kind, t.sem.Major, t.sem.Minor, t.sem.Patch);
+        => new(t.kind, t.sem);
 
     public static explicit operator (Kind kind, SemVersion sem)(VmVersion vm) // VmVersion -> (Kind, SemVersion)
         => (vm.K, vm.Semantic);

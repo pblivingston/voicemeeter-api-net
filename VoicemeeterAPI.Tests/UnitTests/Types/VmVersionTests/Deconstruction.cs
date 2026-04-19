@@ -1,4 +1,4 @@
-using PBLivingston.VoicemeeterAPI.Exceptions;
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Utilities;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
@@ -169,13 +169,11 @@ public class Deconstruction
     {
         var version = new VmVersion(0x0204_0608);
 
-        var ex = Assert.Throws<TypeNotSupportedException<bool>>(() => ((IVersion)version).Deconstruct(out bool _, out int _, out int _, out int _));
+        var ex = Assert.Throws<TypeNotSupportedException>(() => ((IVersion)version).Deconstruct(out bool _, out int _, out int _, out int _));
 
         Assert.Multiple(
-            () => Assert.Equal("Deconstruct", ex.Method),
-            () => Assert.Equal("kind", ex.Param),
             () => Assert.Equal(typeof(bool), ex.Type),
-            () => Assert.Equal(SupportedTypes.KindTypes, ex.Supported)
+            () => Assert.Equal(SupportedTypes.KindTypes, ex.SupportedTypes)
         );
     }
 
@@ -184,13 +182,11 @@ public class Deconstruction
     {
         var version = new VmVersion(0x0204_0608);
 
-        var ex = Assert.Throws<TypeNotSupportedException<float>>(() => ((IVersion)version).Deconstruct(out float _, out SemVersion _));
+        var ex = Assert.Throws<TypeNotSupportedException>(() => ((IVersion)version).Deconstruct(out float _, out SemVersion _));
 
         Assert.Multiple(
-            () => Assert.Equal("Deconstruct", ex.Method),
-            () => Assert.Equal("kind", ex.Param),
             () => Assert.Equal(typeof(float), ex.Type),
-            () => Assert.Equal(SupportedTypes.KindTypes, ex.Supported)
+            () => Assert.Equal(SupportedTypes.KindTypes, ex.SupportedTypes)
         );
     }
 }

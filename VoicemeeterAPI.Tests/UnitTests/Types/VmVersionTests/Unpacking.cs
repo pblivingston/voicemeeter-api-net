@@ -1,3 +1,4 @@
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
 
@@ -65,12 +66,14 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Unpack_Ints_ThrowsException_ArgumentOutOfRange(Case scenario, CaseRecord data)
+    public void Unpack_Ints_ThrowsException_VmPackedOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_Packed;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => VmVersion.Unpack(data.Packed, out int _, out int _, out int _, out int _));
+        var ex = Assert.Throws<VmPackedOutOfRangeException>(() => VmVersion.Unpack(data.Packed, out int _, out int _, out int _, out int _));
+
+        Assert.Equal(data.Packed, ex.ActualValue);
     }
 
     [Theory]
@@ -116,12 +119,14 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Unpack_Kind_ThrowsException_ArgumentOutOfRange(Case scenario, CaseRecord data)
+    public void Unpack_Kind_ThrowsException_VmPackedOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_Packed;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => VmVersion.Unpack(data.Packed, out Kind _, out int _, out int _, out int _));
+        var ex = Assert.Throws<VmPackedOutOfRangeException>(() => VmVersion.Unpack(data.Packed, out Kind _, out int _, out int _, out int _));
+
+        Assert.Equal(data.Packed, ex.ActualValue);
     }
 
     [Theory]
@@ -178,12 +183,14 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Unpack_Semantic_ThrowsException_ArgumentOutOfRange(Case scenario, CaseRecord data)
+    public void Unpack_Semantic_ThrowsException_VmPackedOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_Packed;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => VmVersion.Unpack(data.Packed, out int _, out SemVersion _));
+        var ex = Assert.Throws<VmPackedOutOfRangeException>(() => VmVersion.Unpack(data.Packed, out int _, out SemVersion _));
+
+        Assert.Equal(data.Packed, ex.ActualValue);
     }
 
     [Theory]
@@ -225,11 +232,13 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Unpack_KindSemantic_ThrowsException_ArgumentOutOfRange(Case scenario, CaseRecord data)
+    public void Unpack_KindSemantic_ThrowsException_VmPackedOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_Packed;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => VmVersion.Unpack(data.Packed, out Kind _, out SemVersion _));
+        var ex = Assert.Throws<VmPackedOutOfRangeException>(() => VmVersion.Unpack(data.Packed, out Kind _, out SemVersion _));
+
+        Assert.Equal(data.Packed, ex.ActualValue);
     }
 }

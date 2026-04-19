@@ -1,3 +1,4 @@
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
 
@@ -45,12 +46,20 @@ public class Packing
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Pack_Ints_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Pack_Ints_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_Parts;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => VmVersion.Pack(data.Kind, data.Major, data.Minor, data.Patch));
+        var ex = Assert.Throws<PartsOutOfRangeException<int>>(() => VmVersion.Pack(data.Kind, data.Major, data.Minor, data.Patch));
+
+        Assert.Multiple(
+            () => Assert.Equal(data.Kind, ex.Kind),
+            () => Assert.Equal(data.Major, ex.Major),
+            () => Assert.Equal(data.Minor, ex.Minor),
+            () => Assert.Equal(data.Patch, ex.Patch),
+            () => Assert.Null(ex.Semantic)
+        );
     }
 
     [Theory]
@@ -84,12 +93,20 @@ public class Packing
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Pack_Kind_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Pack_Kind_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_Parts;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => VmVersion.Pack(data.K, data.Major, data.Minor, data.Patch));
+        var ex = Assert.Throws<PartsOutOfRangeException<Kind>>(() => VmVersion.Pack(data.K, data.Major, data.Minor, data.Patch));
+
+        Assert.Multiple(
+            () => Assert.Equal(data.K, ex.Kind),
+            () => Assert.Equal(data.Major, ex.Major),
+            () => Assert.Equal(data.Minor, ex.Minor),
+            () => Assert.Equal(data.Patch, ex.Patch),
+            () => Assert.Null(ex.Semantic)
+        );
     }
 
     [Theory]
@@ -139,7 +156,7 @@ public class Packing
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Pack_Semantic_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Pack_Semantic_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_Kind;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
@@ -149,7 +166,15 @@ public class Packing
 
         var semantic = new SemVersion(data.SemPacked);
 
-        Assert.Throws<ArgumentException>(() => VmVersion.Pack(data.Kind, semantic));
+        var ex = Assert.Throws<PartsOutOfRangeException<int>>(() => VmVersion.Pack(data.Kind, semantic));
+
+        Assert.Multiple(
+            () => Assert.Equal(data.Kind, ex.Kind),
+            () => Assert.Null(ex.Major),
+            () => Assert.Null(ex.Minor),
+            () => Assert.Null(ex.Patch),
+            () => Assert.Equal(semantic, ex.Semantic)
+        );
     }
 
     [Theory]
@@ -187,7 +212,7 @@ public class Packing
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Pack_KindSemantic_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Pack_KindSemantic_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_Kind;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
@@ -197,6 +222,14 @@ public class Packing
 
         var semantic = new SemVersion(data.SemPacked);
 
-        Assert.Throws<ArgumentException>(() => VmVersion.Pack(data.K, semantic));
+        var ex = Assert.Throws<PartsOutOfRangeException<Kind>>(() => VmVersion.Pack(data.K, semantic));
+
+        Assert.Multiple(
+            () => Assert.Equal(data.K, ex.Kind),
+            () => Assert.Null(ex.Major),
+            () => Assert.Null(ex.Minor),
+            () => Assert.Null(ex.Patch),
+            () => Assert.Equal(semantic, ex.Semantic)
+        );
     }
 }

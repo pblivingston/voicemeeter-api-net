@@ -1,3 +1,4 @@
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
 
@@ -60,12 +61,14 @@ public class StringRepresentation
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Parse_Ints_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Parse_Ints_ThrowsException_CannotParseAsParts(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_String;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => VmVersion.Parse(data.String, out int _, out int _, out int _, out int _));
+        var ex = Assert.Throws<CannotParseAsPartsException>(() => VmVersion.Parse(data.String, out int _, out int _, out int _, out int _));
+
+        Assert.Equal(data.String, ex.ActualValue);
     }
 
     [Theory]
@@ -111,12 +114,14 @@ public class StringRepresentation
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Parse_Kind_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Parse_Kind_ThrowsException_CannotParseAsParts(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_String;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => VmVersion.Parse(data.String, out Kind _, out int _, out int _, out int _));
+        var ex = Assert.Throws<CannotParseAsPartsException>(() => VmVersion.Parse(data.String, out Kind _, out int _, out int _, out int _));
+
+        Assert.Equal(data.String, ex.ActualValue);
     }
 
     [Theory]
@@ -158,12 +163,14 @@ public class StringRepresentation
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Parse_Semantic_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Parse_Semantic_ThrowsException_CannotParseAsParts(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_String;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => VmVersion.Parse(data.String, out int _, out SemVersion _));
+        var ex = Assert.Throws<CannotParseAsPartsException>(() => VmVersion.Parse(data.String, out int _, out SemVersion _));
+
+        Assert.Equal(data.String, ex.ActualValue);
     }
 
     [Theory]
@@ -205,12 +212,14 @@ public class StringRepresentation
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Parse_KindSemantic_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Parse_KindSemantic_ThrowsException_CannotParseAsParts(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_String;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => VmVersion.Parse(data.String, out Kind _, out SemVersion _));
+        var ex = Assert.Throws<CannotParseAsPartsException>(() => VmVersion.Parse(data.String, out Kind _, out SemVersion _));
+
+        Assert.Equal(data.String, ex.ActualValue);
     }
 
     [Theory]
@@ -246,12 +255,14 @@ public class StringRepresentation
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Parse_Packed_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void Parse_Packed_ThrowsException_CannotParseAsParts(Case scenario, CaseRecord data)
     {
         var runTags = CaseTag.Invalid_String;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => VmVersion.Parse(data.String, out int _));
+        var ex = Assert.Throws<CannotParseAsPartsException>(() => VmVersion.Parse(data.String, out int _));
+
+        Assert.Equal(data.String, ex.ActualValue);
     }
 
     [Theory]
@@ -292,6 +303,11 @@ public class StringRepresentation
         var runTags = CaseTag.Invalid_String;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        Assert.Throws<ArgumentException>(() => VmVersion.Parse(data.String));
+        var ex = Assert.Throws<CannotParseAsTypeException>(() => VmVersion.Parse(data.String));
+
+        Assert.Multiple(
+            () => Assert.Equal(data.String, ex.ActualValue),
+            () => Assert.Equal(typeof(VmVersion), ex.Type)
+        );
     }
 }
