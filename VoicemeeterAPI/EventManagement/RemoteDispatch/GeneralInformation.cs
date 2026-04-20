@@ -22,10 +22,10 @@ internal static partial class RemoteDispatch
         RemoteLog.GetInfo_Success(logger, methodName, typeof(T).Name, value.ToString());
     }
 
-    public static void GetInfo_Error(ILogger logger, InfoResponse response, int value, [CallerMemberName] string methodName = "")
+    public static GetInfoException GetInfo_Error(ILogger logger, InfoResponse response, int value, [CallerMemberName] string methodName = "")
     {
         RemoteLog.GetInfo_Error(logger, methodName, response.ToString(), value);
 
-        throw new GetInfoException(response, value);
+        return new GetInfoException(response, value);
     }
 }

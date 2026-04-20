@@ -17,17 +17,17 @@ internal static class GeneralDispatch
         GeneralLog.BitAdjust(logger, appBefore.ToString(), appAfter.ToString());
     }
 
-    public static void TypeNotSupported(ILogger logger, Type type, string paramName, Type[] supportedTypes, [CallerMemberName] string methodName = "")
+    public static TypeNotSupportedException TypeNotSupported(ILogger logger, Type type, string paramName, Type[] supportedTypes, [CallerMemberName] string methodName = "")
     {
         GeneralLog.TypeNotSupported(logger, type.Name, methodName, paramName, SupportedTypes.ListString(supportedTypes));
 
-        throw new TypeNotSupportedException(type, paramName, supportedTypes);
+        return new TypeNotSupportedException(type, paramName, supportedTypes);
     }
 
-    public static void CannotParseAsType(ILogger logger, string value, Type type, string paramName)
+    public static CannotParseAsTypeException CannotParseAsType(ILogger logger, string value, Type type, string paramName)
     {
         GeneralLog.CannotParseAsType(logger, value, type.Name);
 
-        throw new CannotParseAsTypeException(value, type, paramName);
+        return new CannotParseAsTypeException(value, type, paramName);
     }
 }

@@ -143,10 +143,10 @@ public sealed partial class Remote : IRemote
         using var scope = BeginMethodScope(methodName);
 
         if (_isDisposed)
-            RemoteDispatch.Guard_ObjectDisposed(_logger);
+            throw RemoteDispatch.Guard_ObjectDisposed(_logger);
 
         if (LoginStatus > requiredStatus)
-            RemoteDispatch.Guard_AccessDenied(_logger, LoginStatus);
+            throw RemoteDispatch.Guard_AccessDenied(_logger, LoginStatus);
     }
 
     private bool Retry(Func<bool> action, int timeoutMs = 1000, int sleepMs = 100, [CallerMemberName] string methodName = "")

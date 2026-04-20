@@ -31,11 +31,6 @@ internal static partial class RemoteDispatch
         RemoteLog.Logout_Start(logger);
     }
 
-    public static void Logout_AlreadyLoggedOut(ILogger logger)
-    {
-        RemoteLog.Method_Error(logger, nameof(Remote.Logout), nameof(LoginResponse.AlreadyLoggedOut));
-    }
-
     public static void Logout_Timeout(ILogger logger, LoginResponse lastResponse)
     {
         RemoteLog.Logout_Timeout(logger, lastResponse.ToString());
@@ -50,11 +45,11 @@ internal static partial class RemoteDispatch
         RemoteLog.Run_Start(logger, app.ToString());
     }
 
-    public static void Run_Error(ILogger logger, RunResponse response, App app)
+    public static RunException Run_Error(ILogger logger, RunResponse response, App app)
     {
         RemoteLog.Run_Error(logger, response.ToString(), app.ToString());
 
-        throw new RunException(response, app);
+        return new RunException(response, app);
     }
 
     #endregion

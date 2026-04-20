@@ -21,11 +21,11 @@ internal static partial class RemoteDispatch
         RemoteLog.GetParam_Success(logger, vmParam, value.ToString());
     }
 
-    public static void GetParam_Error<T>(ILogger logger, Response response, string vmParam, T value, Type expectedType)
+    public static GetParamException<T> GetParam_Error<T>(ILogger logger, Response response, string vmParam, T value, Type expectedType)
         where T : notnull
     {
         RemoteLog.GetParam_Error(logger, response.ToString(), vmParam, value.ToString(), expectedType.Name);
 
-        throw new GetParamException<T>(response, vmParam, value, expectedType);
+        return new GetParamException<T>(response, vmParam, value, expectedType);
     }
 }

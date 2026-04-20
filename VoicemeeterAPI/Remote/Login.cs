@@ -22,7 +22,7 @@ partial class Remote
         RemoteDispatch.Login_Start(_logger);
 
         if (LoggedIn)
-            RemoteDispatch.Method_Error(_logger, LoginResponse.AlreadyLoggedIn);
+            throw RemoteDispatch.Method_Error(_logger, LoginResponse.AlreadyLoggedIn);
 
         LoginStatus = _vmrApi.Login();
 
@@ -30,7 +30,7 @@ partial class Remote
         {
             case LoginResponse.Ok:
                 if (!WaitForRunning(timeoutMs, sleepMs))
-                    RemoteDispatch.Method_Error(_logger, LoginResponse.Timeout);
+                    throw RemoteDispatch.Method_Error(_logger, LoginResponse.Timeout);
 
                 RemoteDispatch.Method_Success(_logger);
                 break;
@@ -40,8 +40,7 @@ partial class Remote
                 break;
 
             default:
-                RemoteDispatch.Method_Error(_logger, LoginStatus);
-                break;
+                throw RemoteDispatch.Method_Error(_logger, LoginStatus);
         }
 
         var currentState = ConnectionState;
@@ -63,7 +62,7 @@ partial class Remote
         RemoteDispatch.Logout_Start(_logger);
 
         if (LoginStatus == LoginResponse.LoggedOut)
-            RemoteDispatch.Logout_AlreadyLoggedOut(_logger);
+            RemoteDispatch.Method_Error(_logger, LoginResponse.AlreadyLoggedOut);
 
         bool Attempt(out LoginResponse response)
         {
@@ -86,7 +85,7 @@ partial class Remote
             RemoteDispatch.Logout_Timeout(_logger, result);
 
         var currentState = ConnectionState;
-        if (_lastState != currentState)
+        if (_lastState != currentState && !nested)
             OnConnectionStateChanged(currentState);
 
         return LoginStatus;
@@ -121,12 +120,12 @@ partial class Remote
         var result = _vmrApi.RunVoicemeeter((int)appAdjusted);
 
         if (result != RunResponse.Ok)
-            RemoteDispatch.Run_Error(_logger, result, appAdjusted);
+            throw RemoteDispatch.Run_Error(_logger, result, appAdjusted);
 
         if (app <= App.Potatox64)
         {
             if (!WaitForRunning(timeoutMs, sleepMs))
-                RemoteDispatch.Run_Error(_logger, RunResponse.Timeout, appAdjusted);
+                throw RemoteDispatch.Run_Error(_logger, RunResponse.Timeout, appAdjusted);
 
             var currentState = ConnectionState;
             if (_lastState != currentState)
@@ -152,7 +151,7 @@ partial class Remote
     public void Run(string app, int timeoutMs = 2000, int sleepMs = 100)
     {
         if (!Enum.TryParse(app, true, out App a))
-            GeneralDispatch.CannotParseAsType(_logger, app, typeof(App), nameof(app));
+            throw GeneralDispatch.CannotParseAsType(_logger, app, typeof(App), nameof(app));
 
         Run(a, timeoutMs, sleepMs);
     }
@@ -176,10 +175,7 @@ partial class Remote
                 break;
             default:
                 using (BeginInstanceScope())
-                {
-                    GeneralDispatch.TypeNotSupported(_logger, typeof(T), nameof(app), SupportedTypes.RunTypes);
-                }
-                break;
+                    throw GeneralDispatch.TypeNotSupported(_logger, typeof(T), nameof(app), SupportedTypes.RunTypes);
         }
     }
 

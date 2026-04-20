@@ -16,12 +16,12 @@ internal static partial class RemoteDispatch
         RemoteLog.Method_Success(logger, methodName);
     }
 
-    public static void Method_Error<T>(ILogger logger, T response, [CallerMemberName] string methodName = "")
+    public static RemoteException<T> Method_Error<T>(ILogger logger, T response, [CallerMemberName] string methodName = "")
         where T : unmanaged
     {
         RemoteLog.Method_Error(logger, methodName, response.ToString());
 
-        throw new RemoteException<T>(response);
+        return new RemoteException<T>(response);
     }
 
     public static void YieldForSettle(ILogger logger)
@@ -62,18 +62,18 @@ internal static partial class RemoteDispatch
 
     #region Guard
 
-    public static void Guard_ObjectDisposed(ILogger logger)
+    public static ObjectDisposedException Guard_ObjectDisposed(ILogger logger)
     {
         RemoteLog.Guard_ObjectDisposed(logger);
 
-        throw new ObjectDisposedException(nameof(Remote));
+        return new ObjectDisposedException(nameof(Remote));
     }
 
-    public static void Guard_AccessDenied(ILogger logger, LoginResponse loginStatus)
+    public static AccessDeniedException Guard_AccessDenied(ILogger logger, LoginResponse loginStatus)
     {
         RemoteLog.Guard_AccessDenied(logger, loginStatus.ToString());
 
-        throw new AccessDeniedException(loginStatus);
+        return new AccessDeniedException(loginStatus);
     }
 
     #endregion
