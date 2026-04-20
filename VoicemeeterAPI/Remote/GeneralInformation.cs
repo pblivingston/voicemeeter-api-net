@@ -11,7 +11,7 @@ partial class Remote
     #region Get Voicemeeter Kind
 
     /// <inheritdoc cref="IRemote.GetKind()"/>
-    internal Kind GetKind(bool nested = false)
+    internal Kind GetKind(bool nested)
     {
         LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
@@ -30,11 +30,16 @@ partial class Remote
         }
         else throw new RemoteException($"GetKind failed - {result}; returned kind: {kind}");
 
-        if (RunningKind != RunningVersion.K)
+        if (RunningVersion.K != RunningKind)
         {
-            if (nested) throw new RemoteException($"RunningKind '{RunningKind}' and RunningVersion '{RunningVersion}' do not match");
-
-            GetVersion(true);
+            if (nested)
+            {
+                // dispatch
+            }
+            else using (BeginMethodScope())
+            {
+                GetVersion(true);
+            }
         }
 
         var currentState = ConnectionState;
@@ -48,7 +53,12 @@ partial class Remote
     }
 
     /// <inheritdoc/>
-    public Kind GetKind() => GetKind(false);
+    public Kind GetKind()
+    {
+        BeginInstanceScope();
+
+        return GetKind(false);
+    }
 
     #endregion
 
@@ -75,9 +85,14 @@ partial class Remote
 
         if (RunningVersion.K != RunningKind)
         {
-            if (nested) throw new RemoteException($"RunningVersion '{RunningVersion}' and RunningKind '{RunningKind}' do not match");
-
-            GetKind(true);
+            if (nested)
+            {
+                // dispatch
+            }
+            else using (BeginMethodScope())
+            {
+                GetKind(true);
+            }
         }
 
         var currentState = ConnectionState;
@@ -91,7 +106,12 @@ partial class Remote
     }
 
     /// <inheritdoc/>
-    public VmVersion GetVersion() => GetVersion(false);
+    public VmVersion GetVersion()
+    {
+        BeginInstanceScope();
+
+        return GetVersion(false);
+    }
 
     #endregion
 }

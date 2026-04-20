@@ -1,4 +1,4 @@
-using PBLivingston.VoicemeeterAPI.Exceptions;
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Utilities;
 
@@ -63,14 +63,13 @@ public class Run : MockRemote
     }
 
     [Fact]
-    public void ThrowsException_RemoteAccess_WhenLoginStatusLoggedOut()
+    public void ThrowsException_AccessDenied_WhenLoginStatusLoggedOut()
     {
         var app = (int)App.DeviceCheck;
 
-        var ex = Assert.Throws<RemoteAccessException>(() => Remote.Run(app));
+        var ex = Assert.Throws<AccessDeniedException>(() => Remote.Run(app));
 
         Assert.Multiple(
-            () => Assert.Equal("Run", ex.Method),
             () => Assert.Equal(LoginResponse.LoggedOut, ex.LoginStatus),
             () => MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Never)
         );
@@ -92,7 +91,7 @@ public class Run : MockRemote
     }
 
     [Fact]
-    public void App_Calls_ButtonsDirty_WhenAppIsMacroButtons()
+    public void App_Calls_IsButtonsDirty_WhenAppIsMacroButtons()
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
@@ -166,12 +165,13 @@ public class Run : MockRemote
     }
 
     [Fact]
-    public void String_ThrowsException_Argument_WhenInvalidString()
+    public void String_ThrowsException_CannotParseAsType_WhenInvalidString()
     {
-        var ex = Assert.Throws<ArgumentException>(() => Remote.Run("InvalidApp"));
+        var ex = Assert.Throws<CannotParseAsTypeException>(() => Remote.Run("InvalidApp"));
 
         Assert.Multiple(
-            () => Assert.Equal("app", ex.ParamName),
+            () => Assert.Equal("InvalidApp", ex.ActualValue),
+            () => Assert.Equal(typeof(App), ex.Type),
             () => MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never)
         );
     }
@@ -247,13 +247,11 @@ public class Run : MockRemote
     [Fact]
     public void Generic_ThrowsException_TypeNotSupported_WhenInvalidType()
     {
-        var ex = Assert.Throws<TypeNotSupportedException<float>>(() => ((IRemote)Remote).Run(10.0f));
+        var ex = Assert.Throws<TypeNotSupportedException>(() => ((IRemote)Remote).Run(10.0f));
 
         Assert.Multiple(
-            () => Assert.Equal("Run", ex.Method),
-            () => Assert.Equal("app", ex.Param),
             () => Assert.Equal(typeof(float), ex.Type),
-            () => Assert.Equal(SupportedTypes.RunTypes, ex.Supported),
+            () => Assert.Equal(SupportedTypes.RunTypes, ex.SupportedTypes),
             () => MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never)
         );
     }

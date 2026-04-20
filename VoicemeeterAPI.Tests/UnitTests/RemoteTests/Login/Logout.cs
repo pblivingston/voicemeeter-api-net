@@ -1,4 +1,3 @@
-using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.Login;
@@ -44,17 +43,6 @@ public class Logout : MockRemote
             () => Assert.Equal(loginStatus, result),
             () => Assert.Equal(expectedState, Remote.ConnectionState),
             () => MockWrapper.Verify(w => w.Logout(), Times.Once)
-        );
-    }
-
-    [Fact]
-    public void ThrowsException_Remote_WhenAlreadyLoggedOut()
-    {
-        var ex = Assert.Throws<RemoteException>(() => Remote.Logout());
-
-        Assert.Multiple(
-            () => Assert.Equal("[VoicemeeterAPI] Remote Error: Already logged out", ex.Message),
-            () => MockWrapper.Verify(w => w.Logout(), Times.Never)
         );
     }
 

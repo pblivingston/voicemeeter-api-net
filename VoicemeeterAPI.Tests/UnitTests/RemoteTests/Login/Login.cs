@@ -1,4 +1,4 @@
-using PBLivingston.VoicemeeterAPI.Exceptions;
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.Login;
@@ -53,11 +53,11 @@ public class Login : MockRemote
     [Theory]
     [InlineData(LoginResponse.AlreadyLoggedIn)]
     [InlineData(LoginResponse.NoClient)]
-    public void ThrowsException_Login_WhenLoginFails(LoginResponse expectedResponse)
+    public void ThrowsException_Remote_WhenLoginFails(LoginResponse expectedResponse)
     {
         MockWrapper.Setup(w => w.Login()).Returns(expectedResponse);
 
-        var ex = Assert.Throws<LoginException>(() => Remote.Login());
+        var ex = Assert.Throws<RemoteException<LoginResponse>>(() => Remote.Login());
 
         Assert.Multiple(
             () => Assert.Equal(expectedResponse, ex.Response),
@@ -66,7 +66,7 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void ThrowsException_Login_WhenWaitForRunningTimesOut()
+    public void ThrowsException_Remote_WhenWaitForRunningTimesOut()
     {
         var kind = (int)Kind.None;
         var version = 0;
@@ -75,7 +75,7 @@ public class Login : MockRemote
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.NoServer);
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.NoServer);
 
-        var ex = Assert.Throws<LoginException>(() => Remote.Login(timeoutMs: 10));
+        var ex = Assert.Throws<RemoteException<LoginResponse>>(() => Remote.Login(timeoutMs: 10));
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.Timeout, ex.Response),
@@ -91,16 +91,16 @@ public class Login : MockRemote
 
         MockLogin_Ok(kind, version);
 
-        var ex = Assert.Throws<RemoteException>(() => Remote.Login());
+        var ex = Assert.Throws<RemoteException<LoginResponse>>(() => Remote.Login());
 
         Assert.Multiple(
-            () => Assert.Equal($"[VoicemeeterAPI] Remote Error: Already logged in - LoginStatus: Ok", ex.Message),
+            () => Assert.Equal(LoginResponse.AlreadyLoggedIn, ex.Response),
             () => MockWrapper.Verify(w => w.Login(), Times.Once)
         );
     }
 
     [Fact]
-    public void ThrowsException_RemoteAccess_WhenLoginStatusUnknown()
+    public void ThrowsException_AccessDenied_WhenLoginStatusUnknown()
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
@@ -111,10 +111,9 @@ public class Login : MockRemote
 
         Remote.Logout(timeoutMs: 10);
 
-        var ex = Assert.Throws<RemoteAccessException>(() => Remote.Login());
+        var ex = Assert.Throws<AccessDeniedException>(() => Remote.Login());
 
         Assert.Multiple(
-            () => Assert.Equal("Login", ex.Method),
             () => Assert.Equal(LoginResponse.Unknown, ex.LoginStatus),
             () => MockWrapper.Verify(w => w.Login(), Times.Once)
         );

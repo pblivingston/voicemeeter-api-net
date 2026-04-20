@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using PBLivingston.VoicemeeterAPI.Types;
-using PBLivingston.VoicemeeterAPI.Messages;
-using PBLivingston.VoicemeeterAPI.Exceptions;
+using PBLivingston.VoicemeeterAPI.EventManagement;
 using PBLivingston.VoicemeeterAPI.Utilities;
+using System.Runtime.CompilerServices;
 
 namespace PBLivingston.VoicemeeterAPI;
 
@@ -15,12 +15,14 @@ partial class Remote
     /// <inheritdoc/>
     public LoginResponse Login(int timeoutMs = 2000, int sleepMs = 100)
     {
+        using var scope = BeginInstanceScope();
+
         LoginGuard(requiredStatus: LoginResponse.LoggedOut);
 
-        RemoteInfo.Write("Logging in...");
+        RemoteDispatch.Login_Start(_logger);
 
         if (LoggedIn)
-            throw new RemoteException($"Already logged in - LoginStatus: {LoginStatus}");
+            RemoteDispatch.Method_Error(_logger, LoginResponse.AlreadyLoggedIn);
 
         LoginStatus = _vmrApi.Login();
 
@@ -28,25 +30,23 @@ partial class Remote
         {
             case LoginResponse.Ok:
                 if (!WaitForRunning(timeoutMs, sleepMs))
-                    throw new LoginException(LoginResponse.Timeout);
+                    RemoteDispatch.Method_Error(_logger, LoginResponse.Timeout);
 
-                RemoteInfo.Write("Login successful");
+                RemoteDispatch.Method_Success(_logger);
                 break;
 
             case LoginResponse.VoicemeeterNotRunning:
-                RemoteWarning.Write("Login successful but Voicemeeter is not running");
+                RemoteDispatch.Login_VmNotRunning(_logger);
                 break;
 
             default:
-                throw new LoginException(LoginStatus);
+                RemoteDispatch.Method_Error(_logger, LoginStatus);
+                break;
         }
 
         var currentState = ConnectionState;
         if (_lastState != currentState)
-        {
-            // dispatch
-            _lastState = currentState;
-        }
+            OnConnectionStateChanged(currentState);
 
         return LoginStatus;
     }
@@ -55,15 +55,15 @@ partial class Remote
 
     #region Logout
 
-    /// <inheritdoc/>
-    public LoginResponse Logout(int timeoutMs = 1000, int sleepMs = 100)
+    /// <inheritdoc cref="IRemote.Logout(int, int)"/>
+    internal LoginResponse Logout(bool nested, int timeoutMs = 1000, int sleepMs = 100)
     {
         LoginGuard(requiredStatus: LoginResponse.Unknown);
 
-        RemoteInfo.Write("Logging out...");
+        RemoteDispatch.Logout_Start(_logger);
 
         if (LoginStatus == LoginResponse.LoggedOut)
-            throw new RemoteException("Already logged out");
+            RemoteDispatch.Logout_AlreadyLoggedOut(_logger);
 
         bool Attempt(out LoginResponse response)
         {
@@ -74,7 +74,7 @@ partial class Remote
 
             if (LoginStatus == LoginResponse.LoggedOut)
             {
-                RemoteInfo.Write("Logout successful");
+                RemoteDispatch.Method_Success(_logger, nameof(Logout));
                 return true;
             }
 
@@ -83,16 +83,21 @@ partial class Remote
 
         var result = LoginResponse.Unknown;
         if (!Retry(() => Attempt(out result), timeoutMs, sleepMs))
-            RemoteWarning.Write($"Logout timed out; last result: {result}");
+            RemoteDispatch.Logout_Timeout(_logger, result);
 
         var currentState = ConnectionState;
         if (_lastState != currentState)
-        {
-            // dispatch
-            _lastState = currentState;
-        }
+            OnConnectionStateChanged(currentState);
 
         return LoginStatus;
+    }
+
+    /// <inheritdoc/>
+    public LoginResponse Logout(int timeoutMs = 1000, int sleepMs = 100)
+    {
+        using var scope = BeginInstanceScope();
+
+        return Logout(false, timeoutMs, sleepMs);
     }
 
     #endregion
@@ -100,51 +105,56 @@ partial class Remote
     #region Run Voicemeeter
 
     /// <inheritdoc cref="IRemote.Run{T}(T, int, int)"/>
-    public void Run(int app, int timeoutMs = 2000, int sleepMs = 100)
+    public void Run(App app, int timeoutMs = 2000, int sleepMs = 100)
     {
+        using var scope = BeginInstanceScope();
+
         LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
-        app = AppUtils.BitAdjust(app);
+        var appAdjusted = app.BitAdjust();
 
-        RemoteInfo.Write($"Running application: {(App)app}...");
+        if (appAdjusted != app)
+            GeneralDispatch.BitAdjust(_logger, app, appAdjusted);
 
-        var result = _vmrApi.RunVoicemeeter(app);
+        RemoteDispatch.Run_Start(_logger, appAdjusted);
 
-        if (result != RunResponse.Ok) throw new RunException(result, (App)app);
+        var result = _vmrApi.RunVoicemeeter((int)appAdjusted);
 
-        if (app <= (int)App.Potatox64)
+        if (result != RunResponse.Ok)
+            RemoteDispatch.Run_Error(_logger, result, appAdjusted);
+
+        if (app <= App.Potatox64)
         {
             if (!WaitForRunning(timeoutMs, sleepMs))
-                throw new RunException(RunResponse.Timeout, (App)app);
+                RemoteDispatch.Run_Error(_logger, RunResponse.Timeout, appAdjusted);
 
             var currentState = ConnectionState;
             if (_lastState != currentState)
-            {
-                // dispatch
-                _lastState = currentState;
-            }
+                OnConnectionStateChanged(currentState);
         }
 
-
-        if (app == (int)App.MacroButtons)
+        if (app == App.MacroButtons)
+        {
+            RemoteDispatch.YieldForSettle(_logger);
             while (IsButtonsDirty()) Thread.Yield();
+        }
     }
 
     /// <inheritdoc cref="IRemote.Run{T}(T, int, int)"/>
-    public void Run(App app, int timeoutMs = 2000, int sleepMs = 100)
-        => Run((int)app, timeoutMs, sleepMs);
+    public void Run(int app, int timeoutMs = 2000, int sleepMs = 100)
+        => Run((App)app, timeoutMs, sleepMs);
 
     /// <inheritdoc cref="IRemote.Run{T}(T, int, int)"/>
     public void Run(Kind kind, int timeoutMs = 2000, int sleepMs = 100)
-        => Run((int)kind, timeoutMs, sleepMs);
+        => Run(kind.ToApp(), timeoutMs, sleepMs);
 
     /// <inheritdoc cref="IRemote.Run{T}(T, int, int)"/>
     public void Run(string app, int timeoutMs = 2000, int sleepMs = 100)
     {
         if (!Enum.TryParse(app, true, out App a))
-            throw new ArgumentException($"Invalid app: {app}", nameof(app));
+            GeneralDispatch.CannotParseAsType(_logger, app, typeof(App), nameof(app));
 
-        Run((int)a, timeoutMs, sleepMs);
+        Run(a, timeoutMs, sleepMs);
     }
 
     /// <inheritdoc/>
@@ -165,7 +175,11 @@ partial class Remote
                 Run(s, timeoutMs, sleepMs);
                 break;
             default:
-                throw new TypeNotSupportedException<T>(nameof(app), SupportedTypes.RunTypes);
+                using (BeginInstanceScope())
+                {
+                    GeneralDispatch.TypeNotSupported(_logger, typeof(T), nameof(app), SupportedTypes.RunTypes);
+                }
+                break;
         }
     }
 
@@ -173,9 +187,11 @@ partial class Remote
 
     #region Helpers
 
-    private bool WaitForRunning(int timeoutMs = 2000, int sleepMs = 100)
+    private bool WaitForRunning(int timeoutMs = 2000, int sleepMs = 100, [CallerMemberName] string methodName = "")
     {
-        RemoteInfo.Write("Waiting for running Voicemeeter...");
+        using var scope = BeginMethodScope(methodName);
+
+        RemoteDispatch.WaitForRunning_Start(_logger);
 
         bool Attempt()
         {
@@ -184,7 +200,7 @@ partial class Remote
 
             if (kind.IsValid() && version.IsValid() && kind == version.K)
             {
-                RemoteInfo.Write($"Voicemeeter {kind} v{version} is running");
+                RemoteDispatch.WaitForRunning_Detected(_logger, kind, version);
                 return true;
             }
 
@@ -193,11 +209,12 @@ partial class Remote
 
         if (Retry(Attempt, timeoutMs, sleepMs))
         {
+            RemoteDispatch.YieldForSettle(_logger);
             while (IsParamsDirty() || IsButtonsDirty()) Thread.Yield();
             return true;
         }
 
-        RemoteWarning.Write("Timed out waiting for Voicemeeter");
+        RemoteDispatch.WaitForRunning_Timeout(_logger);
         return false;
     }
 

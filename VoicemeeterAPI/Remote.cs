@@ -8,7 +8,7 @@ using AtgDev.Voicemeeter;
 using AtgDev.Voicemeeter.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using PBLivingston.VoicemeeterAPI.Exceptions;
+using PBLivingston.VoicemeeterAPI.EventManagement;
 using PBLivingston.VoicemeeterAPI.Types;
 
 namespace PBLivingston.VoicemeeterAPI;
@@ -101,41 +101,94 @@ public sealed partial class Remote : IRemote
         => FromAtgWrapper(new RemoteApiWrapper(dllPath), logger);
 
     /// <summary>
-    ///   Calls <see cref="DllWrapperBase.Dispose()"/> when the <see cref="Remote"/> instance is disposed.
+    ///   Calls <see cref="DllWrapperBase.Dispose()"/>.
     /// </summary>
+    /// <remarks>
+    ///   Calls <see cref="Logout(int, int)"/> if still logged in.
+    /// </remarks>
     public void Dispose()
     {
-        if (_isDisposed) return;
+        using var scope = BeginInstanceScope();
 
-        if (LoggedIn) Logout();
+        if (_isDisposed)
+        {
+            RemoteDispatch.Dispose_AlreadyDisposed(_logger);
+            return;
+        }
+
+        if (LoggedIn)
+        {
+            RemoteDispatch.Dispose_LoggedIn(_logger, LoginStatus);
+
+            using (BeginMethodScope())
+            {
+                Logout(timeoutMs: 0, nested: true);
+            }
+        }
+
+        RemoteDispatch.Dispose_Start(_logger);
 
         _vmrApi.Dispose();
 
+        RemoteDispatch.Dispose_Success(_logger);
         _isDisposed = true;
     }
 
     private IDisposable? BeginInstanceScope() => _logger.BeginScope("Instance: {GUID}", _remoteGuid);
 
-    private IDisposable? BeginMethodScope(string methodName) => _logger.BeginScope("Method: {MethodName}", methodName);
+    private IDisposable? BeginMethodScope([CallerMemberName] string methodName = "") => _logger.BeginScope("Method: {MethodName}", methodName);
 
     private void LoginGuard(LoginResponse requiredStatus = LoginResponse.Ok, [CallerMemberName] string methodName = "")
     {
+        using var scope = BeginMethodScope(methodName);
+
         if (_isDisposed)
-            throw new ObjectDisposedException(nameof(Remote), $"Called method: {methodName}");
+            RemoteDispatch.Guard_ObjectDisposed(_logger);
 
         if (LoginStatus > requiredStatus)
-            throw new RemoteAccessException(methodName, LoginStatus);
+            RemoteDispatch.Guard_AccessDenied(_logger, LoginStatus);
     }
 
-    private bool Retry(Func<bool> action, int timeoutMs = 1000, int sleepMs = 100)
+    private bool Retry(Func<bool> action, int timeoutMs = 1000, int sleepMs = 100, [CallerMemberName] string methodName = "")
     {
+        using var scope = BeginMethodScope(methodName);
+
+        RemoteDispatch.Retry_Start(_logger);
+
+        var attempt = 1;
         var timeout = TimeSpan.FromMilliseconds(timeoutMs);
         var stopwatch = Stopwatch.StartNew();
-        while (stopwatch.Elapsed < timeout)
+        do
         {
-            if (action()) return true;
+            if (action())
+            {
+                RemoteDispatch.Retry_Success(_logger, attempt);
+                return true;
+            }
+
+            RemoteDispatch.Retry_Attempt(_logger, attempt++);
+
             Thread.Sleep(sleepMs);
         }
+        while (stopwatch.Elapsed < timeout);
+
+        RemoteDispatch.Retry_Timeout(_logger, attempt);
         return false;
+    }
+
+    private void OnConnectionStateChanged(ConnectionStateEventArgs currentState, [CallerMemberName] string methodName = "")
+    {
+        RemoteDispatch.ConnectionStateChanged(_logger, this, ConnectionStateChanged, _lastState, currentState, methodName);
+        _lastState = currentState;
+    }
+
+    private void OnParamsDirty()
+    {
+        RemoteDispatch.Dirty_Dirty(_logger, this, ParamsDirty, nameof(IsParamsDirty));
+    }
+
+    private void OnButtonsDirty()
+    {
+        RemoteDispatch.Dirty_Dirty(_logger, this, ButtonsDirty, nameof(IsButtonsDirty));
     }
 }
