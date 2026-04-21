@@ -15,6 +15,17 @@ public class AccessDeniedException(LoginResponse loginStatus)
     public LoginResponse LoginStatus { get; } = loginStatus;
 }
 
+public class KindMismatchException(Kind returnedKind, VmVersion returnedVersion)
+    : RemoteException($"""
+    Kind and version do not match.
+    GetKind returned: {returnedKind} ({(int)returnedKind})
+    GetVersion returned: {returnedVersion} ({returnedVersion.Kind})
+    """)
+{
+    public Kind ReturnedKind { get; } = returnedKind;
+    public VmVersion ReturnedVersion { get; } = returnedVersion;
+}
+
 public class RemoteException<T> : RemoteException
     where T : unmanaged
 {
@@ -46,7 +57,11 @@ public class GetInfoException(InfoResponse response, int returnedValue)
 }
 
 public class GetParamException<T>(Response response, string vmParam, T returnedValue, Type expectedType)
-    : RemoteException<Response>(response, $"Requested Voicemeeter parameter: {vmParam}\r\nReturned value: {returnedValue}\r\nExpected type: {expectedType}")
+    : RemoteException<Response>(response, $"""
+    Requested Voicemeeter parameter: {vmParam}
+    Returned value: {returnedValue}
+    Expected type: {expectedType}
+    """)
     where T : notnull
 {
     public string VmParam { get; } = vmParam;

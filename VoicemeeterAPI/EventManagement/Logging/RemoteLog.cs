@@ -7,6 +7,8 @@ namespace PBLivingston.VoicemeeterAPI.EventManagement.Logging;
 
 internal static partial class RemoteLog
 {
+    #region Methods
+
     [LoggerMessage(
         EventId = (int)Event.Method_Success,
         EventName = nameof(Event.Method_Success),
@@ -31,13 +33,27 @@ internal static partial class RemoteLog
     )]
     public static partial void YieldForSettle(ILogger logger);
 
+    #endregion
+
+    #region Connection State
+
     [LoggerMessage(
-        EventId = (int)Event.ConnectionStateChanged,
-        EventName = nameof(Event.ConnectionStateChanged),
+        EventId = (int)Event.ConnectionState_Changed,
+        EventName = nameof(Event.ConnectionState_Changed),
         Level = LogLevel.Information,
-        Message = "ConnectionState changed during {MethodName}. Last state - {LastStateMembers}. Current state - {CurrentStateMembers}."
+        Message = "Connection State changed during {MethodName}. Last state - {LastStateMembers}. Current state - {CurrentStateMembers}."
     )]
-    public static partial void ConnectionStateChanged(ILogger logger, string methodName, string lastStateMembers, string currentStateMembers);
+    public static partial void ConnectionState_Changed(ILogger logger, string methodName, string lastStateMembers, string currentStateMembers);
+
+    [LoggerMessage(
+        EventId = (int)Event.ConnectionState_KindMismatch,
+        EventName = nameof(Event.ConnectionState_KindMismatch),
+        Level = LogLevel.Critical,
+        Message = "Kind and version did not match when getting Connection State. GetKind returned: {ReturnedKind}; GetVersion returned: {ReturnedVersion}"
+    )]
+    public static partial void ConnectionState_KindMismatch(ILogger logger, string returnedKind, string returnedVersion);
+
+    #endregion
 
     #region Dispose
 

@@ -21,33 +21,37 @@ partial class Remote
 
         RemoteDispatch.Login_Start(_logger);
 
-        if (LoggedIn)
+        if (_lastState.LoggedIn)
             throw RemoteDispatch.Method_Error(_logger, LoginResponse.AlreadyLoggedIn);
 
-        LoginStatus = _vmrApi.Login();
+        _loginStatus = _vmrApi.Login();
 
-        switch (LoginStatus)
+        ConnectionStateEventArgs state;
+        switch (_loginStatus)
         {
             case LoginResponse.Ok:
-                if (!WaitForRunning(timeoutMs, sleepMs))
+                if (!WaitForRunning(out Kind kind, out VmVersion version, timeoutMs, sleepMs))
                     throw RemoteDispatch.Method_Error(_logger, LoginResponse.Timeout);
+
+                state = new(_loginStatus, kind, version);
 
                 RemoteDispatch.Method_Success(_logger);
                 break;
 
             case LoginResponse.VoicemeeterNotRunning:
+                state = new(_loginStatus, Kind.None, default);
+
                 RemoteDispatch.Login_VmNotRunning(_logger);
                 break;
 
             default:
-                throw RemoteDispatch.Method_Error(_logger, LoginStatus);
+                throw RemoteDispatch.Method_Error(_logger, _loginStatus);
         }
 
-        var currentState = ConnectionState;
-        if (_lastState != currentState)
-            OnConnectionStateChanged(currentState);
+        if (state != _lastState)
+            OnConnectionStateChanged(state);
 
-        return LoginStatus;
+        return _loginStatus;
     }
 
     #endregion
@@ -61,34 +65,37 @@ partial class Remote
 
         RemoteDispatch.Logout_Start(_logger);
 
-        if (LoginStatus == LoginResponse.LoggedOut)
-            RemoteDispatch.Method_Error(_logger, LoginResponse.AlreadyLoggedOut);
-
-        bool Attempt(out LoginResponse response)
+        if (_loginStatus == LoginResponse.LoggedOut)
         {
-            response = _vmrApi.Logout();
-
-            LoginStatus = response is LoginResponse.Ok
-                ? LoginResponse.LoggedOut : LoginResponse.Unknown;
-
-            if (LoginStatus == LoginResponse.LoggedOut)
-            {
-                RemoteDispatch.Method_Success(_logger, nameof(Logout));
-                return true;
-            }
-
-            return false;
+            RemoteDispatch.Method_Error(_logger, LoginResponse.AlreadyLoggedOut);
+            return _loginStatus;
         }
 
-        var result = LoginResponse.Unknown;
-        if (!Retry(() => Attempt(out result), timeoutMs, sleepMs))
-            RemoteDispatch.Logout_Timeout(_logger, result);
+        (LoginResponse, bool) Attempt()
+        {
+            var result = _vmrApi.Logout();
 
-        var currentState = ConnectionState;
-        if (_lastState != currentState && !nested)
-            OnConnectionStateChanged(currentState);
+            _loginStatus = result is LoginResponse.Ok
+                ? LoginResponse.LoggedOut : LoginResponse.Unknown;
 
-        return LoginStatus;
+            if (_loginStatus == LoginResponse.LoggedOut)
+            {
+                RemoteDispatch.Method_Success(_logger, nameof(Logout));
+                return (result, true);
+            }
+
+            return (result, false);
+        }
+
+        (LoginResponse response, bool success) = Retry(Attempt, timeoutMs, sleepMs);
+        if (!success)
+            RemoteDispatch.Logout_Timeout(_logger, response);
+
+        ConnectionStateEventArgs state = new(_loginStatus, _lastState.RunningKind, _lastState.RunningVersion);
+        if (!nested && state != _lastState)
+            OnConnectionStateChanged(state);
+
+        return _loginStatus;
     }
 
     /// <inheritdoc/>
@@ -124,12 +131,12 @@ partial class Remote
 
         if (app <= App.Potatox64)
         {
-            if (!WaitForRunning(timeoutMs, sleepMs))
+            if (!WaitForRunning(out Kind kind, out VmVersion version, timeoutMs, sleepMs))
                 throw RemoteDispatch.Run_Error(_logger, RunResponse.Timeout, appAdjusted);
 
-            var currentState = ConnectionState;
-            if (_lastState != currentState)
-                OnConnectionStateChanged(currentState);
+            ConnectionStateEventArgs state = new(_loginStatus, kind, version);
+            if (state != _lastState)
+                OnConnectionStateChanged(state);
         }
 
         if (app == App.MacroButtons)
@@ -183,27 +190,28 @@ partial class Remote
 
     #region Helpers
 
-    private bool WaitForRunning(int timeoutMs = 2000, int sleepMs = 100, [CallerMemberName] string methodName = "")
+    private bool WaitForRunning(out Kind kind, out VmVersion version, int timeoutMs = 2000, int sleepMs = 100, [CallerMemberName] string methodName = "")
     {
         using var scope = BeginMethodScope(methodName);
 
         RemoteDispatch.WaitForRunning_Start(_logger);
 
-        bool Attempt()
+        ((Kind, VmVersion), bool) Attempt()
         {
-            var kind = GetKind(true);
-            var version = GetVersion(true);
+            var k = GetKind(true);
+            var v = GetVersion(true);
 
-            if (kind.IsValid() && version.IsValid() && kind == version.K)
+            if (k.IsValid() && v.IsValid() && k == v.K)
             {
-                RemoteDispatch.WaitForRunning_Detected(_logger, kind, version);
-                return true;
+                RemoteDispatch.WaitForRunning_Detected(_logger, k, v);
+                return ((k, v), true);
             }
 
-            return false;
+            return ((k, v), false);
         }
 
-        if (Retry(Attempt, timeoutMs, sleepMs))
+        ((kind, version), bool success) = Retry(Attempt, timeoutMs, sleepMs);
+        if (success)
         {
             RemoteDispatch.YieldForSettle(_logger);
             while (IsParamsDirty() || IsButtonsDirty()) Thread.Yield();

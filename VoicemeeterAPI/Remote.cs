@@ -36,22 +36,8 @@ public sealed partial class Remote : IRemote
     private readonly ILogger<Remote> _logger;
     private readonly Guid _remoteGuid = new();
     private bool _isDisposed = false;
+    private LoginResponse _loginStatus = LoginResponse.LoggedOut;
     private ConnectionStateEventArgs _lastState = new(LoginResponse.LoggedOut, Kind.None, default);
-
-    /// <inheritdoc/>
-    public LoginResponse LoginStatus { get; private set; } = LoginResponse.LoggedOut;
-    /// <inheritdoc/>
-    public bool LoggedIn => LoginStatus < LoginResponse.LoggedOut;
-    /// <inheritdoc/>
-    public bool Connected => LoginStatus == LoginResponse.Ok;
-
-    /// <inheritdoc/>
-    public Kind RunningKind { get; private set; } = Kind.None;
-    /// <inheritdoc/>
-    public VmVersion RunningVersion { get; private set; } = default;
-
-    /// <inheritdoc/>
-    public ConnectionStateEventArgs ConnectionState => new(LoginStatus, RunningKind, RunningVersion);
 
     /// <inheritdoc/>
     public event EventHandler<ConnectionStateEventArgs>? ConnectionStateChanged;
@@ -100,6 +86,26 @@ public sealed partial class Remote : IRemote
     public Remote FromDllPath(string dllPath, ILogger<Remote>? logger = null)
         => FromAtgWrapper(new RemoteApiWrapper(dllPath), logger);
 
+    /// <inheritdoc/>
+    public ConnectionStateEventArgs GetConnectionState()
+    {
+        if (!_lastState.LoggedIn)
+            return _lastState;
+
+        var kind = GetKind(true);
+        var version = GetVersion(true);
+
+        if (kind != version.K)
+            throw RemoteDispatch.ConnectionState_KindMismatch(_logger, kind, version);
+
+        ConnectionStateEventArgs state = new(_loginStatus, kind, version);
+
+        if (state != _lastState)
+            OnConnectionStateChanged(state);
+
+        return state;
+    }
+
     /// <summary>
     ///   Calls <see cref="DllWrapperBase.Dispose()"/>.
     /// </summary>
@@ -116,9 +122,9 @@ public sealed partial class Remote : IRemote
             return;
         }
 
-        if (LoggedIn)
+        if (_lastState.LoggedIn)
         {
-            RemoteDispatch.Dispose_LoggedIn(_logger, LoginStatus);
+            RemoteDispatch.Dispose_LoggedIn(_logger, _loginStatus);
 
             using (BeginMethodScope())
             {
@@ -145,8 +151,8 @@ public sealed partial class Remote : IRemote
         if (_isDisposed)
             throw RemoteDispatch.Guard_ObjectDisposed(_logger);
 
-        if (LoginStatus > requiredStatus)
-            throw RemoteDispatch.Guard_AccessDenied(_logger, LoginStatus);
+        if (_loginStatus > requiredStatus)
+            throw RemoteDispatch.Guard_AccessDenied(_logger, _loginStatus);
     }
 
     private bool Retry(Func<bool> action, int timeoutMs = 1000, int sleepMs = 100, [CallerMemberName] string methodName = "")
@@ -176,9 +182,39 @@ public sealed partial class Remote : IRemote
         return false;
     }
 
+    private (T LastResult, bool Success) Retry<T>(Func<(T Result, bool Success)> action, int timeoutMs = 1000, int sleepMs = 100, [CallerMemberName] string methodName = "")
+    {
+        using var scope = BeginMethodScope(methodName);
+
+        RemoteDispatch.Retry_Start(_logger);
+
+        (T, bool Success) res;
+        var attempt = 1;
+        var timeout = TimeSpan.FromMilliseconds(timeoutMs);
+        var stopwatch = Stopwatch.StartNew();
+        do
+        {
+            res = action();
+
+            if (res.Success)
+            {
+                RemoteDispatch.Retry_Success(_logger, attempt);
+                return res;
+            }
+
+            RemoteDispatch.Retry_Attempt(_logger, attempt++);
+
+            Thread.Sleep(sleepMs);
+        }
+        while (stopwatch.Elapsed < timeout);
+
+        RemoteDispatch.Retry_Timeout(_logger, attempt);
+        return res;
+    }
+
     private void OnConnectionStateChanged(ConnectionStateEventArgs currentState, [CallerMemberName] string methodName = "")
     {
-        RemoteDispatch.ConnectionStateChanged(_logger, this, ConnectionStateChanged, _lastState, currentState, methodName);
+        RemoteDispatch.ConnectionState_Changed(_logger, this, ConnectionStateChanged, _lastState, currentState, methodName);
         _lastState = currentState;
     }
 

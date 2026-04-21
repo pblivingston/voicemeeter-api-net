@@ -28,7 +28,7 @@ public class Login : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(loginStatus, result),
-            () => Assert.Equal(expectedState, Remote.ConnectionState),
+            () => Assert.Equal(expectedState, Remote.GetConnectionState()),
             () => MockWrapper.Verify(w => w.Login(), Times.Once)
         );
     }
@@ -36,16 +36,20 @@ public class Login : MockRemote
     [Fact]
     public void UpdatesConnectionState_VoicemeeterNotRunning_WhenVoicemeeterNotRunning()
     {
+        var kind = (int)Kind.None;
+        var version = 0x0000_0000;
         var loginStatus = LoginResponse.VoicemeeterNotRunning;
         var expectedState = new ConnectionStateEventArgs(loginStatus, Kind.None, default);
 
         MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
+        MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.NoServer);
+        MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.NoServer);
 
         var result = Remote.Login();
 
         Assert.Multiple(
             () => Assert.Equal(loginStatus, result),
-            () => Assert.Equal(expectedState, Remote.ConnectionState),
+            () => Assert.Equal(expectedState, Remote.GetConnectionState()),
             () => MockWrapper.Verify(w => w.Login(), Times.Once)
         );
     }

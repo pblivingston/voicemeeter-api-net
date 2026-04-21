@@ -10,18 +10,16 @@ internal static partial class RemoteLog
     [LoggerMessage(
         EventId = (int)Event.GetInfo_Start,
         EventName = nameof(Event.GetInfo_Start),
-        Level = LogLevel.Trace,
         Message = "Getting running {InfoType}..."
     )]
-    public static partial void GetInfo_Start(ILogger logger, string infoType);
+    public static partial void GetInfo_Start(ILogger logger, LogLevel level, string infoType);
 
     [LoggerMessage(
         EventId = (int)Event.GetInfo_Success,
         EventName = nameof(Event.GetInfo_Success),
-        Level = LogLevel.Trace,
         Message = "{MethodName} successful. Returned {InfoType}: {ValueString}"
     )]
-    public static partial void GetInfo_Success(ILogger logger, string methodName, string infoType, string valueString);
+    public static partial void GetInfo_Success(ILogger logger, LogLevel level, string methodName, string infoType, string valueString);
 
     [LoggerMessage(
         EventId = (int)Event.GetInfo_Error,
@@ -30,4 +28,11 @@ internal static partial class RemoteLog
         Message = "{MethodName} failed. Response: {Response}; Returned value: {Value}"
     )]
     public static partial void GetInfo_Error(ILogger logger, string methodName, string response, int value);
+
+    [LoggerMessage(
+        EventId = (int)Event.GetInfo_StateMismatch,
+        EventName = nameof(Event.GetInfo_StateMismatch),
+        Message = "{InfoType} did not match last Connection State. Recommend calling GetConnectionState. Last {InfoType}: {LastValue}"
+    )]
+    public static partial void GetInfo_StateMismatch(ILogger logger, LogLevel level, string infoType, string lastValue);
 }

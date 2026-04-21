@@ -17,9 +17,11 @@ internal enum Event
     Method_Success = 1000, // info
     Method_Error, // error + throw
     YieldForSettle, // debug
-    ConnectionStateChanged, // info
 
-    Dispose_Start = 1010, // debug
+    ConnectionState_Changed = 1040, // info
+    ConnectionState_KindMismatch, // trace
+
+    Dispose_Start = 1050, // debug
     Dispose_LoggedIn, // debug
     Dispose_AlreadyDisposed, // error
     Dispose_Success, // debug
@@ -51,9 +53,10 @@ internal enum Event
 
     // 1200-1299 Remote - General Information
 
-    GetInfo_Start = 1200, // trace
-    GetInfo_Success, // trace
+    GetInfo_Start = 1200, // trace/info
+    GetInfo_Success, // trace/info
     GetInfo_Error, // error + throw
+    GetInfo_StateMismatch, // trace/warning
 
 
     // 1300-1399 Remote - Get Parameters

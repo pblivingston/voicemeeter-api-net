@@ -11,15 +11,15 @@ namespace PBLivingston.VoicemeeterAPI.EventManagement;
 
 internal static partial class RemoteDispatch
 {
-    public static void GetInfo_Start(ILogger logger, Type infoType)
+    public static void GetInfo_Start(ILogger logger, LogLevel level, Type infoType)
     {
-        RemoteLog.GetInfo_Start(logger, infoType.Name);
+        RemoteLog.GetInfo_Start(logger, level, infoType.Name);
     }
 
-    public static void GetInfo_Success<T>(ILogger logger, T value, [CallerMemberName] string methodName = "")
+    public static void GetInfo_Success<T>(ILogger logger, LogLevel level, T value, [CallerMemberName] string methodName = "")
         where T : unmanaged
     {
-        RemoteLog.GetInfo_Success(logger, methodName, typeof(T).Name, value.ToString());
+        RemoteLog.GetInfo_Success(logger, level, methodName, typeof(T).Name, value.ToString());
     }
 
     public static GetInfoException GetInfo_Error(ILogger logger, InfoResponse response, int value, [CallerMemberName] string methodName = "")
@@ -27,5 +27,11 @@ internal static partial class RemoteDispatch
         RemoteLog.GetInfo_Error(logger, methodName, response.ToString(), value);
 
         return new GetInfoException(response, value);
+    }
+
+    public static void GetInfo_StateMismatch<T>(ILogger logger, LogLevel level, T lastValue)
+        where T : unmanaged
+    {
+        RemoteLog.GetInfo_StateMismatch(logger, level, typeof(T).Name, lastValue.ToString());
     }
 }

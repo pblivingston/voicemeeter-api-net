@@ -11,6 +11,8 @@ namespace PBLivingston.VoicemeeterAPI.EventManagement;
 
 internal static partial class RemoteDispatch
 {
+    #region Methods
+
     public static void Method_Success(ILogger logger, [CallerMemberName] string methodName = "")
     {
         RemoteLog.Method_Success(logger, methodName);
@@ -29,12 +31,25 @@ internal static partial class RemoteDispatch
         RemoteLog.YieldForSettle(logger);
     }
 
-    public static void ConnectionStateChanged(ILogger logger, Remote sender, EventHandler<ConnectionStateEventArgs>? eventTrigger, ConnectionStateEventArgs lastState, ConnectionStateEventArgs currentState, string methodName)
+    #endregion
+
+    #region Connection State
+
+    public static void ConnectionState_Changed(ILogger logger, Remote sender, EventHandler<ConnectionStateEventArgs>? eventTrigger, ConnectionStateEventArgs lastState, ConnectionStateEventArgs currentState, string methodName)
     {
-        RemoteLog.ConnectionStateChanged(logger, methodName, lastState.MemberString, currentState.MemberString);
+        RemoteLog.ConnectionState_Changed(logger, methodName, lastState.MemberString, currentState.MemberString);
 
         eventTrigger?.Invoke(sender, currentState);
     }
+
+    public static KindMismatchException ConnectionState_KindMismatch(ILogger logger, Kind returnedKind, VmVersion returnedVersion)
+    {
+        RemoteLog.ConnectionState_KindMismatch(logger, returnedKind.ToString(), returnedVersion.ToString());
+
+        return new KindMismatchException(returnedKind, returnedVersion);
+    }
+
+    #endregion
 
     #region Dispose
 

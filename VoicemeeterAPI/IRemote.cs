@@ -13,48 +13,6 @@ namespace PBLivingston.VoicemeeterAPI;
 public interface IRemote : IDisposable
 {
     /// <summary>
-    ///   Returns the current login status of the <see cref="IRemote"/> instance.
-    /// </summary>
-    /// <remarks>
-    ///   Initially set to <see cref="LoginResponse.LoggedOut"/> until a successful login attempt is made.
-    /// </remarks>
-    LoginResponse LoginStatus { get; }
-
-    /// <summary>
-    ///   Simplifies <see cref="LoginStatus"/> checks.
-    /// </summary>
-    /// <remarks>
-    ///   `true` if <see cref="LoginStatus"/> is <see cref="LoginResponse.Ok"/> or <see cref="LoginResponse.VoicemeeterNotRunning"/>, otherwise `false`.
-    /// </remarks>
-    bool LoggedIn { get; }
-
-    /// <summary>
-    ///   Simplifies <see cref="LoginStatus"/> checks.
-    /// </summary>
-    /// <remarks>
-    ///   `true` if <see cref="LoginStatus"/> is <see cref="LoginResponse.Ok"/>, otherwise `false`.
-    /// </remarks>
-    bool Connected { get; }
-
-    /// <summary>
-    ///   Returns the currently running Voicemeeter Kind.
-    /// </summary>
-    /// <remarks>
-    ///   Standard, Banana, Potato
-    /// </remarks>
-    Kind RunningKind { get; }
-
-    /// <summary>
-    ///   Returns the currently running Voicemeeter version.
-    /// </summary>
-    VmVersion RunningVersion { get; }
-
-    /// <summary>
-    ///   Contains the current <see cref="LoginStatus"/>, <see cref="RunningKind"/>, and <see cref="RunningVersion"/>.
-    /// </summary>
-    ConnectionStateEventArgs ConnectionState { get; }
-
-    /// <summary>
     ///   Triggered when <see cref="LoginStatus"/>, <see cref="RunningKind"/>, or <see cref="RunningVersion"/> have changed.
     /// </summary>
     event EventHandler<ConnectionStateEventArgs> ConnectionStateChanged;
@@ -68,6 +26,12 @@ public interface IRemote : IDisposable
     ///   Triggered when <see cref="ButtonsDirty()"/> returns true.
     /// </summary>
     event EventHandler ButtonsDirty;
+
+    /// <summary>
+    ///   Returns the current connection state.
+    /// </summary>
+    /// <returns></returns>
+    ConnectionStateEventArgs GetConnectionState();
 
     #region Login
 

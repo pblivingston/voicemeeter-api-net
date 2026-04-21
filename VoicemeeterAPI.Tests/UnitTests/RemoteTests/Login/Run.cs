@@ -121,6 +121,8 @@ public class Run : MockRemote
         var expectedState = new ConnectionStateEventArgs(LoginResponse.Ok, (Kind)kind, (VmVersion)version);
         var app = Environment.Is64BitProcess ? App.Standardx64 : App.Standard;
 
+        MockLogin_VoicemeeterNotRunning();
+
         MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
@@ -132,12 +134,10 @@ public class Run : MockRemote
             .Returns(Response.Dirty)
             .Returns(Response.Ok);
 
-        MockLogin_VoicemeeterNotRunning();
-
         Remote.Run(Kind.Standard);
 
         Assert.Multiple(
-            () => Assert.Equal(expectedState, Remote.ConnectionState),
+            () => Assert.Equal(expectedState, Remote.GetConnectionState()),
             () => MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once)
         );
     }
@@ -215,13 +215,13 @@ public class Run : MockRemote
         var version = 0x0101_0202;
         var app = Environment.Is64BitProcess ? App.Standardx64 : App.Standard;
 
+        MockLogin_VoicemeeterNotRunning();
+
         MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
         MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Ok);
         MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Ok);
-
-        MockLogin_VoicemeeterNotRunning();
 
         ((IRemote)Remote).Run(Kind.Standard);
 
