@@ -9,18 +9,20 @@ namespace PBLivingston.VoicemeeterAPI.Types;
 /// <param name="loginStatus"></param>
 /// <param name="runningKind"></param>
 /// <param name="runningVersion"></param>
-public class ConnectionStateEventArgs(LoginResponse loginStatus, Kind runningKind, VmVersion runningVersion) : EventArgs, IEquatable<ConnectionStateEventArgs>
+public class ConnectionStateEventArgs(LoginResponse loginStatus, bool macroButtonsIsRunning, Kind runningKind, VmVersion runningVersion) : EventArgs, IEquatable<ConnectionStateEventArgs>
 {
     /// <summary>
-    ///   Returns the current login status of the <see cref="IRemote"/> instance.
+    ///   The login status of the <see cref="IRemote"/> instance.
     /// </summary>
-    /// <remarks>
-    ///   Initially set to <see cref="LoginResponse.LoggedOut"/> until a successful login attempt is made.
-    /// </remarks>
     public LoginResponse LoginStatus { get; } = loginStatus;
 
     /// <summary>
-    ///   Returns the currently running Voicemeeter Kind.
+    /// 
+    /// </summary>
+    public bool MacroButtonsIsRunning { get; } = macroButtonsIsRunning;
+
+    /// <summary>
+    ///   The running Voicemeeter Kind.
     /// </summary>
     /// <remarks>
     ///   Standard, Banana, Potato
@@ -28,7 +30,7 @@ public class ConnectionStateEventArgs(LoginResponse loginStatus, Kind runningKin
     public Kind RunningKind { get; } = runningKind;
 
     /// <summary>
-    ///   Returns the currently running Voicemeeter version.
+    ///   The running Voicemeeter version.
     /// </summary>
     public VmVersion RunningVersion { get; } = runningVersion;
 
@@ -48,10 +50,12 @@ public class ConnectionStateEventArgs(LoginResponse loginStatus, Kind runningKin
     /// </remarks>
     public bool Connected => LoginStatus == LoginResponse.Ok;
 
-    public string MemberString => $"LoginStatus: {LoginStatus}; RunningKind: {RunningKind}; RunningVersion: {RunningVersion}";
+    public string MemberString => $"LoginStatus: {LoginStatus}; MacroButtonsIsRunning: {MacroButtonsIsRunning}; RunningKind: {RunningKind}; RunningVersion: {RunningVersion}";
 
     public bool Equals(ConnectionStateEventArgs other)
-        => LoginStatus == other.LoginStatus
+        => other is not null
+        && LoginStatus == other.LoginStatus
+        && MacroButtonsIsRunning == other.MacroButtonsIsRunning
         && RunningKind == other.RunningKind
         && RunningVersion == other.RunningVersion;
 
@@ -59,6 +63,19 @@ public class ConnectionStateEventArgs(LoginResponse loginStatus, Kind runningKin
         => obj is ConnectionStateEventArgs other
         && Equals(other);
 
+    /// <summary>
+    ///   Hash will be positive if logged in, negative if logged out.
+    /// </summary>
+    /// <returns></returns>
+    /// <remarks>
+    ///   <code>(int)LoginStatus &lt;&lt; 30 | (MacroButtonsIsRunning ? 0 : 1) &lt;&lt; 29 | (int)RunningKind &lt;&lt; 26 | (int)RunningVersion</code>
+    /// </remarks>
     public override int GetHashCode()
-        => LoggedIn ? RunningVersion.GetHashCode() : -1;
+        => unchecked((int)LoginStatus << 30 | (MacroButtonsIsRunning ? 0 : 1) << 29 | (int)RunningKind << 26 | (int)RunningVersion);
+
+    public static bool operator ==(ConnectionStateEventArgs? a, ConnectionStateEventArgs? b)
+        => Equals(a, b);
+
+    public static bool operator !=(ConnectionStateEventArgs? a, ConnectionStateEventArgs? b)
+        => !Equals(a, b);
 }

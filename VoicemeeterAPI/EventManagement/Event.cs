@@ -78,8 +78,8 @@ internal enum Event
 
     // 1900-1999 Remote - Misc.
 
-    Dirty_Start = 1900, // trace
-    Dirty_Success, // trace
+    Dirty_Start = 1900, // trace/info
+    Dirty_Success, // trace/info
 
     // 2000-2999 Voicemeeter object model logging
 

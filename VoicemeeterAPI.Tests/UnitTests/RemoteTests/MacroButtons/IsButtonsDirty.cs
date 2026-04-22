@@ -1,4 +1,4 @@
-using PBLivingston.VoicemeeterAPI.Exceptions;
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.MacroButtons;
@@ -51,23 +51,22 @@ public class IsButtonsDirty : MockRemote
 
         MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Error);
 
-        var ex = Assert.Throws<RemoteException>(() => Remote.IsButtonsDirty());
+        var ex = Assert.Throws<RemoteException<Response>>(() => Remote.IsButtonsDirty());
 
         Assert.Multiple(
-            () => Assert.Equal("[VoicemeeterAPI] Remote Error: IsButtonsDirty failed - Error", ex.Message),
+            () => Assert.Equal(Response.Error, ex.Response),
             () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(2))
         );
     }
 
     [Fact]
-    public void ThrowsException_RemoteAccess_WhenLoginStatusNotOk()
+    public void ThrowsException_AccessDenied_WhenLoginStatusNotOk()
     {
         MockLogin_VoicemeeterNotRunning();
 
-        var ex = Assert.Throws<RemoteAccessException>(() => Remote.IsButtonsDirty());
+        var ex = Assert.Throws<AccessDeniedException>(() => Remote.IsButtonsDirty());
 
         Assert.Multiple(
-            () => Assert.Equal("IsButtonsDirty", ex.Method),
             () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
             () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Never)
         );

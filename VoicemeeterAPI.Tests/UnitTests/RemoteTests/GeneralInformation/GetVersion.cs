@@ -10,7 +10,7 @@ public class GetVersion : MockRemote
     {
         var kind = (int)Kind.Banana;
         var version = 0x0201_0202;
-        var expectedState = new ConnectionStateEventArgs(LoginResponse.Ok, (Kind)kind, (VmVersion)version);
+        var expectedState = new ConnectionStateEventArgs(LoginResponse.Ok, true, (Kind)kind, (VmVersion)version);
 
         MockLogin_VoicemeeterNotRunning();
 
@@ -33,7 +33,7 @@ public class GetVersion : MockRemote
         var version = 0x0201_0202;
         var noKind = (int)Kind.None;
         var noVersion = 0x0000_0000;
-        var expectedState = new ConnectionStateEventArgs(LoginResponse.VoicemeeterNotRunning, Kind.None, default);
+        var expectedState = new ConnectionStateEventArgs(LoginResponse.VoicemeeterNotRunning, true, Kind.None, default);
 
         MockLogin_Ok(kind, version);
 

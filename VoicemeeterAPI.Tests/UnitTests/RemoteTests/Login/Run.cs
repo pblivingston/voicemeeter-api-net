@@ -118,7 +118,7 @@ public class Run : MockRemote
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var expectedState = new ConnectionStateEventArgs(LoginResponse.Ok, (Kind)kind, (VmVersion)version);
+        var expectedState = new ConnectionStateEventArgs(LoginResponse.Ok, true, (Kind)kind, (VmVersion)version);
         var app = Environment.Is64BitProcess ? App.Standardx64 : App.Standard;
 
         MockLogin_VoicemeeterNotRunning();

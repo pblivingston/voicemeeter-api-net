@@ -26,27 +26,27 @@ partial class Remote
 
         _loginStatus = _vmrApi.Login();
 
-        ConnectionStateEventArgs state;
+        var kind = Kind.None;
+        VmVersion version = default;
+
         switch (_loginStatus)
         {
             case LoginResponse.Ok:
-                if (!WaitForRunning(out Kind kind, out VmVersion version, timeoutMs, sleepMs))
+                if (!WaitForRunning(out kind, out version, timeoutMs, sleepMs))
                     throw RemoteDispatch.Method_Error(_logger, LoginResponse.Timeout);
-
-                state = new(_loginStatus, kind, version);
 
                 RemoteDispatch.Method_Success(_logger);
                 break;
 
             case LoginResponse.VoicemeeterNotRunning:
-                state = new(_loginStatus, Kind.None, default);
-
                 RemoteDispatch.Login_VmNotRunning(_logger);
                 break;
 
             default:
                 throw RemoteDispatch.Method_Error(_logger, _loginStatus);
         }
+
+        ConnectionStateEventArgs state = new(_loginStatus, IsMacroButtonsRunning(), kind, version);
 
         if (state != _lastState)
             OnConnectionStateChanged(state);
@@ -91,9 +91,17 @@ partial class Remote
         if (!success)
             RemoteDispatch.Logout_Timeout(_logger, response);
 
-        ConnectionStateEventArgs state = new(_loginStatus, _lastState.RunningKind, _lastState.RunningVersion);
-        if (!nested && state != _lastState)
-            OnConnectionStateChanged(state);
+        if (!nested)
+        {
+            ConnectionStateEventArgs state = new(
+                _loginStatus,
+                _lastState.MacroButtonsIsRunning,
+                _lastState.RunningKind,
+                _lastState.RunningVersion
+            );
+            if (state != _lastState)
+                OnConnectionStateChanged(state);
+        }
 
         return _loginStatus;
     }
@@ -134,7 +142,7 @@ partial class Remote
             if (!WaitForRunning(out Kind kind, out VmVersion version, timeoutMs, sleepMs))
                 throw RemoteDispatch.Run_Error(_logger, RunResponse.Timeout, appAdjusted);
 
-            ConnectionStateEventArgs state = new(_loginStatus, kind, version);
+            ConnectionStateEventArgs state = new(_loginStatus, IsMacroButtonsRunning(), kind, version);
             if (state != _lastState)
                 OnConnectionStateChanged(state);
         }
@@ -143,6 +151,10 @@ partial class Remote
         {
             RemoteDispatch.YieldForSettle(_logger);
             while (IsButtonsDirty()) Thread.Yield();
+
+            var state = GetConnectionState();
+            if (state != _lastState)
+                OnConnectionStateChanged(state);
         }
     }
 

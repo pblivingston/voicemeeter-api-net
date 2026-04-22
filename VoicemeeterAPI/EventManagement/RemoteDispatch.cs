@@ -33,6 +33,28 @@ internal static partial class RemoteDispatch
 
     #endregion
 
+    #region Dirty
+
+    public static void Dirty_Start(ILogger logger, LogLevel level, [CallerMemberName] string methodName = "")
+    {
+        RemoteLog.Dirty_Start(logger, level, methodName);
+    }
+
+    public static void Dirty_Clean(ILogger logger, LogLevel level, [CallerMemberName] string methodName = "")
+    {
+        RemoteLog.Dirty_Success(logger, level, methodName, Response.Ok.ToString());
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Dirty_Dirty(ILogger logger, LogLevel level, Remote sender, EventHandler? eventTrigger, string methodName)
+    {
+        RemoteLog.Dirty_Success(logger, level, methodName, Response.Dirty.ToString());
+
+        eventTrigger?.Invoke(sender, null);
+    }
+
+    #endregion
+
     #region Connection State
 
     public static void ConnectionState_Changed(ILogger logger, Remote sender, EventHandler<ConnectionStateEventArgs>? eventTrigger, ConnectionStateEventArgs lastState, ConnectionStateEventArgs currentState, string methodName)
@@ -113,28 +135,6 @@ internal static partial class RemoteDispatch
     public static void Retry_Timeout(ILogger logger, int attempts)
     {
         RemoteLog.Retry_Timeout(logger, attempts);
-    }
-
-    #endregion
-
-    #region Dirty
-
-    public static void Dirty_Start(ILogger logger, [CallerMemberName] string methodName = "")
-    {
-        RemoteLog.Dirty_Start(logger, methodName);
-    }
-
-    public static void Dirty_Clean(ILogger logger, [CallerMemberName] string methodName = "")
-    {
-        RemoteLog.Dirty_Success(logger, methodName, Response.Ok.ToString());
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Dirty_Dirty(ILogger logger, Remote sender, EventHandler? eventTrigger, string methodName)
-    {
-        RemoteLog.Dirty_Success(logger, methodName, Response.Dirty.ToString());
-
-        eventTrigger?.Invoke(sender, null);
     }
 
     #endregion

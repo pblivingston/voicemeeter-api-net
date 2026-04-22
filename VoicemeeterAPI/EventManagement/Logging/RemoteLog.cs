@@ -35,6 +35,24 @@ internal static partial class RemoteLog
 
     #endregion
 
+    #region Dirty
+
+    [LoggerMessage(
+        EventId = (int)Event.Dirty_Start,
+        EventName = nameof(Event.Dirty_Start),
+        Message = "Checking {MethodName}..."
+    )]
+    public static partial void Dirty_Start(ILogger logger, LogLevel level, string methodName);
+
+    [LoggerMessage(
+        EventId = (int)Event.Dirty_Success,
+        EventName = nameof(Event.Dirty_Success),
+        Message = "{MethodName} successful. Response: {Response}"
+    )]
+    public static partial void Dirty_Success(ILogger logger, LogLevel level, string methodName, string response);
+
+    #endregion
+
     #region Connection State
 
     [LoggerMessage(
@@ -144,26 +162,6 @@ internal static partial class RemoteLog
         Message = "Retry timed out after {Attempts} attempts."
     )]
     public static partial void Retry_Timeout(ILogger logger, int attempts);
-
-    #endregion
-
-    #region Dirty
-
-    [LoggerMessage(
-        EventId = (int)Event.Dirty_Start,
-        EventName = nameof(Event.Dirty_Start),
-        Level = LogLevel.Trace,
-        Message = "Checking {MethodName}..."
-    )]
-    public static partial void Dirty_Start(ILogger logger, string methodName);
-
-    [LoggerMessage(
-        EventId = (int)Event.Dirty_Success,
-        EventName = nameof(Event.Dirty_Success),
-        Level = LogLevel.Trace,
-        Message = "{MethodName} successful. Response: {Response}"
-    )]
-    public static partial void Dirty_Success(ILogger logger, string methodName, string response);
 
     #endregion
 }

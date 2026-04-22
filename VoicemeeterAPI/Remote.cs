@@ -32,20 +32,26 @@ namespace PBLivingston.VoicemeeterAPI;
 /// </example>
 public sealed partial class Remote : IRemote
 {
+    private const string MbName = "VoicemeeterMacroButtons";
+
     private readonly IWrapper _vmrApi;
     private readonly ILogger<Remote> _logger;
     private readonly Guid _remoteGuid = new();
+    private readonly string _installDir = PathHelper.GetProgramFolder();
+
     private bool _isDisposed = false;
     private LoginResponse _loginStatus = LoginResponse.LoggedOut;
-    private ConnectionStateEventArgs _lastState = new(LoginResponse.LoggedOut, Kind.None, default);
+    private Process? _macroButtons = null;
+    private ConnectionStateEventArgs _lastState = new(LoginResponse.LoggedOut, false, Kind.None, default);
 
     /// <inheritdoc/>
     public event EventHandler<ConnectionStateEventArgs>? ConnectionStateChanged;
-
     /// <inheritdoc/>
     public event EventHandler? ParamsDirty;
     /// <inheritdoc/>
     public event EventHandler? ButtonsDirty;
+
+    #region Construction
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="IWrapper"/>.
@@ -70,12 +76,16 @@ public sealed partial class Remote : IRemote
         : this(new Wrapper(new RemoteApiWrapper(PathHelper.GetDllPath())), logger)
     { }
 
+    #endregion
+
+    #region Factory
+
     /// <summary>
     ///   Initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="RemoteApiWrapper"/>.
     /// </summary>
     /// <param name="apiWrapper"></param>
     /// <param name="logger"></param>
-    public Remote FromAtgWrapper(RemoteApiWrapper apiWrapper, ILogger<Remote>? logger = null)
+    public static Remote FromAtgWrapper(RemoteApiWrapper apiWrapper, ILogger<Remote>? logger = null)
         => new(new Wrapper(apiWrapper), logger);
 
     /// <summary>
@@ -83,8 +93,12 @@ public sealed partial class Remote : IRemote
     /// </summary>
     /// <param name="dllPath"></param>
     /// <param name="logger"></param>
-    public Remote FromDllPath(string dllPath, ILogger<Remote>? logger = null)
+    public static Remote FromDllPath(string dllPath, ILogger<Remote>? logger = null)
         => FromAtgWrapper(new RemoteApiWrapper(dllPath), logger);
+
+    #endregion
+
+    #region Connection State
 
     /// <inheritdoc/>
     public ConnectionStateEventArgs GetConnectionState()
@@ -94,17 +108,28 @@ public sealed partial class Remote : IRemote
 
         var kind = GetKind(true);
         var version = GetVersion(true);
+        bool mbRunning = IsMacroButtonsRunning(true);
 
         if (kind != version.K)
             throw RemoteDispatch.ConnectionState_KindMismatch(_logger, kind, version);
 
-        ConnectionStateEventArgs state = new(_loginStatus, kind, version);
+        ConnectionStateEventArgs state = new(_loginStatus, mbRunning, kind, version);
 
         if (state != _lastState)
             OnConnectionStateChanged(state);
 
         return state;
     }
+
+    private void OnConnectionStateChanged(ConnectionStateEventArgs currentState, [CallerMemberName] string methodName = "")
+    {
+        RemoteDispatch.ConnectionState_Changed(_logger, this, ConnectionStateChanged, _lastState, currentState, methodName);
+        _lastState = currentState;
+    }
+
+    #endregion
+
+    #region Disposal
 
     /// <summary>
     ///   Calls <see cref="DllWrapperBase.Dispose()"/>.
@@ -122,14 +147,15 @@ public sealed partial class Remote : IRemote
             return;
         }
 
+        if (_macroButtons != null) using (BeginMethodScope())
+            ReleaseMacroButtonsHandle();
+
         if (_lastState.LoggedIn)
         {
             RemoteDispatch.Dispose_LoggedIn(_logger, _loginStatus);
 
             using (BeginMethodScope())
-            {
                 Logout(timeoutMs: 0, nested: true);
-            }
         }
 
         RemoteDispatch.Dispose_Start(_logger);
@@ -139,6 +165,10 @@ public sealed partial class Remote : IRemote
         RemoteDispatch.Dispose_Success(_logger);
         _isDisposed = true;
     }
+
+    #endregion
+
+    #region Helpers
 
     private IDisposable? BeginInstanceScope() => _logger.BeginScope("Instance: {GUID}", _remoteGuid);
 
@@ -154,6 +184,10 @@ public sealed partial class Remote : IRemote
         if (_loginStatus > requiredStatus)
             throw RemoteDispatch.Guard_AccessDenied(_logger, _loginStatus);
     }
+
+    #endregion
+
+    #region Retry
 
     private bool Retry(Func<bool> action, int timeoutMs = 1000, int sleepMs = 100, [CallerMemberName] string methodName = "")
     {
@@ -212,19 +246,5 @@ public sealed partial class Remote : IRemote
         return res;
     }
 
-    private void OnConnectionStateChanged(ConnectionStateEventArgs currentState, [CallerMemberName] string methodName = "")
-    {
-        RemoteDispatch.ConnectionState_Changed(_logger, this, ConnectionStateChanged, _lastState, currentState, methodName);
-        _lastState = currentState;
-    }
-
-    private void OnParamsDirty()
-    {
-        RemoteDispatch.Dirty_Dirty(_logger, this, ParamsDirty, nameof(IsParamsDirty));
-    }
-
-    private void OnButtonsDirty()
-    {
-        RemoteDispatch.Dirty_Dirty(_logger, this, ButtonsDirty, nameof(IsButtonsDirty));
-    }
+    #endregion
 }
