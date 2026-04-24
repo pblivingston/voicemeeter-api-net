@@ -46,7 +46,11 @@ partial class Remote
                 throw RemoteDispatch.Method_Error(_logger, _loginStatus);
         }
 
-        ConnectionStateEventArgs state = new(_loginStatus, IsMacroButtonsRunning(), kind, version);
+        ConnectionStateEventArgs state;
+        using (BeginMethodScope())
+        {
+            state = new(_loginStatus, IsMacroButtonsRunning(false), kind, version);
+        }
 
         if (state != _lastState)
             OnConnectionStateChanged(state);
@@ -125,7 +129,7 @@ partial class Remote
 
         LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
-        var appAdjusted = app.BitAdjust();
+        var appAdjusted = app.BitAdjust(_vmrApi.Is64Bit);
 
         if (appAdjusted != app)
             GeneralDispatch.BitAdjust(_logger, app, appAdjusted);
@@ -164,7 +168,7 @@ partial class Remote
 
     /// <inheritdoc cref="IRemote.Run{T}(T, int, int)"/>
     public void Run(Kind kind, int timeoutMs = 2000, int sleepMs = 100)
-        => Run(kind.ToApp(), timeoutMs, sleepMs);
+        => Run(kind.ToApp(_vmrApi.Is64Bit), timeoutMs, sleepMs);
 
     /// <inheritdoc cref="IRemote.Run{T}(T, int, int)"/>
     public void Run(string app, int timeoutMs = 2000, int sleepMs = 100)

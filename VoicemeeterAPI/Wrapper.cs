@@ -1,8 +1,10 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
+using System.Diagnostics;
 using AtgDev.Voicemeeter;
 using PBLivingston.VoicemeeterAPI.Types;
+using PBLivingston.VoicemeeterAPI.Utilities;
 
 namespace PBLivingston.VoicemeeterAPI;
 
@@ -13,11 +15,41 @@ namespace PBLivingston.VoicemeeterAPI;
 /// <remarks>
 ///   The primary constructor initializes a new instance of the <see cref="Wrapper"/> class with a provided <see cref="RemoteApiWrapper"/>.
 /// </remarks>
-internal sealed class Wrapper(RemoteApiWrapper remoteApiWrapper) : IWrapper
+internal sealed class Wrapper : IWrapper
 {
-    private readonly RemoteApiWrapper _remoteApiWrapper = remoteApiWrapper;
+    private const string VmrName = "VoicemeeterRemote";
+    private const string MbName = "VoicemeeterMacroButtons";
 
-    public void Dispose() => _remoteApiWrapper.Dispose();
+    private readonly RemoteApiWrapper _remoteApiWrapper;
+    private Process? _macroButtons = null;
+
+    public bool Is64Bit { get; } = Environment.Is64BitProcess;
+    public string InstallDir { get; } = PathHelperExt.GetInstallDirectory();
+
+    private string DllName => VmrName + (Is64Bit ? "64.dll" : ".dll");
+
+    public Wrapper(RemoteApiWrapper remoteApiWrapper)
+    {
+        _remoteApiWrapper = remoteApiWrapper ?? throw new ArgumentNullException(nameof(remoteApiWrapper));
+    }
+
+    public Wrapper(string installDir)
+    {
+        InstallDir = installDir;
+        _remoteApiWrapper = new RemoteApiWrapper(Path.Combine(InstallDir, DllName));
+    }
+
+    public Wrapper()
+    {
+        _remoteApiWrapper = new RemoteApiWrapper(Path.Combine(InstallDir, DllName));
+    }
+
+    public void Dispose()
+    {
+        ReleaseMacroButtons();
+
+        _remoteApiWrapper.Dispose();
+    }
 
     /// <inheritdoc/>
     public LoginResponse Login() => (LoginResponse)_remoteApiWrapper.Login();
@@ -40,4 +72,61 @@ internal sealed class Wrapper(RemoteApiWrapper remoteApiWrapper) : IWrapper
 
     /// <inheritdoc/>
     public Response MacroButtonIsDirty() => (Response)_remoteApiWrapper.MacroButtonIsDirty();
+
+    /// <inheritdoc/>
+    public RunResponse MacroButtonIsRunning()
+    {
+        if (MacroButtonsHasExited())
+        {
+            ReleaseMacroButtons();
+
+            if (!MacroButtonsExists())
+                return RunResponse.NotInstalled;
+
+            _macroButtons = GetMacroButtons();
+        }
+
+        return _macroButtons is null ? RunResponse.NotRunning : RunResponse.Ok;
+    }
+
+    private bool MacroButtonsExists() => File.Exists(Path.Combine(InstallDir, MbName + ".exe"));
+
+    private bool MacroButtonsHasExited()
+    {
+        bool isClosed = true;
+        try
+        {
+            _macroButtons?.Refresh();
+            isClosed = _macroButtons?.HasExited ?? true;
+        }
+        catch { }
+        return isClosed;
+    }
+
+    private Process? GetMacroButtons()
+    {
+        var processes = Process.GetProcessesByName(MbName);
+        Process? target = null;
+
+        foreach (Process p in processes)
+        {
+            var isValid = false;
+            try
+            {
+                isValid = p.MainModule?.FileName.StartsWith(InstallDir) ?? false;
+            }
+            catch { }
+
+            if (isValid && target is null) target = p;
+            else p.Dispose();
+        }
+
+        return target;
+    }
+
+    private void ReleaseMacroButtons()
+    {
+        _macroButtons?.Dispose();
+        _macroButtons = null;
+    }
 }

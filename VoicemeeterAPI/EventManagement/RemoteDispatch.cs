@@ -13,9 +13,9 @@ internal static partial class RemoteDispatch
 {
     #region Methods
 
-    public static void Method_Success(ILogger logger, [CallerMemberName] string methodName = "")
+    public static void Method_Success(ILogger logger, [CallerMemberName] string methodName = "", LogLevel level = LogLevel.Information)
     {
-        RemoteLog.Method_Success(logger, methodName);
+        RemoteLog.Method_Success(logger, level, methodName);
     }
 
     public static RemoteException<T> Method_Error<T>(ILogger logger, T response, [CallerMemberName] string methodName = "")
@@ -33,22 +33,22 @@ internal static partial class RemoteDispatch
 
     #endregion
 
-    #region Dirty
+    #region Query
 
-    public static void Dirty_Start(ILogger logger, LogLevel level, [CallerMemberName] string methodName = "")
+    public static void Query_Start(ILogger logger, LogLevel level, [CallerMemberName] string methodName = "")
     {
-        RemoteLog.Dirty_Start(logger, level, methodName);
+        RemoteLog.Query_Start(logger, level, methodName);
     }
 
-    public static void Dirty_Clean(ILogger logger, LogLevel level, [CallerMemberName] string methodName = "")
+    public static void Query_Success<T>(ILogger logger, LogLevel level, T result, [CallerMemberName] string methodName = "")
+        where T : unmanaged
     {
-        RemoteLog.Dirty_Success(logger, level, methodName, Response.Ok.ToString());
+        RemoteLog.Query_Success(logger, level, methodName, result.ToString());
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Dirty_Dirty(ILogger logger, LogLevel level, Remote sender, EventHandler? eventTrigger, string methodName)
+    public static void Dirty_Success(ILogger logger, LogLevel level, Remote sender, EventHandler? eventTrigger, string methodName)
     {
-        RemoteLog.Dirty_Success(logger, level, methodName, Response.Dirty.ToString());
+        RemoteLog.Query_Success(logger, level, methodName, Response.Dirty.ToString());
 
         eventTrigger?.Invoke(sender, null);
     }
@@ -69,6 +69,12 @@ internal static partial class RemoteDispatch
         RemoteLog.ConnectionState_KindMismatch(logger, returnedKind.ToString(), returnedVersion.ToString());
 
         return new KindMismatchException(returnedKind, returnedVersion);
+    }
+
+    public static void ConnectionState_StateMismatch<T>(ILogger logger, LogLevel level, string memberName, T lastValue)
+        where T : unmanaged
+    {
+        RemoteLog.ConnectionState_StateMismatch(logger, level, memberName, lastValue.ToString());
     }
 
     #endregion

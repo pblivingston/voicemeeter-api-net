@@ -119,10 +119,11 @@ public class Run : MockRemote
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
         var expectedState = new ConnectionStateEventArgs(LoginResponse.Ok, true, (Kind)kind, (VmVersion)version);
-        var app = Environment.Is64BitProcess ? App.Standardx64 : App.Standard;
+        var app = App.Standardx64;
 
         MockLogin_VoicemeeterNotRunning();
 
+        MockWrapper.Setup(w => w.Is64Bit).Returns(true);
         MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
@@ -147,8 +148,9 @@ public class Run : MockRemote
     {
         var kind = (int)Kind.None;
         var version = 0;
-        var app = Environment.Is64BitProcess ? App.Standardx64 : App.Standard;
+        var app = App.Standardx64;
 
+        MockWrapper.Setup(w => w.Is64Bit).Returns(true);
         MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.NoServer);
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.NoServer);
@@ -213,10 +215,11 @@ public class Run : MockRemote
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var app = Environment.Is64BitProcess ? App.Standardx64 : App.Standard;
+        var app = App.Standardx64;
 
         MockLogin_VoicemeeterNotRunning();
 
+        MockWrapper.Setup(w => w.Is64Bit).Returns(true);
         MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);

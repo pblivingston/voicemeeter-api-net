@@ -36,7 +36,7 @@ public static class AppExt
     public static Kind ToKind(this App app) => AppUtils.ToKind(app);
 
     /// <inheritdoc cref="AppUtils.BitAdjust(App)"/>
-    public static App BitAdjust(this App app) => AppUtils.BitAdjust(app);
+    public static App BitAdjust(this App app, bool? is64Bit = null) => AppUtils.BitAdjust(app, is64Bit);
 }
 
 public static class AppUtils
@@ -69,28 +69,28 @@ public static class AppUtils
     }
 
     /// <inheritdoc cref="BitAdjust(int, bool?)"/>
-    public static App BitAdjust(App app) => (App)BitAdjust((int)app);
+    public static App BitAdjust(App app, bool? is64Bit = null) => (App)BitAdjust((int)app, is64Bit);
 
     /// <summary>
     ///   Attempts to parse the given string into an <see cref="App"/> and ensures a Voicemeeter app is the correct bit version based on the current operating system.
     /// </summary>
-    /// <param name="s"></param>
+    /// <param name="appName"></param>
     /// <param name="app"></param>
     /// <returns></returns>
-    public static bool TryParseBit(string s, out App app)
+    public static bool TryParseBit(string appName, out App app, bool? is64Bit = null)
     {
         app = App.None;
-        if (!Enum.TryParse(s, true, out App result)) return false;
-        app = BitAdjust(result);
+        if (!Enum.TryParse(appName, true, out App result)) return false;
+        app = BitAdjust(result, is64Bit);
         return true;
     }
 
     /// <summary>
     ///   Parses the given string into an <see cref="App"/> and ensures a Voicemeeter app is the correct bit version based on the current operating system.
     /// </summary>
-    /// <param name="s"></param>
+    /// <param name="appName"></param>
     /// <returns></returns>
     /// <exception cref="CannotParseAsTypeException"></exception>
-    public static App ParseBit(string s) => TryParseBit(s, out App app) ? app
-        : throw new CannotParseAsTypeException(s, typeof(App), nameof(s));
+    public static App ParseBit(string appName, bool? is64Bit = null) => TryParseBit(appName, out App app, is64Bit) ? app
+        : throw new CannotParseAsTypeException(appName, typeof(App), nameof(appName));
 }

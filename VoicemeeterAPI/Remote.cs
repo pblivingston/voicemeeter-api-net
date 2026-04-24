@@ -5,11 +5,11 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using AtgDev.Utils.Native;
 using AtgDev.Voicemeeter;
-using AtgDev.Voicemeeter.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using PBLivingston.VoicemeeterAPI.EventManagement;
 using PBLivingston.VoicemeeterAPI.Types;
+using PBLivingston.VoicemeeterAPI.Utilities;
 
 namespace PBLivingston.VoicemeeterAPI;
 
@@ -32,16 +32,12 @@ namespace PBLivingston.VoicemeeterAPI;
 /// </example>
 public sealed partial class Remote : IRemote
 {
-    private const string MbName = "VoicemeeterMacroButtons";
-
     private readonly IWrapper _vmrApi;
     private readonly ILogger<Remote> _logger;
     private readonly Guid _remoteGuid = new();
-    private readonly string _installDir = PathHelper.GetProgramFolder();
 
     private bool _isDisposed = false;
     private LoginResponse _loginStatus = LoginResponse.LoggedOut;
-    private Process? _macroButtons = null;
     private ConnectionStateEventArgs _lastState = new(LoginResponse.LoggedOut, false, Kind.None, default);
 
     /// <inheritdoc/>
@@ -70,10 +66,10 @@ public sealed partial class Remote : IRemote
     /// </summary>
     /// <param name="logger"></param>
     /// <remarks>
-    ///   Uses <see cref="PathHelper.GetDllPath()"/> to determine the default path.
+    ///   Uses <see cref="PathHelperExt.GetInstallDirectory()"/> to determine the default path.
     /// </remarks>
     public Remote(ILogger<Remote>? logger = null)
-        : this(new Wrapper(new RemoteApiWrapper(PathHelper.GetDllPath())), logger)
+        : this(new Wrapper(), logger)
     { }
 
     #endregion
@@ -85,16 +81,16 @@ public sealed partial class Remote : IRemote
     /// </summary>
     /// <param name="apiWrapper"></param>
     /// <param name="logger"></param>
-    public static Remote FromAtgWrapper(RemoteApiWrapper apiWrapper, ILogger<Remote>? logger = null)
+    public static Remote FromAtgRemoteApiWrapper(RemoteApiWrapper apiWrapper, ILogger<Remote>? logger = null)
         => new(new Wrapper(apiWrapper), logger);
 
     /// <summary>
-    ///   Initializes a new instance of the <see cref="Remote"/> class with a new <see cref="RemoteApiWrapper"/> using the specified DLL path.
+    ///   Initializes a new instance of the <see cref="Remote"/> class with a new <see cref="RemoteApiWrapper"/> using the specified installation directory.
     /// </summary>
-    /// <param name="dllPath"></param>
+    /// <param name="installDir"></param>
     /// <param name="logger"></param>
-    public static Remote FromDllPath(string dllPath, ILogger<Remote>? logger = null)
-        => FromAtgWrapper(new RemoteApiWrapper(dllPath), logger);
+    public static Remote FromInstallationDirectory(string installDir, ILogger<Remote>? logger = null)
+        => new(new Wrapper(installDir), logger);
 
     #endregion
 
@@ -146,9 +142,6 @@ public sealed partial class Remote : IRemote
             RemoteDispatch.Dispose_AlreadyDisposed(_logger);
             return;
         }
-
-        if (_macroButtons != null) using (BeginMethodScope())
-            ReleaseMacroButtonsHandle();
 
         if (_lastState.LoggedIn)
         {

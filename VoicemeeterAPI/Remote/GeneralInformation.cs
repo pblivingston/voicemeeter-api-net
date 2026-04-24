@@ -38,7 +38,7 @@ partial class Remote
         RemoteDispatch.GetInfo_Success(_logger, info, kind);
 
         if (kind != _lastState.RunningKind)
-            RemoteDispatch.GetInfo_StateMismatch(_logger, warning, _lastState.RunningKind);
+            RemoteDispatch.ConnectionState_StateMismatch(_logger, warning, nameof(_lastState.RunningKind), _lastState.RunningKind);
 
         return kind;
     }
@@ -82,7 +82,7 @@ partial class Remote
         RemoteDispatch.GetInfo_Success(_logger, info, version);
 
         if (version != _lastState.RunningVersion)
-            RemoteDispatch.GetInfo_StateMismatch(_logger, warning, _lastState.RunningVersion);
+            RemoteDispatch.ConnectionState_StateMismatch(_logger, warning, nameof(_lastState.RunningVersion), _lastState.RunningVersion);
 
         return version;
     }

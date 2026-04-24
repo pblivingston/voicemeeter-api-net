@@ -71,6 +71,7 @@ public abstract class MockRemote
         MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
+        MockWrapper.Setup(w => w.MacroButtonIsRunning()).Returns(RunResponse.Ok);
         MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Ok);
         MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Ok);
 
@@ -82,6 +83,7 @@ public abstract class MockRemote
             () => MockWrapper.Verify(w => w.Login(), Times.Once()),
             () => MockWrapper.Verify(w => w.GetVoicemeeterType(out kind), Times.Exactly(2)),
             () => MockWrapper.Verify(w => w.GetVoicemeeterVersion(out version), Times.Exactly(2)),
+            () => MockWrapper.Verify(w => w.MacroButtonIsRunning(), Times.Exactly(2)),
             () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Once()),
             () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Once())
         );

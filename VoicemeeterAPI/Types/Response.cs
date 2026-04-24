@@ -43,6 +43,7 @@ public enum RunResponse
     UnknownApp = -2,
     NotInstalled = -1,
     Ok = 0,
+    NotRunning,
     Timeout
 }
 

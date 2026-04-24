@@ -28,11 +28,4 @@ internal static partial class RemoteLog
         Message = "{MethodName} failed. Response: {Response}; Returned value: {Value}"
     )]
     public static partial void GetInfo_Error(ILogger logger, string methodName, string response, int value);
-
-    [LoggerMessage(
-        EventId = (int)Event.GetInfo_StateMismatch,
-        EventName = nameof(Event.GetInfo_StateMismatch),
-        Message = "{InfoType} did not match last Connection State. Recommend calling GetConnectionState. Last {InfoType}: {LastValue}"
-    )]
-    public static partial void GetInfo_StateMismatch(ILogger logger, LogLevel level, string infoType, string lastValue);
 }

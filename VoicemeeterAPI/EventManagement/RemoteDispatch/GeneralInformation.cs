@@ -28,10 +28,4 @@ internal static partial class RemoteDispatch
 
         return new GetInfoException(response, value);
     }
-
-    public static void GetInfo_StateMismatch<T>(ILogger logger, LogLevel level, T lastValue)
-        where T : unmanaged
-    {
-        RemoteLog.GetInfo_StateMismatch(logger, level, typeof(T).Name, lastValue.ToString());
-    }
 }

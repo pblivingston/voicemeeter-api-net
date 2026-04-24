@@ -12,10 +12,9 @@ internal static partial class RemoteLog
     [LoggerMessage(
         EventId = (int)Event.Method_Success,
         EventName = nameof(Event.Method_Success),
-        Level = LogLevel.Information,
         Message = "{MethodName} successful."
     )]
-    public static partial void Method_Success(ILogger logger, string methodName);
+    public static partial void Method_Success(ILogger logger, LogLevel level, string methodName);
 
     [LoggerMessage(
         EventId = (int)Event.Method_Error,
@@ -35,21 +34,21 @@ internal static partial class RemoteLog
 
     #endregion
 
-    #region Dirty
+    #region Query
 
     [LoggerMessage(
-        EventId = (int)Event.Dirty_Start,
-        EventName = nameof(Event.Dirty_Start),
+        EventId = (int)Event.Query_Start,
+        EventName = nameof(Event.Query_Start),
         Message = "Checking {MethodName}..."
     )]
-    public static partial void Dirty_Start(ILogger logger, LogLevel level, string methodName);
+    public static partial void Query_Start(ILogger logger, LogLevel level, string methodName);
 
     [LoggerMessage(
-        EventId = (int)Event.Dirty_Success,
-        EventName = nameof(Event.Dirty_Success),
+        EventId = (int)Event.Query_Success,
+        EventName = nameof(Event.Query_Success),
         Message = "{MethodName} successful. Response: {Response}"
     )]
-    public static partial void Dirty_Success(ILogger logger, LogLevel level, string methodName, string response);
+    public static partial void Query_Success(ILogger logger, LogLevel level, string methodName, string response);
 
     #endregion
 
@@ -70,6 +69,13 @@ internal static partial class RemoteLog
         Message = "Kind and version did not match when getting Connection State. GetKind returned: {ReturnedKind}; GetVersion returned: {ReturnedVersion}"
     )]
     public static partial void ConnectionState_KindMismatch(ILogger logger, string returnedKind, string returnedVersion);
+
+    [LoggerMessage(
+        EventId = (int)Event.ConnectionState_StateMismatch,
+        EventName = nameof(Event.ConnectionState_StateMismatch),
+        Message = "{MemberName} did not match last Connection State. Recommend calling GetConnectionState. Last {MemberName}: {LastValue}"
+    )]
+    public static partial void ConnectionState_StateMismatch(ILogger logger, LogLevel level, string memberName, string lastValue);
 
     #endregion
 

@@ -11,6 +11,9 @@ namespace PBLivingston.VoicemeeterAPI;
 /// </summary>
 internal interface IWrapper : IDisposable
 {
+    bool Is64Bit { get; }
+    string InstallDir { get; }
+
     /// <inheritdoc cref="RemoteApiWrapper.Login()" path="/summary"/>
     LoginResponse Login();
     /// <inheritdoc cref="RemoteApiWrapper.Logout()" path="/summary"/>
@@ -30,6 +33,15 @@ internal interface IWrapper : IDisposable
     /// <inheritdoc cref="RemoteApiWrapper.GetParameter(string, out string)" path="/summary"/>
     Response GetParameter(string param, out string value);
 
+    /// <summary>
+    ///   Check if MacroButtons is running.
+    /// </summary>
+    /// <returns>
+    ///   Ok<br/>
+    ///   NotRunning<br/>
+    ///   NotInstalled<br/>
+    /// </returns>
+    RunResponse MacroButtonIsRunning();
     /// <inheritdoc cref="RemoteApiWrapper.MacroButtonIsDirty()" path="/summary"/>
     Response MacroButtonIsDirty();
 }
