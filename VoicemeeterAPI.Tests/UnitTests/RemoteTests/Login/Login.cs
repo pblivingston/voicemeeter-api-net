@@ -16,6 +16,7 @@ public class Login : MockRemote
         MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
+        MockWrapper.Setup(w => w.MacroButtonIsRunning()).Returns(RunResponse.Ok);
 
         MockWrapper.SetupSequence(w => w.IsParametersDirty())
             .Returns(Response.Dirty)
@@ -29,7 +30,12 @@ public class Login : MockRemote
         Assert.Multiple(
             () => Assert.Equal(loginStatus, result),
             () => Assert.Equal(expectedState, Remote.GetConnectionState()),
-            () => MockWrapper.Verify(w => w.Login(), Times.Once)
+            () => MockWrapper.Verify(w => w.Login(), Times.Once()),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterType(out kind), Times.Exactly(2)),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterVersion(out version), Times.Exactly(2)),
+            () => MockWrapper.Verify(w => w.MacroButtonIsRunning(), Times.Exactly(2)),
+            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(3)),
+            () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(2))
         );
     }
 
@@ -44,13 +50,17 @@ public class Login : MockRemote
         MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
         MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.NoServer);
         MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.NoServer);
+        MockWrapper.Setup(w => w.MacroButtonIsRunning()).Returns(RunResponse.Ok);
 
         var result = Remote.Login();
 
         Assert.Multiple(
             () => Assert.Equal(loginStatus, result),
             () => Assert.Equal(expectedState, Remote.GetConnectionState()),
-            () => MockWrapper.Verify(w => w.Login(), Times.Once)
+            () => MockWrapper.Verify(w => w.Login(), Times.Once()),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterType(out kind), Times.Once()),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterVersion(out version), Times.Once()),
+            () => MockWrapper.Verify(w => w.MacroButtonIsRunning(), Times.Exactly(2))
         );
     }
 
@@ -65,7 +75,7 @@ public class Login : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(expectedResponse, ex.Response),
-            () => MockWrapper.Verify(w => w.Login(), Times.Once)
+            () => MockWrapper.Verify(w => w.Login(), Times.Once())
         );
     }
 
@@ -83,7 +93,7 @@ public class Login : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.Timeout, ex.Response),
-            () => MockWrapper.Verify(w => w.Login(), Times.Once)
+            () => MockWrapper.Verify(w => w.Login(), Times.Once())
         );
     }
 
@@ -99,7 +109,7 @@ public class Login : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.AlreadyLoggedIn, ex.Response),
-            () => MockWrapper.Verify(w => w.Login(), Times.Once)
+            () => MockWrapper.Verify(w => w.Login(), Times.Once())
         );
     }
 
@@ -119,7 +129,7 @@ public class Login : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.Unknown, ex.LoginStatus),
-            () => MockWrapper.Verify(w => w.Login(), Times.Once)
+            () => MockWrapper.Verify(w => w.Login(), Times.Once())
         );
     }
 
@@ -132,7 +142,7 @@ public class Login : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal("Remote", ex.ObjectName),
-            () => MockWrapper.Verify(w => w.Login(), Times.Never)
+            () => MockWrapper.Verify(w => w.Login(), Times.Never())
         );
     }
 }

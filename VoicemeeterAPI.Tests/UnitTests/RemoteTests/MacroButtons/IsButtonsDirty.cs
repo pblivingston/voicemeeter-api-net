@@ -68,7 +68,7 @@ public class IsButtonsDirty : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
-            () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Never)
+            () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Never())
         );
     }
 
@@ -81,7 +81,7 @@ public class IsButtonsDirty : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal("Remote", ex.ObjectName),
-            () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Never)
+            () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Never())
         );
     }
 }

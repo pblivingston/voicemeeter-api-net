@@ -21,7 +21,18 @@ public class Logout : MockRemote
         Assert.Multiple(
             () => Assert.Equal(loginStatus, result),
             () => Assert.Equal(expectedState, Remote.GetConnectionState()),
-            () => MockWrapper.Verify(w => w.Logout(), Times.Once)
+            () => MockWrapper.Verify(w => w.Logout(), Times.Once())
+        );
+    }
+
+    [Fact]
+    public void ReturnsExpected_LoginResponse_WhenAlreadyLoggedOut()
+    {
+        var result = Remote.Logout();
+
+        Assert.Multiple(
+            () => Assert.Equal(LoginResponse.LoggedOut, result),
+            () => MockWrapper.Verify(w => w.Logout(), Times.Never())
         );
     }
 
@@ -42,7 +53,7 @@ public class Logout : MockRemote
         Assert.Multiple(
             () => Assert.Equal(loginStatus, result),
             () => Assert.Equal(expectedState, Remote.GetConnectionState()),
-            () => MockWrapper.Verify(w => w.Logout(), Times.Once)
+            () => MockWrapper.Verify(w => w.Logout(), Times.Once())
         );
     }
 
@@ -55,7 +66,7 @@ public class Logout : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal("Remote", ex.ObjectName),
-            () => MockWrapper.Verify(w => w.Logout(), Times.Never)
+            () => MockWrapper.Verify(w => w.Logout(), Times.Never())
         );
     }
 
@@ -71,6 +82,6 @@ public class Logout : MockRemote
 
         Remote.Dispose();
 
-        MockWrapper.Verify(w => w.Logout(), Times.Once);
+        MockWrapper.Verify(w => w.Logout(), Times.Once());
     }
 }

@@ -19,7 +19,69 @@ public class Run : MockRemote
 
         Remote.Run(app);
 
-        MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once);
+        MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once());
+    }
+
+    [Theory]
+    [InlineData(App.Standard, true, App.Standardx64)]
+    [InlineData(App.Standardx64, false, App.Standard)]
+    public void LaunchesAdjustedApp_WhenAppIsVoicemeeter(App requested, bool is64Bit, App launched)
+    {
+        var k = (int)Kind.Standard;
+        var version = 0x0101_0202;
+        var expectedState = new ConnectionStateEventArgs(LoginResponse.Ok, true, (Kind)k, (VmVersion)version);
+
+        MockLogin_VoicemeeterNotRunning();
+
+        MockWrapper.Setup(w => w.Is64Bit).Returns(is64Bit);
+        MockWrapper.Setup(w => w.RunVoicemeeter((int)launched)).Returns(RunResponse.Ok);
+        MockWrapper.Setup(w => w.GetVoicemeeterType(out k)).Returns(InfoResponse.Ok);
+        MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
+
+        MockWrapper.SetupSequence(w => w.IsParametersDirty())
+            .Returns(Response.Dirty)
+            .Returns(Response.Ok);
+        MockWrapper.SetupSequence(w => w.MacroButtonIsDirty())
+            .Returns(Response.Dirty)
+            .Returns(Response.Ok);
+
+        Remote.Run(requested);
+
+        Assert.Multiple(
+            () => Assert.Equal(expectedState, Remote.GetConnectionState()),
+            () => MockWrapper.Verify(w => w.RunVoicemeeter((int)launched), Times.Once()),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterType(out k), Times.Exactly(3)),
+            () => MockWrapper.Verify(w => w.GetVoicemeeterVersion(out version), Times.Exactly(3)),
+            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(3)),
+            () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(2))
+        );
+    }
+
+    [Fact]
+    public void UpdatesConnectionState_WhenAppIsMacroButtons()
+    {
+        var kind = Kind.Standard;
+        var version = 0x0101_0202;
+        var expectedState = new ConnectionStateEventArgs(LoginResponse.Ok, true, kind, (VmVersion)version);
+        var app = App.MacroButtons;
+
+        MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
+
+        MockLogin_MacroButtonsNotRunning((int)kind, version);
+
+        MockWrapper.Setup(w => w.MacroButtonIsRunning()).Returns(RunResponse.Ok);
+
+        MockWrapper.SetupSequence(w => w.MacroButtonIsDirty())
+            .Returns(Response.Dirty)
+            .Returns(Response.Ok);
+
+        Remote.Run(app);
+
+        Assert.Multiple(
+            () => Assert.Equal(expectedState, Remote.GetConnectionState()),
+            () => MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once()),
+            () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(3))
+        );
     }
 
     [Fact]
@@ -38,7 +100,7 @@ public class Run : MockRemote
         Assert.Multiple(
             () => Assert.Equal(app, (int)ex.App),
             () => Assert.Equal(RunResponse.UnknownApp, ex.Response),
-            () => MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once)
+            () => MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once())
         );
     }
 
@@ -58,7 +120,7 @@ public class Run : MockRemote
         Assert.Multiple(
             () => Assert.Equal(app, (int)ex.App),
             () => Assert.Equal(RunResponse.NotInstalled, ex.Response),
-            () => MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once)
+            () => MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once())
         );
     }
 
@@ -71,7 +133,7 @@ public class Run : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.LoggedOut, ex.LoginStatus),
-            () => MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Never)
+            () => MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Never())
         );
     }
 
@@ -86,30 +148,7 @@ public class Run : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal("Remote", ex.ObjectName),
-            () => MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Never)
-        );
-    }
-
-    [Fact]
-    public void App_Calls_IsButtonsDirty_WhenAppIsMacroButtons()
-    {
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-        var app = App.MacroButtons;
-
-        MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
-
-        MockLogin_Ok(kind, version);
-
-        MockWrapper.SetupSequence(w => w.MacroButtonIsDirty())
-            .Returns(Response.Dirty)
-            .Returns(Response.Ok);
-
-        Remote.Run(app);
-
-        Assert.Multiple(
-            () => MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once),
-            () => MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(3))
+            () => MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Never())
         );
     }
 
@@ -139,7 +178,7 @@ public class Run : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(expectedState, Remote.GetConnectionState()),
-            () => MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once)
+            () => MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once())
         );
     }
 
@@ -162,7 +201,7 @@ public class Run : MockRemote
         Assert.Multiple(
             () => Assert.Equal(app, ex.App),
             () => Assert.Equal(RunResponse.Timeout, ex.Response),
-            () => MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once)
+            () => MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once())
         );
     }
 
@@ -174,24 +213,8 @@ public class Run : MockRemote
         Assert.Multiple(
             () => Assert.Equal("InvalidApp", ex.ActualValue),
             () => Assert.Equal(typeof(App), ex.Type),
-            () => MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never)
+            () => MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never())
         );
-    }
-
-    [Fact]
-    public void GenericInt_Calls_CorrectOverload()
-    {
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-        var app = (int)App.VBAN2MIDI;
-
-        MockWrapper.Setup(w => w.RunVoicemeeter(app)).Returns(RunResponse.Ok);
-
-        MockLogin_Ok(kind, version);
-
-        ((IRemote)Remote).Run(app);
-
-        MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once);
     }
 
     [Fact]
@@ -207,7 +230,23 @@ public class Run : MockRemote
 
         ((IRemote)Remote).Run(app);
 
-        MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once);
+        MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once());
+    }
+
+    [Fact]
+    public void GenericInt_Calls_CorrectOverload()
+    {
+        var kind = (int)Kind.Standard;
+        var version = 0x0101_0202;
+        var app = (int)App.VBAN2MIDI;
+
+        MockWrapper.Setup(w => w.RunVoicemeeter(app)).Returns(RunResponse.Ok);
+
+        MockLogin_Ok(kind, version);
+
+        ((IRemote)Remote).Run(app);
+
+        MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once());
     }
 
     [Fact]
@@ -228,7 +267,7 @@ public class Run : MockRemote
 
         ((IRemote)Remote).Run(Kind.Standard);
 
-        MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once);
+        MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once());
     }
 
     [Fact]
@@ -244,7 +283,7 @@ public class Run : MockRemote
 
         ((IRemote)Remote).Run("CABLEControlPanel");
 
-        MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once);
+        MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once());
     }
 
     [Fact]
@@ -255,7 +294,7 @@ public class Run : MockRemote
         Assert.Multiple(
             () => Assert.Equal(typeof(float), ex.Type),
             () => Assert.Equal(SupportedTypes.RunTypes, ex.SupportedTypes),
-            () => MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never)
+            () => MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never())
         );
     }
 }
