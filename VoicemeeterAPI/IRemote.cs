@@ -3,7 +3,7 @@
 
 using AtgDev.Voicemeeter;
 using PBLivingston.VoicemeeterAPI.Types;
-using PBLivingston.VoicemeeterAPI.Exceptions;
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 
 namespace PBLivingston.VoicemeeterAPI;
 
