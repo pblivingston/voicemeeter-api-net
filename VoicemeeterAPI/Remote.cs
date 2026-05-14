@@ -102,9 +102,9 @@ public sealed partial class Remote : IRemote
         if (!_lastState.LoggedIn)
             return _lastState;
 
-        var kind = GetKind(true);
-        var version = GetVersion(true);
-        bool mbRunning = IsMacroButtonsRunning(true);
+        var kind = GetInfo_Kind(true);
+        var version = GetInfo_Version(true);
+        bool mbRunning = Query_ButtonsRunning(true);
 
         if (kind != version.K)
             throw RemoteDispatch.ConnectionState_KindMismatch(_logger, kind, version);

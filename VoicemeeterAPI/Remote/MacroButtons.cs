@@ -4,7 +4,6 @@
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.EventManagement;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
 
 namespace PBLivingston.VoicemeeterAPI;
 
@@ -12,7 +11,7 @@ partial class Remote
 {
     #region MacroButtons Is Running
 
-    internal bool IsMacroButtonsRunning(bool nested)
+    internal bool Query_ButtonsRunning(bool nested)
     {
         LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
@@ -46,11 +45,11 @@ partial class Remote
         return running;
     }
 
-    public bool IsMacroButtonsRunning()
+    public bool IsButtonsRunning()
     {
         using var scope = BeginInstanceScope();
 
-        return IsMacroButtonsRunning(false);
+        return Query_ButtonsRunning(false);
     }
 
     #endregion
@@ -58,11 +57,11 @@ partial class Remote
     #region MacroButtons Is Dirty
 
     /// <inheritdoc cref="IRemote.IsButtonsDirty()"/>
-    internal bool IsButtonsDirty(bool nested)
+    internal bool Query_ButtonsDirty()
     {
         LoginGuard();
 
-        var level = nested ? LogLevel.Trace : LogLevel.Information;
+        var level = LogLevel.Trace;
 
         RemoteDispatch.Query_Start(_logger, level);
 
@@ -88,7 +87,7 @@ partial class Remote
     {
         using var scope = BeginInstanceScope();
 
-        return IsButtonsDirty(false);
+        return Query_ButtonsDirty();
     }
 
     #endregion

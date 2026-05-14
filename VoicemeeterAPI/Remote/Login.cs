@@ -49,7 +49,7 @@ partial class Remote
         ConnectionStateEventArgs state;
         using (BeginMethodScope())
         {
-            state = new(_loginStatus, IsMacroButtonsRunning(false), kind, version);
+            state = new(_loginStatus, Query_ButtonsRunning(false), kind, version);
         }
 
         if (state != _lastState)
@@ -146,7 +146,7 @@ partial class Remote
             if (!WaitForRunning(out Kind kind, out VmVersion version, timeoutMs, sleepMs))
                 throw RemoteDispatch.Run_Error(_logger, RunResponse.Timeout, appAdjusted);
 
-            ConnectionStateEventArgs state = new(_loginStatus, IsMacroButtonsRunning(), kind, version);
+            ConnectionStateEventArgs state = new(_loginStatus, Query_ButtonsRunning(false), kind, version);
             if (state != _lastState)
                 OnConnectionStateChanged(state);
         }
@@ -154,7 +154,7 @@ partial class Remote
         if (app == App.MacroButtons)
         {
             RemoteDispatch.YieldForSettle(_logger);
-            while (IsButtonsDirty()) Thread.Yield();
+            while (Query_ButtonsDirty()) Thread.Yield();
 
             var state = GetConnectionState();
             if (state != _lastState)
@@ -214,8 +214,8 @@ partial class Remote
 
         ((Kind, VmVersion), bool) Attempt()
         {
-            var k = GetKind(true);
-            var v = GetVersion(true);
+            var k = GetInfo_Kind(true);
+            var v = GetInfo_Version(true);
 
             if (k.IsValid() && v.IsValid() && k == v.K)
             {
@@ -230,7 +230,7 @@ partial class Remote
         if (success)
         {
             RemoteDispatch.YieldForSettle(_logger);
-            while (IsParamsDirty() || IsButtonsDirty()) Thread.Yield();
+            while (Query_ParamsDirty() || Query_ButtonsDirty()) Thread.Yield();
             return true;
         }
 

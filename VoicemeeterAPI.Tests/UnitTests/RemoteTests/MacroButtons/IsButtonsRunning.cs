@@ -13,7 +13,7 @@ public class IsMacroButtonsRunning : MockRemote
 
         MockLogin_Ok(kind, version);
 
-        var result = Remote.IsMacroButtonsRunning();
+        var result = Remote.IsButtonsRunning();
 
         Assert.Multiple(
             () => Assert.True(result),
@@ -29,7 +29,7 @@ public class IsMacroButtonsRunning : MockRemote
 
         MockLogin_MacroButtonsNotRunning(kind, version);
 
-        var result = Remote.IsMacroButtonsRunning();
+        var result = Remote.IsButtonsRunning();
 
         Assert.Multiple(
             () => Assert.False(result),
@@ -47,7 +47,7 @@ public class IsMacroButtonsRunning : MockRemote
 
         MockWrapper.Setup(w => w.MacroButtonIsRunning()).Returns(RunResponse.NotInstalled);
 
-        var ex = Assert.Throws<RemoteException<RunResponse>>(() => Remote.IsMacroButtonsRunning());
+        var ex = Assert.Throws<RemoteException<RunResponse>>(() => Remote.IsButtonsRunning());
 
         Assert.Multiple(
             () => Assert.Equal(RunResponse.NotInstalled, ex.Response),
@@ -58,7 +58,7 @@ public class IsMacroButtonsRunning : MockRemote
     [Fact]
     public void ThrowsException_AccessDenied_WhenLoginStatusLoggedOut()
     {
-        var ex = Assert.Throws<AccessDeniedException>(() => Remote.IsMacroButtonsRunning());
+        var ex = Assert.Throws<AccessDeniedException>(() => Remote.IsButtonsRunning());
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.LoggedOut, ex.LoginStatus),
@@ -71,7 +71,7 @@ public class IsMacroButtonsRunning : MockRemote
     {
         Remote.Dispose();
 
-        var ex = Assert.Throws<ObjectDisposedException>(() => Remote.IsMacroButtonsRunning());
+        var ex = Assert.Throws<ObjectDisposedException>(() => Remote.IsButtonsRunning());
 
         Assert.Multiple(
             () => Assert.Equal("Remote", ex.ObjectName),

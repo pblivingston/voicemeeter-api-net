@@ -12,7 +12,7 @@ partial class Remote
     #region Is Parameters Dirty
 
     /// <inheritdoc/>
-    public bool IsParamsDirty()
+    internal bool Query_ParamsDirty()
     {
         LoginGuard();
 
@@ -24,6 +24,14 @@ partial class Remote
             Response.Dirty => true,
             _ => throw new RemoteException($"ParamsDirty failed - {result}"),
         };
+    }
+
+    /// <inheritdoc/>
+    public bool IsParamsDirty()
+    {
+        using var scope = BeginInstanceScope();
+
+        return Query_ParamsDirty();
     }
 
     #endregion

@@ -12,7 +12,7 @@ partial class Remote
     #region Get Voicemeeter Kind
 
     /// <inheritdoc cref="IRemote.GetKind()"/>
-    internal Kind GetKind(bool nested)
+    internal Kind GetInfo_Kind(bool nested)
     {
         LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
@@ -48,7 +48,7 @@ partial class Remote
     {
         using var scope = BeginInstanceScope();
 
-        return GetKind(false);
+        return GetInfo_Kind(false);
     }
 
     #endregion
@@ -56,7 +56,7 @@ partial class Remote
     #region Get Voicemeeter Version
 
     /// <inheritdoc cref="IRemote.GetVersion()"/>
-    internal VmVersion GetVersion(bool nested)
+    internal VmVersion GetInfo_Version(bool nested)
     {
         LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
@@ -92,7 +92,7 @@ partial class Remote
     {
         using var scope = BeginInstanceScope();
 
-        return GetVersion(false);
+        return GetInfo_Version(false);
     }
 
     #endregion
