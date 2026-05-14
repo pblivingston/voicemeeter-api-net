@@ -1,4 +1,4 @@
-using PBLivingston.VoicemeeterAPI.Exceptions;
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;
@@ -21,7 +21,7 @@ public class GetParamString : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(value, result),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once)
+            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
         );
     }
 
@@ -44,26 +44,25 @@ public class GetParamString : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(response, ex.Response),
-            () => Assert.Equal(param, ex.Param),
-            () => Assert.Equal(value, ex.Value),
+            () => Assert.Equal(param, ex.VmParam),
+            () => Assert.Equal(value, ex.ReturnedValue),
             () => Assert.Equal(typeof(string), ex.ExpectedType),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once)
+            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
         );
     }
 
     [Fact]
-    public void ThrowsException_RemoteAccess_WhenLoginStatus_NotOk()
+    public void ThrowsException_AccessDenied_WhenLoginStatus_NotOk()
     {
         var param = "Mock.Param";
 
         MockLogin_VoicemeeterNotRunning();
 
-        var ex = Assert.Throws<RemoteAccessException>(() => Remote.GetParam(param, out string _));
+        var ex = Assert.Throws<AccessDeniedException>(() => Remote.GetParam(param, out string _));
 
         Assert.Multiple(
-            () => Assert.Equal("GetParam", ex.Method),
             () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never)
+            () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never())
         );
     }
 
@@ -78,7 +77,7 @@ public class GetParamString : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal("Remote", ex.ObjectName),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never)
+            () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never())
         );
     }
 }

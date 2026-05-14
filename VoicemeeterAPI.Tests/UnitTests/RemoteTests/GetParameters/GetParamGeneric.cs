@@ -1,4 +1,4 @@
-using PBLivingston.VoicemeeterAPI.Exceptions;
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Utilities;
 
@@ -22,7 +22,7 @@ public class GetParamGeneric : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(value, result),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once)
+            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
         );
     }
 
@@ -43,7 +43,7 @@ public class GetParamGeneric : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(expected, result),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once)
+            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
         );
     }
 
@@ -64,7 +64,7 @@ public class GetParamGeneric : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(expected, result),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once)
+            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
         );
     }
 
@@ -84,7 +84,7 @@ public class GetParamGeneric : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(value, result),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once)
+            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
         );
     }
 
@@ -97,15 +97,14 @@ public class GetParamGeneric : MockRemote
 
         MockLogin_Ok(kind, version);
 
-        var ex = Assert.Throws<TypeNotSupportedException<DateTime>>(() => ((IRemote)Remote).GetParam(param, out DateTime _));
+        var ex = Assert.Throws<TypeNotSupportedException>(() => ((IRemote)Remote).GetParam(param, out DateTime _));
 
         Assert.Multiple(
-            () => Assert.Equal($"GetParam", ex.Method),
-            () => Assert.Equal($"value", ex.Param),
+            () => Assert.Equal($"value", ex.ParamName),
             () => Assert.Equal(typeof(DateTime), ex.Type),
-            () => Assert.Equal(SupportedTypes.ParamTypes, ex.Supported),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<float>.IsAny), Times.Never),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never)
+            () => Assert.Equal(SupportedTypes.ParamTypes, ex.SupportedTypes),
+            () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<float>.IsAny), Times.Never()),
+            () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never())
         );
     }
 }

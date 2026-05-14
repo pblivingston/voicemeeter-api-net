@@ -1,4 +1,4 @@
-using PBLivingston.VoicemeeterAPI.Exceptions;
+using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;
@@ -51,30 +51,29 @@ public class IsParamsDirty : MockRemote
 
         MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Error);
 
-        var ex = Assert.Throws<RemoteException>(() => Remote.IsParamsDirty());
+        var ex = Assert.Throws<RemoteException<Response>>(() => Remote.IsParamsDirty());
 
         Assert.Multiple(
-            () => Assert.Equal("[VoicemeeterAPI] Remote Error: IsParamsDirty failed - Error", ex.Message),
+            () => Assert.Equal(Response.Error, ex.Response),
             () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2))
         );
     }
 
     [Fact]
-    public void ThrowsException_RemoteAccess_WhenLoginStatusNotOk()
+    public void ThrowsException_AccessDenied_WhenLoginStatusNotOk()
     {
         MockLogin_VoicemeeterNotRunning();
 
-        var ex = Assert.Throws<RemoteAccessException>(() => Remote.IsParamsDirty());
+        var ex = Assert.Throws<AccessDeniedException>(() => Remote.IsParamsDirty());
 
         Assert.Multiple(
-            () => Assert.Equal("IsParamsDirty", ex.Method),
             () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
-            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never)
+            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never())
         );
     }
 
     [Fact]
-    public void ThrowsException_ObjectDisposed_WhenRemoteIsDisposed()
+    public void ThrowsException_ObjectDisposed_WhenRemoteDisposed()
     {
         Remote.Dispose();
 
@@ -82,7 +81,7 @@ public class IsParamsDirty : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal("Remote", ex.ObjectName),
-            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never)
+            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never())
         );
     }
 }
