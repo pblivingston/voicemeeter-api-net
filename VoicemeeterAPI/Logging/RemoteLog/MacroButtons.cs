@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.Logging;
 
-namespace PBLivingston.VoicemeeterAPI.EventManagement.Logging;
+namespace PBLivingston.VoicemeeterAPI.Logging;
 
 internal static partial class RemoteLog
 {

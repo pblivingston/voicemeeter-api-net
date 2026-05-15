@@ -7,7 +7,6 @@ using AtgDev.Utils.Native;
 using AtgDev.Voicemeeter;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using PBLivingston.VoicemeeterAPI.EventManagement;
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Utilities;
 
@@ -107,20 +106,14 @@ public sealed partial class Remote : IRemote
         bool mbRunning = Query_ButtonsRunning(true);
 
         if (kind != version.K)
-            throw RemoteDispatch.ConnectionState_KindMismatch(_logger, kind, version);
+            throw On_ConnectionState_KindMismatch(kind, version);
 
         ConnectionStateEventArgs state = new(_loginStatus, mbRunning, kind, version);
 
         if (state != _lastState)
-            OnConnectionStateChanged(state);
+            On_ConnectionState_Changed(state);
 
         return state;
-    }
-
-    private void OnConnectionStateChanged(ConnectionStateEventArgs currentState, [CallerMemberName] string methodName = "")
-    {
-        RemoteDispatch.ConnectionState_Changed(_logger, this, ConnectionStateChanged, _lastState, currentState, methodName);
-        _lastState = currentState;
     }
 
     #endregion
@@ -139,23 +132,23 @@ public sealed partial class Remote : IRemote
 
         if (_isDisposed)
         {
-            RemoteDispatch.Dispose_AlreadyDisposed(_logger);
+            On_Dispose_AlreadyDisposed();
             return;
         }
 
         if (_lastState.LoggedIn)
         {
-            RemoteDispatch.Dispose_LoggedIn(_logger, _loginStatus);
+            On_Dispose_LoggedIn(_loginStatus);
 
             using (BeginMethodScope())
                 Logout(timeoutMs: 0, nested: true);
         }
 
-        RemoteDispatch.Dispose_Start(_logger);
+        On_Dispose_Start();
 
         _vmrApi.Dispose();
 
-        RemoteDispatch.Dispose_Success(_logger);
+        On_Dispose_Success();
         _isDisposed = true;
     }
 
@@ -172,10 +165,10 @@ public sealed partial class Remote : IRemote
         using var scope = BeginMethodScope(methodName);
 
         if (_isDisposed)
-            throw RemoteDispatch.Guard_ObjectDisposed(_logger);
+            throw On_Guard_ObjectDisposed();
 
         if (_loginStatus > requiredStatus)
-            throw RemoteDispatch.Guard_AccessDenied(_logger, _loginStatus);
+            throw On_Guard_AccessDenied(_loginStatus);
     }
 
     #endregion
@@ -186,7 +179,7 @@ public sealed partial class Remote : IRemote
     {
         using var scope = BeginMethodScope(methodName);
 
-        RemoteDispatch.Retry_Start(_logger);
+        On_Retry_Start();
 
         var attempt = 1;
         var timeout = TimeSpan.FromMilliseconds(timeoutMs);
@@ -195,17 +188,17 @@ public sealed partial class Remote : IRemote
         {
             if (action())
             {
-                RemoteDispatch.Retry_Success(_logger, attempt);
+                On_Retry_Success(attempt);
                 return true;
             }
 
-            RemoteDispatch.Retry_Attempt(_logger, attempt++);
+            On_Retry_Attempt(attempt++);
 
             Thread.Sleep(sleepMs);
         }
         while (stopwatch.Elapsed < timeout);
 
-        RemoteDispatch.Retry_Timeout(_logger, attempt);
+        On_Retry_Timeout(attempt);
         return false;
     }
 
@@ -213,7 +206,7 @@ public sealed partial class Remote : IRemote
     {
         using var scope = BeginMethodScope(methodName);
 
-        RemoteDispatch.Retry_Start(_logger);
+        On_Retry_Start();
 
         (T, bool Success) res;
         var attempt = 1;
@@ -225,17 +218,17 @@ public sealed partial class Remote : IRemote
 
             if (res.Success)
             {
-                RemoteDispatch.Retry_Success(_logger, attempt);
+                On_Retry_Success(attempt);
                 return res;
             }
 
-            RemoteDispatch.Retry_Attempt(_logger, attempt++);
+            On_Retry_Attempt(attempt++);
 
             Thread.Sleep(sleepMs);
         }
         while (stopwatch.Elapsed < timeout);
 
-        RemoteDispatch.Retry_Timeout(_logger, attempt);
+        On_Retry_Timeout(attempt);
         return res;
     }
 

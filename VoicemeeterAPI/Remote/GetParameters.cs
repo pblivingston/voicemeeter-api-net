@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using PBLivingston.VoicemeeterAPI.Types;
-using PBLivingston.VoicemeeterAPI.EventManagement;
 using PBLivingston.VoicemeeterAPI.Utilities;
 using Microsoft.Extensions.Logging;
 
@@ -19,22 +18,22 @@ partial class Remote
 
         var level = LogLevel.Trace;
 
-        RemoteDispatch.Query_Start(_logger, level);
+        On_Query_Start(level);
 
         var result = _vmrApi.IsParametersDirty();
 
         switch (result)
         {
             case Response.Ok:
-                RemoteDispatch.Query_Success(_logger, level, Response.Ok);
+                On_Query_Success(Response.Ok, level);
                 return false;
 
             case Response.Dirty:
-                OnParamsDirty(level);
+                On_ParamsDirty(level);
                 return true;
 
             default:
-                throw RemoteDispatch.Method_Error(_logger, result);
+                throw On_Method_Error(result);
         }
     }
 
@@ -55,12 +54,12 @@ partial class Remote
     {
         LoginGuard();
 
-        RemoteDispatch.GetParam_Start(_logger, param);
+        On_GetParam_Start(param);
 
         var result = _vmrApi.GetParameter(param, out value);
 
         if (result != Response.Ok)
-            throw RemoteDispatch.GetParam_Error(_logger, result, param, value, typeof(float));
+            throw On_GetParam_Error(result, param, value, typeof(float));
     }
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
@@ -70,7 +69,7 @@ partial class Remote
 
         GetParam_Float(param, out value);
 
-        RemoteDispatch.GetParam_Success(_logger, param, value);
+        On_GetParam_Success(param, value);
     }
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
@@ -83,9 +82,9 @@ partial class Remote
         value = Convert.ToInt32(val);
 
         if (Math.Abs(val - value) > 0.0001f || value < 0)
-            throw RemoteDispatch.GetParam_Error(_logger, Response.TypeMismatch, param, val, typeof(int));
+            throw On_GetParam_Error(Response.TypeMismatch, param, val, typeof(int));
 
-        RemoteDispatch.GetParam_Success(_logger, param, value);
+        On_GetParam_Success(param, value);
     }
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
@@ -98,11 +97,11 @@ partial class Remote
         var v = Convert.ToInt32(val);
 
         if (Math.Abs(val - v) > 0.0001f || v is not (0 or 1))
-            throw RemoteDispatch.GetParam_Error(_logger, Response.TypeMismatch, param, val, typeof(bool));
+            throw On_GetParam_Error(Response.TypeMismatch, param, val, typeof(bool));
 
         value = v == 1;
 
-        RemoteDispatch.GetParam_Success(_logger, param, value);
+        On_GetParam_Success(param, value);
     }
 
     #endregion
@@ -114,14 +113,14 @@ partial class Remote
     {
         LoginGuard();
 
-        RemoteDispatch.GetParam_Start(_logger, param);
+        On_GetParam_Start(param);
 
         var result = _vmrApi.GetParameter(param, out value);
 
         if (result != Response.Ok)
-            throw RemoteDispatch.GetParam_Error(_logger, result, param, value, typeof(string));
+            throw On_GetParam_Error(result, param, value, typeof(string));
 
-        RemoteDispatch.GetParam_Success(_logger, param, value);
+        On_GetParam_Success(param, value);
     }
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
@@ -165,11 +164,6 @@ partial class Remote
             return;
         }
 
-        throw GeneralDispatch.TypeNotSupported(_logger, typeof(T), nameof(value), SupportedTypes.ParamTypes);
-    }
-
-    private void OnParamsDirty(LogLevel level)
-    {
-        RemoteDispatch.Dirty_Success(_logger, level, this, ParamsDirty, nameof(IsParamsDirty));
+        throw GeneralDispatch.On_TypeNotSupported(_logger, typeof(T), nameof(value), SupportedTypes.ParamTypes);
     }
 }

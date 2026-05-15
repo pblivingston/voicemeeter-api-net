@@ -1,4 +1,4 @@
-using PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
+using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Utilities;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;

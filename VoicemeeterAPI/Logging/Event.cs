@@ -1,7 +1,7 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-namespace PBLivingston.VoicemeeterAPI.EventManagement;
+namespace PBLivingston.VoicemeeterAPI.Logging;
 
 internal enum Event
 {
@@ -16,7 +16,10 @@ internal enum Event
 
     ConnectionState_Changed = 1000, // info
     ConnectionState_KindMismatch, // critical
-    ConnectionState_StateMismatch, // trace/warning
+    ConnectionState_StateMismatch_LoginStatus, // trace/warning
+    ConnectionState_StateMismatch_MacroButtonsIsRunning, // trace/warning
+    ConnectionState_StateMismatch_RunningKind, // trace/warning
+    ConnectionState_StateMismatch_RunningVersion, // trace/warning
 
     Dispose_Start = 1010, // debug
     Dispose_LoggedIn, // debug
@@ -51,15 +54,20 @@ internal enum Event
     // 1200-1299 Remote - General Information
 
     GetInfo_Start = 1200, // trace/info
-    GetInfo_Success, // trace/info
+    GetInfo_Success_Kind, // trace/info
+    GetInfo_Success_Version, // trace/info
     GetInfo_Error, // error + throw
 
 
     // 1300-1399 Remote - Get Parameters
 
     GetParam_Start = 1300, // trace
-    GetParam_Success, // trace
-    GetParam_Error, // error + throw
+    GetParam_Success_Float, // trace
+    GetParam_Success_Int, // trace
+    GetParam_Success_Bool, // trace
+    GetParam_Success_String, // trace
+    GetParam_Error_Float, // error + throw
+    GetParam_Error_String, // error + throw
 
 
     // 1400-1499 Remote - Set Parameters
@@ -77,11 +85,14 @@ internal enum Event
     // 1900-1999 Remote - Misc.
 
     Method_Success = 1900, // info
-    Method_Error, // error + throw
-    YieldForSettle, // debug
+    Method_Error_Response, // error + throw
+    Method_Error_LoginResponse, // error + throw
+    Method_Error_RunResponse, // error + throw
+    Method_YieldForSettle = 1909, // debug
 
     Query_Start = 1910, // trace/info
-    Query_Success, // trace/info
+    Query_Success_Response, // trace/info
+    Query_Success_RunResponse, // trace/info
 
     // 2000-2999 Voicemeeter object model logging
 

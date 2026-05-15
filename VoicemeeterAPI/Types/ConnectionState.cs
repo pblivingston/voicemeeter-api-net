@@ -52,7 +52,7 @@ public class ConnectionStateEventArgs(LoginResponse loginStatus, bool macroButto
 
     public string MemberString => $"LoginStatus: {LoginStatus}; MacroButtonsIsRunning: {MacroButtonsIsRunning}; RunningKind: {RunningKind}; RunningVersion: {RunningVersion}";
 
-    public bool Equals(ConnectionStateEventArgs other)
+    public bool Equals(ConnectionStateEventArgs? other)
         => other is not null
         && LoginStatus == other.LoginStatus
         && MacroButtonsIsRunning == other.MacroButtonsIsRunning

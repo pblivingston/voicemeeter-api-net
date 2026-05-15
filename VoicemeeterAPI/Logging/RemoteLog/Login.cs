@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using Microsoft.Extensions.Logging;
+using PBLivingston.VoicemeeterAPI.Types;
 
-namespace PBLivingston.VoicemeeterAPI.EventManagement.Logging;
+namespace PBLivingston.VoicemeeterAPI.Logging;
 
 internal static partial class RemoteLog
 {
@@ -43,7 +44,7 @@ internal static partial class RemoteLog
         Level = LogLevel.Error,
         Message = "Logout timed out. Last reponse: {LastResponse}"
     )]
-    public static partial void Logout_Timeout(ILogger logger, string lastResponse);
+    public static partial void Logout_Timeout(ILogger logger, LoginResponse lastResponse);
 
     #endregion
 
@@ -53,17 +54,17 @@ internal static partial class RemoteLog
         EventId = (int)Event.Run_Start,
         EventName = nameof(Event.Run_Start),
         Level = LogLevel.Information,
-        Message = "Running application: {AppName}..."
+        Message = "Running application: {App}..."
     )]
-    public static partial void Run_Start(ILogger logger, string appName);
+    public static partial void Run_Start(ILogger logger, App app);
 
     [LoggerMessage(
         EventId = (int)Event.Run_Error,
         EventName = nameof(Event.Run_Error),
         Level = LogLevel.Error,
-        Message = "Run failed. Response: {Response}; Requested application: {AppName}"
+        Message = "Run failed. Response: {Response}; Requested application: {App}"
     )]
-    public static partial void Run_Error(ILogger logger, string response, string appName);
+    public static partial void Run_Error(ILogger logger, RunResponse response, App app);
 
     #endregion
 
@@ -81,9 +82,9 @@ internal static partial class RemoteLog
         EventId = (int)Event.WaitForRunning_Detected,
         EventName = nameof(Event.WaitForRunning_Detected),
         Level = LogLevel.Information,
-        Message = "Voicemeeter {KindName} v{VersionString} is running."
+        Message = "Voicemeeter {Kind} v{Version} is running."
     )]
-    public static partial void WaitForRunning_Detected(ILogger logger, string kindName, string versionString);
+    public static partial void WaitForRunning_Detected(ILogger logger, Kind kind, VmVersion version);
 
     [LoggerMessage(
         EventId = (int)Event.WaitForRunning_Timeout,

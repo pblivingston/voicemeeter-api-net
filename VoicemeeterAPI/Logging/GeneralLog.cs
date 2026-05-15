@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using Microsoft.Extensions.Logging;
+using PBLivingston.VoicemeeterAPI.Types;
 
-namespace PBLivingston.VoicemeeterAPI.EventManagement.Logging;
+namespace PBLivingston.VoicemeeterAPI.Logging;
 
 internal static partial class GeneralLog
 {
@@ -11,9 +12,9 @@ internal static partial class GeneralLog
         EventId = (int)Event.BitAdjust,
         EventName = nameof(Event.BitAdjust),
         Level = LogLevel.Debug,
-        Message = "App adjusted for OS bitness. Received: {AppNameBefore}; Returned: {AppNameAfter}"
+        Message = "App adjusted for OS bitness. Received: {AppBefore}; Returned: {AppAfter}"
     )]
-    public static partial void BitAdjust(ILogger logger, string appNameBefore, string appNameAfter);
+    public static partial void BitAdjust(ILogger logger, App appBefore, App appAfter);
 
     [LoggerMessage(
         EventId = (int)Event.TypeNotSupported,

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using PBLivingston.VoicemeeterAPI.Types;
-using PBLivingston.VoicemeeterAPI.EventManagement;
 using Microsoft.Extensions.Logging;
 
 namespace PBLivingston.VoicemeeterAPI;
@@ -19,7 +18,7 @@ partial class Remote
         var info = nested ? LogLevel.Trace : LogLevel.Information;
         var warning = nested ? LogLevel.Trace : LogLevel.Warning;
 
-        RemoteDispatch.GetInfo_Start(_logger, info, typeof(Kind));
+        On_GetInfo_Start(typeof(Kind), info);
 
         var result = _vmrApi.GetVoicemeeterType(out int k);
 
@@ -33,12 +32,12 @@ partial class Remote
             _loginStatus = LoginResponse.VoicemeeterNotRunning;
             kind = Kind.None;
         }
-        else throw RemoteDispatch.GetInfo_Error(_logger, result, k);
+        else throw On_GetInfo_Error(result, k);
 
-        RemoteDispatch.GetInfo_Success(_logger, info, kind);
+        On_GetInfo_Success(kind, info);
 
         if (kind != _lastState.RunningKind)
-            RemoteDispatch.ConnectionState_StateMismatch(_logger, warning, nameof(_lastState.RunningKind), _lastState.RunningKind);
+            On_ConnectionState_StateMismatch(kind, warning);
 
         return kind;
     }
@@ -63,7 +62,7 @@ partial class Remote
         var info = nested ? LogLevel.Trace : LogLevel.Information;
         var warning = nested ? LogLevel.Trace : LogLevel.Warning;
 
-        RemoteDispatch.GetInfo_Start(_logger, info, typeof(VmVersion));
+        On_GetInfo_Start(typeof(VmVersion), info);
 
         var result = _vmrApi.GetVoicemeeterVersion(out int v);
 
@@ -77,12 +76,12 @@ partial class Remote
         {
             _loginStatus = LoginResponse.VoicemeeterNotRunning;
         }
-        else throw RemoteDispatch.GetInfo_Error(_logger, result, v);
+        else throw On_GetInfo_Error(result, v);
 
-        RemoteDispatch.GetInfo_Success(_logger, info, version);
+        On_GetInfo_Success(version, info);
 
         if (version != _lastState.RunningVersion)
-            RemoteDispatch.ConnectionState_StateMismatch(_logger, warning, nameof(_lastState.RunningVersion), _lastState.RunningVersion);
+            On_ConnectionState_StateMismatch(version, warning);
 
         return version;
     }

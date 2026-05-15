@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using PBLivingston.VoicemeeterAPI.Types;
-using PBLivingston.VoicemeeterAPI.EventManagement;
 using Microsoft.Extensions.Logging;
 
 namespace PBLivingston.VoicemeeterAPI;
@@ -18,7 +17,7 @@ partial class Remote
         var info = nested ? LogLevel.Trace : LogLevel.Information;
         var warning = nested ? LogLevel.Trace : LogLevel.Warning;
 
-        RemoteDispatch.Query_Start(_logger, info);
+        On_Query_Start(info);
 
         var result = _vmrApi.MacroButtonIsRunning();
 
@@ -26,21 +25,21 @@ partial class Remote
         switch (result)
         {
             case RunResponse.Ok:
-                RemoteDispatch.Query_Success(_logger, info, RunResponse.Ok);
+                On_Query_Success(RunResponse.Ok, info);
                 running = true;
                 break;
 
             case RunResponse.NotRunning:
-                RemoteDispatch.MbRunning_NotRunning(_logger, warning);
+                On_MbRunning_NotRunning(warning);
                 running = false;
                 break;
 
             default:
-                throw RemoteDispatch.Method_Error(_logger, result);
+                throw On_Method_Error(result);
         }
 
         if (running != _lastState.MacroButtonsIsRunning)
-            RemoteDispatch.ConnectionState_StateMismatch(_logger, warning, nameof(_lastState.MacroButtonsIsRunning), _lastState.MacroButtonsIsRunning);
+            On_ConnectionState_StateMismatch(running, warning);
 
         return running;
     }
@@ -63,22 +62,22 @@ partial class Remote
 
         var level = LogLevel.Trace;
 
-        RemoteDispatch.Query_Start(_logger, level);
+        On_Query_Start(level);
 
         var result = _vmrApi.MacroButtonIsDirty();
 
         switch (result)
         {
             case Response.Ok:
-                RemoteDispatch.Query_Success(_logger, level, Response.Ok);
+                On_Query_Success(Response.Ok, level);
                 return false;
 
             case Response.Dirty:
-                OnButtonsDirty(level);
+                On_ButtonsDirty(level);
                 return true;
 
             default:
-                throw RemoteDispatch.Method_Error(_logger, result);
+                throw On_Method_Error(result);
         }
     }
 
@@ -91,9 +90,4 @@ partial class Remote
     }
 
     #endregion
-
-    private void OnButtonsDirty(LogLevel level)
-    {
-        RemoteDispatch.Dirty_Success(_logger, level, this, ButtonsDirty, nameof(IsButtonsDirty));
-    }
 }

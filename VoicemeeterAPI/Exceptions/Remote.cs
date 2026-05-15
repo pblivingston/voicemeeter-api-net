@@ -3,7 +3,7 @@
 
 using PBLivingston.VoicemeeterAPI.Types;
 
-namespace PBLivingston.VoicemeeterAPI.EventManagement.Exceptions;
+namespace PBLivingston.VoicemeeterAPI.Exceptions;
 
 public class RemoteException(string message)
     : VmApiException(message)

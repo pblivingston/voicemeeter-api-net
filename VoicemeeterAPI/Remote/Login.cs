@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 using PBLivingston.VoicemeeterAPI.Types;
-using PBLivingston.VoicemeeterAPI.EventManagement;
 using PBLivingston.VoicemeeterAPI.Utilities;
 using System.Runtime.CompilerServices;
 
@@ -19,10 +18,10 @@ partial class Remote
 
         LoginGuard(requiredStatus: LoginResponse.LoggedOut);
 
-        RemoteDispatch.Login_Start(_logger);
+        On_Login_Start();
 
         if (_lastState.LoggedIn)
-            throw RemoteDispatch.Method_Error(_logger, LoginResponse.AlreadyLoggedIn);
+            throw On_Method_Error(LoginResponse.AlreadyLoggedIn);
 
         _loginStatus = _vmrApi.Login();
 
@@ -33,17 +32,17 @@ partial class Remote
         {
             case LoginResponse.Ok:
                 if (!WaitForRunning(out kind, out version, timeoutMs, sleepMs))
-                    throw RemoteDispatch.Method_Error(_logger, LoginResponse.Timeout);
+                    throw On_Method_Error(LoginResponse.Timeout);
 
-                RemoteDispatch.Method_Success(_logger);
+                On_Method_Success();
                 break;
 
             case LoginResponse.VoicemeeterNotRunning:
-                RemoteDispatch.Login_VmNotRunning(_logger);
+                On_Login_VmNotRunning();
                 break;
 
             default:
-                throw RemoteDispatch.Method_Error(_logger, _loginStatus);
+                throw On_Method_Error(_loginStatus);
         }
 
         ConnectionStateEventArgs state;
@@ -53,7 +52,7 @@ partial class Remote
         }
 
         if (state != _lastState)
-            OnConnectionStateChanged(state);
+            On_ConnectionState_Changed(state);
 
         return _loginStatus;
     }
@@ -67,11 +66,11 @@ partial class Remote
     {
         LoginGuard(requiredStatus: LoginResponse.Unknown);
 
-        RemoteDispatch.Logout_Start(_logger);
+        On_Logout_Start();
 
         if (_loginStatus == LoginResponse.LoggedOut)
         {
-            RemoteDispatch.Method_Error(_logger, LoginResponse.AlreadyLoggedOut);
+            On_Method_Error(LoginResponse.AlreadyLoggedOut);
             return _loginStatus;
         }
 
@@ -84,7 +83,7 @@ partial class Remote
 
             if (_loginStatus == LoginResponse.LoggedOut)
             {
-                RemoteDispatch.Method_Success(_logger, nameof(Logout));
+                On_Method_Success(methodName: nameof(Logout));
                 return (result, true);
             }
 
@@ -93,7 +92,7 @@ partial class Remote
 
         (LoginResponse response, bool success) = Retry(Attempt, timeoutMs, sleepMs);
         if (!success)
-            RemoteDispatch.Logout_Timeout(_logger, response);
+            On_Logout_Timeout(response);
 
         if (!nested)
         {
@@ -104,7 +103,7 @@ partial class Remote
                 _lastState.RunningVersion
             );
             if (state != _lastState)
-                OnConnectionStateChanged(state);
+                On_ConnectionState_Changed(state);
         }
 
         return _loginStatus;
@@ -132,33 +131,33 @@ partial class Remote
         var appAdjusted = app.BitAdjust(_vmrApi.Is64Bit);
 
         if (appAdjusted != app)
-            GeneralDispatch.BitAdjust(_logger, app, appAdjusted);
+            GeneralDispatch.On_BitAdjust(_logger, app, appAdjusted);
 
-        RemoteDispatch.Run_Start(_logger, appAdjusted);
+        On_Run_Start(appAdjusted);
 
         var result = _vmrApi.RunVoicemeeter((int)appAdjusted);
 
         if (result != RunResponse.Ok)
-            throw RemoteDispatch.Run_Error(_logger, result, appAdjusted);
+            throw On_Run_Error(result, appAdjusted);
 
         if (app <= App.Potatox64)
         {
             if (!WaitForRunning(out Kind kind, out VmVersion version, timeoutMs, sleepMs))
-                throw RemoteDispatch.Run_Error(_logger, RunResponse.Timeout, appAdjusted);
+                throw On_Run_Error(RunResponse.Timeout, appAdjusted);
 
             ConnectionStateEventArgs state = new(_loginStatus, Query_ButtonsRunning(false), kind, version);
             if (state != _lastState)
-                OnConnectionStateChanged(state);
+                On_ConnectionState_Changed(state);
         }
 
         if (app == App.MacroButtons)
         {
-            RemoteDispatch.YieldForSettle(_logger);
+            On_Method_YieldForSettle();
             while (Query_ButtonsDirty()) Thread.Yield();
 
             var state = GetConnectionState();
             if (state != _lastState)
-                OnConnectionStateChanged(state);
+                On_ConnectionState_Changed(state);
         }
     }
 
@@ -174,7 +173,7 @@ partial class Remote
     public void Run(string app, int timeoutMs = 2000, int sleepMs = 100)
     {
         if (!Enum.TryParse(app, true, out App a))
-            throw GeneralDispatch.CannotParseAsType(_logger, app, typeof(App), nameof(app));
+            throw GeneralDispatch.On_CannotParseAsType(_logger, app, typeof(App), nameof(app));
 
         Run(a, timeoutMs, sleepMs);
     }
@@ -198,7 +197,7 @@ partial class Remote
                 break;
             default:
                 using (BeginInstanceScope())
-                    throw GeneralDispatch.TypeNotSupported(_logger, typeof(T), nameof(app), SupportedTypes.RunTypes);
+                    throw GeneralDispatch.On_TypeNotSupported(_logger, typeof(T), nameof(app), SupportedTypes.RunTypes);
         }
     }
 
@@ -210,7 +209,7 @@ partial class Remote
     {
         using var scope = BeginMethodScope(methodName);
 
-        RemoteDispatch.WaitForRunning_Start(_logger);
+        On_WaitForRunning_Start();
 
         ((Kind, VmVersion), bool) Attempt()
         {
@@ -219,7 +218,7 @@ partial class Remote
 
             if (k.IsValid() && v.IsValid() && k == v.K)
             {
-                RemoteDispatch.WaitForRunning_Detected(_logger, k, v);
+                On_WaitForRunning_Detected(k, v);
                 return ((k, v), true);
             }
 
@@ -229,12 +228,12 @@ partial class Remote
         ((kind, version), bool success) = Retry(Attempt, timeoutMs, sleepMs);
         if (success)
         {
-            RemoteDispatch.YieldForSettle(_logger);
+            On_Method_YieldForSettle();
             while (Query_ParamsDirty() || Query_ButtonsDirty()) Thread.Yield();
             return true;
         }
 
-        RemoteDispatch.WaitForRunning_Timeout(_logger);
+        On_WaitForRunning_Timeout();
         return false;
     }
 
