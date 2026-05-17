@@ -1,15 +1,15 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.SemVersionTests;
+
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
-
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.SemVersionTests;
 
 public class EqualityOrdering
 {
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Equals_Version_ReturnsExpected_True(Case scenario, CaseRecord data)
+    public void EqualsVersionReturnsExpectedTrue(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked | CaseTag.Invalid_Sems;
+        var skipTags = CaseTag.InvalidSemPacked | CaseTag.InvalidSems;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var versionA = new SemVersion(data.SemPacked);
@@ -20,13 +20,16 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Equals_Version_ReturnsExpected_False(Case scenario, CaseRecord data)
+    public void EqualsVersionReturnsExpectedFalse(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0006_0102;
-        if (data.SemPacked == testPacked) { testPacked = 0x0009_0901; }
+        if (data.SemPacked == testPacked)
+        {
+            testPacked = 0x0009_0901;
+        }
 
         var versionA = new SemVersion(data.SemPacked);
         var versionB = new SemVersion(testPacked);
@@ -36,9 +39,9 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Equals_Object_ReturnsExpected_True(Case scenario, CaseRecord data)
+    public void EqualsObjectReturnsExpectedTrue(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked | CaseTag.Invalid_Sems;
+        var skipTags = CaseTag.InvalidSemPacked | CaseTag.InvalidSems;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var versionA = new SemVersion(data.SemPacked);
@@ -49,13 +52,16 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Equals_Object_ReturnsExpected_False_Val(Case scenario, CaseRecord data)
+    public void EqualsObjectReturnsExpectedFalseVal(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0006_0102;
-        if (data.SemPacked == testPacked) { testPacked = 0x0009_0901; }
+        if (data.SemPacked == testPacked)
+        {
+            testPacked = 0x0009_0901;
+        }
 
         var versionA = new SemVersion(data.SemPacked);
         var versionB = (object)new SemVersion(testPacked);
@@ -65,22 +71,22 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Equals_Object_ReturnsExpected_False_Obj(Case scenario, CaseRecord data)
+    public void EqualsObjectReturnsExpectedFalseObj(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packs;
+        var skipTags = CaseTag.InvalidPacks;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var sem = new SemVersion(data.SemPacked);
-        var vm = new VmVersion(data.Packed);
+        var vm = new VmVersion(data.VmPacked);
 
         Assert.False(sem.Equals(vm));
     }
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void GetHashCode_ReturnsExpected_Packed(Case scenario, CaseRecord data)
+    public void GetHashCodeReturnsExpectedPacked(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = new SemVersion(data.SemPacked);
@@ -90,9 +96,9 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CompareTo_Version_ReturnsExpected_Int(Case scenario, CaseRecord data)
+    public void CompareToVersionReturnsExpectedInt(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0003_0405;
@@ -106,9 +112,9 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CompareTo_Object_ReturnsExpected_Int(Case scenario, CaseRecord data)
+    public void CompareToObjectReturnsExpectedInt(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0003_0405;
@@ -122,22 +128,22 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CompareTo_Object_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void CompareToObjectThrowsExceptionArgument(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packs;
+        var skipTags = CaseTag.InvalidPacks;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var sem = new SemVersion(data.SemPacked);
-        var vm = new VmVersion(data.Packed);
+        var vm = new VmVersion(data.VmPacked);
 
         Assert.Throws<ArgumentException>(() => ((IComparable)sem).CompareTo(vm));
     }
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void EqualTo_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void EqualToReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0003_0405;
@@ -151,9 +157,9 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void NotEqualTo_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void NotEqualToReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0003_0405;
@@ -167,9 +173,9 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void LessThan_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void LessThanReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0003_0405;
@@ -183,9 +189,9 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void GreaterThan_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void GreaterThanReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0003_0405;
@@ -199,9 +205,9 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void LessThanOrEqualTo_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void LessThanOrEqualToReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0003_0405;
@@ -215,9 +221,9 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void GreaterThanOrEqualTo_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void GreaterThanOrEqualToReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0003_0405;

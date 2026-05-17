@@ -1,9 +1,9 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using PBLivingston.VoicemeeterAPI.Types;
-
 namespace PBLivingston.VoicemeeterAPI.Exceptions;
+
+using PBLivingston.VoicemeeterAPI.Types;
 
 public class VmApiException : Exception
 {
@@ -26,15 +26,11 @@ public class VmApiArgumentException : VmApiException
 
     public VmApiArgumentException(string message, string paramName, Exception innerException)
         : base($"{message}\r\nParameter name: {paramName}", innerException)
-    {
-        ParamName = paramName;
-    }
+        => this.ParamName = paramName;
 
     public VmApiArgumentException(string message, string paramName)
         : base($"{message}\r\nParameter name: {paramName}")
-    {
-        ParamName = paramName;
-    }
+        => this.ParamName = paramName;
 
     public VmApiArgumentException(string message, Exception innerException)
         : base(message, innerException)
@@ -55,9 +51,7 @@ public class VmApiArgumentOutOfRangeException : VmApiArgumentException
 
     public VmApiArgumentOutOfRangeException(string paramName, object actualValue, string message)
         : base($"'{paramName}' was out of range. {message}.")
-    {
-        ActualValue = actualValue;
-    }
+        => this.ActualValue = actualValue;
 
     public VmApiArgumentOutOfRangeException(string paramName, string message)
         : base($"'{paramName}' was out of range. {message}.", paramName)
@@ -113,15 +107,23 @@ public class PartsOutOfRangeException : VmApiArgumentException
         Patch: {patch}; Parameter name: {patchName}
         """)
     {
-        Major = major; Minor = minor; Patch = patch;
-        MajorName = majorName; MinorName = minorName; PatchName = patchName;
+        this.Major = major;
+        this.Minor = minor;
+        this.Patch = patch;
+        this.MajorName = majorName;
+        this.MinorName = minorName;
+        this.PatchName = patchName;
     }
 
     public PartsOutOfRangeException(string message, int major, int minor, int patch, string majorName = "maj", string minorName = "min", string patchName = "pat")
         : base(message)
     {
-        Major = major; Minor = minor; Patch = patch;
-        MajorName = majorName; MinorName = minorName; PatchName = patchName;
+        this.Major = major;
+        this.Minor = minor;
+        this.Patch = patch;
+        this.MajorName = majorName;
+        this.MinorName = minorName;
+        this.PatchName = patchName;
     }
 
     public PartsOutOfRangeException(string message)
@@ -147,7 +149,8 @@ public class PartsOutOfRangeException<T> : PartsOutOfRangeException
         Patch: {patch}; Parameter name: {patchName}
         """, major, minor, patch, majorName, minorName, patchName)
     {
-        Kind = kind; KindName = kindName;
+        this.Kind = kind;
+        this.KindName = kindName;
     }
 
     public PartsOutOfRangeException(T kind, SemVersion semantic, string kindName = "kind", string semanticName = "sem")
@@ -158,8 +161,10 @@ public class PartsOutOfRangeException<T> : PartsOutOfRangeException
         Semantic: {semantic}; Parameter name: {semanticName}
         """)
     {
-        Kind = kind; Semantic = semantic;
-        KindName = kindName; SemanticName = semanticName;
+        this.Kind = kind;
+        this.Semantic = semantic;
+        this.KindName = kindName;
+        this.SemanticName = semanticName;
     }
 }
 

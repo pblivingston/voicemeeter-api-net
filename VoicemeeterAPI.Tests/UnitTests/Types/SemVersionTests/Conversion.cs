@@ -1,19 +1,19 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.SemVersionTests;
+
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
-
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.SemVersionTests;
 
 public class Conversion
 {
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastFrom_VmVersion_ReturnsExpected_Packed(Case scenario, CaseRecord data)
+    public void CastFromVmVersionReturnsExpectedPacked(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packs;
+        var skipTags = CaseTag.InvalidPacks;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var vm = new VmVersion(data.Packed);
+        var vm = new VmVersion(data.VmPacked);
 
         var version = (SemVersion)vm;
 
@@ -22,9 +22,9 @@ public class Conversion
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastTo_Int_ReturnsExpected_Packed(Case scenario, CaseRecord data)
+    public void CastToIntReturnsExpectedPacked(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = new SemVersion(data.SemPacked);
@@ -34,9 +34,9 @@ public class Conversion
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastFrom_Int_ReturnsExpected_Packed(Case scenario, CaseRecord data)
+    public void CastFromIntReturnsExpectedPacked(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = (SemVersion)data.SemPacked;
@@ -46,9 +46,9 @@ public class Conversion
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastFrom_Int_ThrowsException_SemPackedOutOfRange(Case scenario, CaseRecord data)
+    public void CastFromIntThrowsExceptionSemPackedOutOfRange(CaseName scenario, CaseRecord data)
     {
-        var runTags = CaseTag.Invalid_SemPacked;
+        var runTags = CaseTag.InvalidSemPacked;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
         var ex = Assert.Throws<SemPackedOutOfRangeException>(() => (SemVersion)data.SemPacked);
@@ -58,9 +58,9 @@ public class Conversion
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastTo_TupleSems_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void CastToTupleSemsReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked | CaseTag.SemsIn;
+        var skipTags = CaseTag.InvalidSemPacked | CaseTag.SemsIn;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = new SemVersion(data.SemPacked);
@@ -76,9 +76,9 @@ public class Conversion
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastFrom_TupleSems_ReturnsExpected_Packed(Case scenario, CaseRecord data)
+    public void CastFromTupleSemsReturnsExpectedPacked(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Sems;
+        var skipTags = CaseTag.InvalidSems;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = (SemVersion)(data.Major, data.Minor, data.Patch);
@@ -88,9 +88,9 @@ public class Conversion
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastFrom_TupleSems_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
+    public void CastFromTupleSemsThrowsExceptionPartsOutOfRange(CaseName scenario, CaseRecord data)
     {
-        var runTags = CaseTag.Invalid_Sems;
+        var runTags = CaseTag.InvalidSems;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
         var ex = Assert.Throws<PartsOutOfRangeException>(() => (SemVersion)(data.Major, data.Minor, data.Patch));

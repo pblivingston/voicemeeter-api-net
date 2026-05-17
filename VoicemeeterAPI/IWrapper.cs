@@ -1,37 +1,37 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
+namespace PBLivingston.VoicemeeterAPI;
+
 using AtgDev.Voicemeeter;
 using PBLivingston.VoicemeeterAPI.Types;
-
-namespace PBLivingston.VoicemeeterAPI;
 
 /// <summary>
 ///   Interface to abstract underlying calls to the VoicemeeterRemote API.
 /// </summary>
 internal interface IWrapper : IDisposable
 {
-    bool Is64Bit { get; }
-    string InstallDir { get; }
+    public bool Is64Bit { get; }
+    public string InstallDir { get; }
 
     /// <inheritdoc cref="RemoteApiWrapper.Login()" path="/summary"/>
-    LoginResponse Login();
+    public LoginResponse Login();
     /// <inheritdoc cref="RemoteApiWrapper.Logout()" path="/summary"/>
-    LoginResponse Logout();
+    public LoginResponse Logout();
     /// <inheritdoc cref="RemoteApiWrapper.RunVoicemeeter(int)" path="/summary"/>
-    RunResponse RunVoicemeeter(int app);
+    public RunResponse RunVoicemeeter(int app);
 
     /// <inheritdoc cref="RemoteApiWrapper.GetVoicemeeterType(out int)" path="/summary"/>
-    InfoResponse GetVoicemeeterType(out int type);
+    public InfoResponse GetVoicemeeterType(out int type);
     /// <inheritdoc cref="RemoteApiWrapper.GetVoicemeeterVersion(out int)" path="/summary"/>
-    InfoResponse GetVoicemeeterVersion(out int version);
+    public InfoResponse GetVoicemeeterVersion(out int version);
 
     /// <inheritdoc cref="RemoteApiWrapper.IsParametersDirty()" path="/summary"/>
-    Response IsParametersDirty();
+    public Response IsParametersDirty();
     /// <inheritdoc cref="RemoteApiWrapper.GetParameter(string, out float)" path="/summary"/>
-    Response GetParameter(string param, out float value);
+    public Response GetParameter(string param, out float value);
     /// <inheritdoc cref="RemoteApiWrapper.GetParameter(string, out string)" path="/summary"/>
-    Response GetParameter(string param, out string value);
+    public Response GetParameter(string param, out string value);
 
     /// <summary>
     ///   Check if MacroButtons is running.
@@ -41,7 +41,7 @@ internal interface IWrapper : IDisposable
     ///   NotRunning<br/>
     ///   NotInstalled<br/>
     /// </returns>
-    RunResponse MacroButtonIsRunning();
+    public RunResponse MacroButtonIsRunning();
     /// <inheritdoc cref="RemoteApiWrapper.MacroButtonIsDirty()" path="/summary"/>
-    Response MacroButtonIsDirty();
+    public Response MacroButtonIsDirty();
 }

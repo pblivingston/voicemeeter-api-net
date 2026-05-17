@@ -1,48 +1,48 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
+namespace PBLivingston.VoicemeeterAPI;
+
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Utilities;
 using Microsoft.Extensions.Logging;
 
-namespace PBLivingston.VoicemeeterAPI;
-
-partial class Remote
+public partial class Remote
 {
     #region Is Parameters Dirty
 
     /// <inheritdoc/>
     internal bool Query_ParamsDirty()
     {
-        LoginGuard();
+        this.LoginGuard();
 
         var level = LogLevel.Trace;
 
-        On_Query_Start(level);
+        this.On_Query_Start(level);
 
-        var result = _vmrApi.IsParametersDirty();
+        var result = this.vmrApi.IsParametersDirty();
 
         switch (result)
         {
             case Response.Ok:
-                On_Query_Success(Response.Ok, level);
+                this.On_Query_Success(Response.Ok, level);
                 return false;
 
             case Response.Dirty:
-                On_ParamsDirty(level);
+                this.On_ParamsDirty(level);
                 return true;
 
             default:
-                throw On_Method_Error(result);
+                throw this.On_Method_Error(result);
         }
     }
 
     /// <inheritdoc/>
     public bool IsParamsDirty()
     {
-        using var scope = BeginInstanceScope();
+        using var scope = this.BeginInstanceScope();
 
-        return Query_ParamsDirty();
+        return this.Query_ParamsDirty();
     }
 
     #endregion
@@ -52,56 +52,62 @@ partial class Remote
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
     internal void GetParam_Float(string param, out float value)
     {
-        LoginGuard();
+        this.LoginGuard();
 
-        On_GetParam_Start(param);
+        this.On_GetParam_Start(param);
 
-        var result = _vmrApi.GetParameter(param, out value);
+        var result = this.vmrApi.GetParameter(param, out value);
 
         if (result != Response.Ok)
-            throw On_GetParam_Error(result, param, value, typeof(float));
+        {
+            throw this.On_GetParam_Error(result, param, value, typeof(float));
+        }
     }
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
     public void GetParam(string param, out float value)
     {
-        using var scope = BeginInstanceScope();
+        using var scope = this.BeginInstanceScope();
 
-        GetParam_Float(param, out value);
+        this.GetParam_Float(param, out value);
 
-        On_GetParam_Success(param, value);
+        this.On_GetParam_Success(param, value);
     }
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
     public void GetParam(string param, out int value)
     {
-        using var scope = BeginInstanceScope();
+        using var scope = this.BeginInstanceScope();
 
-        GetParam_Float(param, out float val);
+        this.GetParam_Float(param, out var val);
 
         value = Convert.ToInt32(val);
 
         if (Math.Abs(val - value) > 0.0001f || value < 0)
-            throw On_GetParam_Error(Response.TypeMismatch, param, val, typeof(int));
+        {
+            throw this.On_GetParam_Error(Response.TypeMismatch, param, val, typeof(int));
+        }
 
-        On_GetParam_Success(param, value);
+        this.On_GetParam_Success(param, value);
     }
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
     public void GetParam(string param, out bool value)
     {
-        using var scope = BeginInstanceScope();
+        using var scope = this.BeginInstanceScope();
 
-        GetParam_Float(param, out float val);
+        this.GetParam_Float(param, out var val);
 
         var v = Convert.ToInt32(val);
 
         if (Math.Abs(val - v) > 0.0001f || v is not (0 or 1))
-            throw On_GetParam_Error(Response.TypeMismatch, param, val, typeof(bool));
+        {
+            throw this.On_GetParam_Error(Response.TypeMismatch, param, val, typeof(bool));
+        }
 
         value = v == 1;
 
-        On_GetParam_Success(param, value);
+        this.On_GetParam_Success(param, value);
     }
 
     #endregion
@@ -111,24 +117,26 @@ partial class Remote
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
     internal void GetParam_String(string param, out string value)
     {
-        LoginGuard();
+        this.LoginGuard();
 
-        On_GetParam_Start(param);
+        this.On_GetParam_Start(param);
 
-        var result = _vmrApi.GetParameter(param, out value);
+        var result = this.vmrApi.GetParameter(param, out value);
 
         if (result != Response.Ok)
-            throw On_GetParam_Error(result, param, value, typeof(string));
+        {
+            throw this.On_GetParam_Error(result, param, value, typeof(string));
+        }
 
-        On_GetParam_Success(param, value);
+        this.On_GetParam_Success(param, value);
     }
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
     public void GetParam(string param, out string value)
     {
-        using var scope = BeginInstanceScope();
+        using var scope = this.BeginInstanceScope();
 
-        GetParam_String(param, out value);
+        this.GetParam_String(param, out value);
     }
 
     #endregion
@@ -138,32 +146,32 @@ partial class Remote
     {
         if (typeof(T) == typeof(float))
         {
-            GetParam(param, out float val);
+            this.GetParam(param, out float val);
             value = (T)(object)val;
             return;
         }
 
         if (typeof(T) == typeof(int))
         {
-            GetParam(param, out int val);
+            this.GetParam(param, out int val);
             value = (T)(object)val;
             return;
         }
 
         if (typeof(T) == typeof(bool))
         {
-            GetParam(param, out bool val);
+            this.GetParam(param, out bool val);
             value = (T)(object)val;
             return;
         }
 
         if (typeof(T) == typeof(string))
         {
-            GetParam(param, out string val);
+            this.GetParam(param, out string val);
             value = (T)(object)val;
             return;
         }
 
-        throw GeneralDispatch.On_TypeNotSupported(_logger, typeof(T), nameof(value), SupportedTypes.ParamTypes);
+        throw GeneralDispatch.On_TypeNotSupported(this.logger, typeof(T), nameof(value), SupportedTypes.ParamTypes);
     }
 }

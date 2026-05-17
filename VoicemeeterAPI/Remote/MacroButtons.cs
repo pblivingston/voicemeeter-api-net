@@ -1,54 +1,56 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
+namespace PBLivingston.VoicemeeterAPI;
+
 using PBLivingston.VoicemeeterAPI.Types;
 using Microsoft.Extensions.Logging;
 
-namespace PBLivingston.VoicemeeterAPI;
-
-partial class Remote
+public partial class Remote
 {
     #region MacroButtons Is Running
 
     internal bool Query_ButtonsRunning(bool nested)
     {
-        LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
+        this.LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
         var info = nested ? LogLevel.Trace : LogLevel.Information;
         var warning = nested ? LogLevel.Trace : LogLevel.Warning;
 
-        On_Query_Start(info);
+        this.On_Query_Start(info);
 
-        var result = _vmrApi.MacroButtonIsRunning();
+        var result = this.vmrApi.MacroButtonIsRunning();
 
         bool running;
         switch (result)
         {
             case RunResponse.Ok:
-                On_Query_Success(RunResponse.Ok, info);
+                this.On_Query_Success(RunResponse.Ok, info);
                 running = true;
                 break;
 
             case RunResponse.NotRunning:
-                On_MbRunning_NotRunning(warning);
+                this.On_MbRunning_NotRunning(warning);
                 running = false;
                 break;
 
             default:
-                throw On_Method_Error(result);
+                throw this.On_Method_Error(result);
         }
 
-        if (running != _lastState.MacroButtonsIsRunning)
-            On_ConnectionState_StateMismatch(running, warning);
+        if (running != this.lastState.MacroButtonsIsRunning)
+        {
+            this.On_ConnectionState_StateMismatch(running, warning);
+        }
 
         return running;
     }
 
     public bool IsButtonsRunning()
     {
-        using var scope = BeginInstanceScope();
+        using var scope = this.BeginInstanceScope();
 
-        return Query_ButtonsRunning(false);
+        return this.Query_ButtonsRunning(false);
     }
 
     #endregion
@@ -58,35 +60,35 @@ partial class Remote
     /// <inheritdoc cref="IRemote.IsButtonsDirty()"/>
     internal bool Query_ButtonsDirty()
     {
-        LoginGuard();
+        this.LoginGuard();
 
         var level = LogLevel.Trace;
 
-        On_Query_Start(level);
+        this.On_Query_Start(level);
 
-        var result = _vmrApi.MacroButtonIsDirty();
+        var result = this.vmrApi.MacroButtonIsDirty();
 
         switch (result)
         {
             case Response.Ok:
-                On_Query_Success(Response.Ok, level);
+                this.On_Query_Success(Response.Ok, level);
                 return false;
 
             case Response.Dirty:
-                On_ButtonsDirty(level);
+                this.On_ButtonsDirty(level);
                 return true;
 
             default:
-                throw On_Method_Error(result);
+                throw this.On_Method_Error(result);
         }
     }
 
     /// <inheritdoc/>
     public bool IsButtonsDirty()
     {
-        using var scope = BeginInstanceScope();
+        using var scope = this.BeginInstanceScope();
 
-        return Query_ButtonsDirty();
+        return this.Query_ButtonsDirty();
     }
 
     #endregion

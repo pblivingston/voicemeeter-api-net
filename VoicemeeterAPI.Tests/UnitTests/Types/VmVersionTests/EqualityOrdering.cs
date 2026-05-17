@@ -1,18 +1,18 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VmVersionTests;
+
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
-
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VmVersionTests;
 
 public class EqualityOrdering
 {
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Equals_Version_ReturnsExpected_True(Case scenario, CaseRecord data)
+    public void EqualsVersionReturnsExpectedTrue(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed | CaseTag.Invalid_Parts;
+        var skipTags = CaseTag.InvalidVmPacked | CaseTag.InvalidParts;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var versionA = new VmVersion(data.Packed);
+        var versionA = new VmVersion(data.VmPacked);
         var versionB = new VmVersion(data.Kind, data.Major, data.Minor, data.Patch);
 
         Assert.True(versionA.Equals(versionB));
@@ -20,15 +20,18 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Equals_Version_ReturnsExpected_False(Case scenario, CaseRecord data)
+    public void EqualsVersionReturnsExpectedFalse(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0106_0102;
-        if (data.Packed == testPacked) { testPacked = 0x0109_0901; }
+        if (data.VmPacked == testPacked)
+        {
+            testPacked = 0x0109_0901;
+        }
 
-        var versionA = new VmVersion(data.Packed);
+        var versionA = new VmVersion(data.VmPacked);
         var versionB = new VmVersion(testPacked);
 
         Assert.False(versionA.Equals(versionB));
@@ -36,12 +39,12 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Equals_Object_ReturnsExpected_True(Case scenario, CaseRecord data)
+    public void EqualsObjectReturnsExpectedTrue(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed | CaseTag.Invalid_Parts;
+        var skipTags = CaseTag.InvalidVmPacked | CaseTag.InvalidParts;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var versionA = new VmVersion(data.Packed);
+        var versionA = new VmVersion(data.VmPacked);
         var versionB = (object)new VmVersion(data.Kind, data.Major, data.Minor, data.Patch);
 
         Assert.True(versionA.Equals(versionB));
@@ -49,15 +52,18 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Equals_Object_ReturnsExpected_False_Val(Case scenario, CaseRecord data)
+    public void EqualsObjectReturnsExpectedFalseVal(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0106_0102;
-        if (data.Packed == testPacked) { testPacked = 0x0109_0901; }
+        if (data.VmPacked == testPacked)
+        {
+            testPacked = 0x0109_0901;
+        }
 
-        var versionA = new VmVersion(data.Packed);
+        var versionA = new VmVersion(data.VmPacked);
         var versionB = (object)new VmVersion(testPacked);
 
         Assert.False(versionA.Equals(versionB));
@@ -65,12 +71,12 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Equals_Object_ReturnsExpected_False_Obj(Case scenario, CaseRecord data)
+    public void EqualsObjectReturnsExpectedFalseObj(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packs;
+        var skipTags = CaseTag.InvalidPacks;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var vm = new VmVersion(data.Packed);
+        var vm = new VmVersion(data.VmPacked);
         var sem = new SemVersion(data.SemPacked);
 
         Assert.False(vm.Equals(sem));
@@ -78,27 +84,27 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void GetHashCode_ReturnsExpected_Packed(Case scenario, CaseRecord data)
+    public void GetHashCodeReturnsExpectedPacked(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = new VmVersion(data.Packed);
+        var version = new VmVersion(data.VmPacked);
 
-        Assert.Equal(data.Packed, version.GetHashCode());
+        Assert.Equal(data.VmPacked, version.GetHashCode());
     }
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CompareTo_Version_ReturnsExpected_Int(Case scenario, CaseRecord data)
+    public void CompareToVersionReturnsExpectedInt(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0203_0405;
-        var expected = data.Packed.CompareTo(testPacked);
+        var expected = data.VmPacked.CompareTo(testPacked);
 
-        var versionA = new VmVersion(data.Packed);
+        var versionA = new VmVersion(data.VmPacked);
         var versionB = new VmVersion(testPacked);
 
         Assert.Equal(expected, versionA.CompareTo(versionB));
@@ -106,15 +112,15 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CompareTo_Object_ReturnsExpected_Int(Case scenario, CaseRecord data)
+    public void CompareToObjectReturnsExpectedInt(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0203_0405;
-        var expected = data.Packed.CompareTo(testPacked);
+        var expected = data.VmPacked.CompareTo(testPacked);
 
-        var versionA = new VmVersion(data.Packed);
+        var versionA = new VmVersion(data.VmPacked);
         var versionB = (object)new VmVersion(testPacked);
 
         Assert.Equal(expected, ((IComparable)versionA).CompareTo(versionB));
@@ -122,12 +128,12 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CompareTo_Object_ThrowsException_Argument(Case scenario, CaseRecord data)
+    public void CompareToObjectThrowsExceptionArgument(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packs;
+        var skipTags = CaseTag.InvalidPacks;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var vm = new VmVersion(data.Packed);
+        var vm = new VmVersion(data.VmPacked);
         var sem = new SemVersion(data.SemPacked);
 
         Assert.Throws<ArgumentException>(() => ((IComparable)vm).CompareTo(sem));
@@ -135,15 +141,15 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void EqualTo_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void EqualToReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0203_0405;
-        var expected = data.Packed == testPacked;
+        var expected = data.VmPacked == testPacked;
 
-        var versionA = new VmVersion(data.Packed);
+        var versionA = new VmVersion(data.VmPacked);
         var versionB = new VmVersion(testPacked);
 
         Assert.Equal(expected, versionA == versionB);
@@ -151,15 +157,15 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void NotEqualTo_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void NotEqualToReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0203_0405;
-        var expected = data.Packed != testPacked;
+        var expected = data.VmPacked != testPacked;
 
-        var versionA = new VmVersion(data.Packed);
+        var versionA = new VmVersion(data.VmPacked);
         var versionB = new VmVersion(testPacked);
 
         Assert.Equal(expected, versionA != versionB);
@@ -167,15 +173,15 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void LessThan_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void LessThanReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0203_0405;
-        var expected = data.Packed < testPacked;
+        var expected = data.VmPacked < testPacked;
 
-        var versionA = new VmVersion(data.Packed);
+        var versionA = new VmVersion(data.VmPacked);
         var versionB = new VmVersion(testPacked);
 
         Assert.Equal(expected, versionA < versionB);
@@ -183,15 +189,15 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void GreaterThan_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void GreaterThanReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0203_0405;
-        var expected = data.Packed > testPacked;
+        var expected = data.VmPacked > testPacked;
 
-        var versionA = new VmVersion(data.Packed);
+        var versionA = new VmVersion(data.VmPacked);
         var versionB = new VmVersion(testPacked);
 
         Assert.Equal(expected, versionA > versionB);
@@ -199,15 +205,15 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void LessThanOrEqualTo_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void LessThanOrEqualToReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0203_0405;
-        var expected = data.Packed <= testPacked;
+        var expected = data.VmPacked <= testPacked;
 
-        var versionA = new VmVersion(data.Packed);
+        var versionA = new VmVersion(data.VmPacked);
         var versionB = new VmVersion(testPacked);
 
         Assert.Equal(expected, versionA <= versionB);
@@ -215,15 +221,15 @@ public class EqualityOrdering
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void GreaterThanOrEqualTo_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void GreaterThanOrEqualToReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var testPacked = 0x0203_0405;
-        var expected = data.Packed >= testPacked;
+        var expected = data.VmPacked >= testPacked;
 
-        var versionA = new VmVersion(data.Packed);
+        var versionA = new VmVersion(data.VmPacked);
         var versionB = new VmVersion(testPacked);
 
         Assert.Equal(expected, versionA >= versionB);

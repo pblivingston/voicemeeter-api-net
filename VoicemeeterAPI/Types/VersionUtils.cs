@@ -1,13 +1,14 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using PBLivingston.VoicemeeterAPI.Exceptions;
-
 namespace PBLivingston.VoicemeeterAPI.Types;
+
+using PBLivingston.VoicemeeterAPI.Exceptions;
 
 public static class VersionUtils
 {
-    private static bool InByte(int value) => (uint)value <= 0xFF;
+    private static bool InByte(int value)
+        => (uint)value <= 0xFF;
 
     public static bool IsValid(int maj, int min, int pat)
         => InByte(maj)
@@ -28,45 +29,84 @@ public static class VersionUtils
 
     public static string ToString(int packed)
     {
-        RawUnpack(packed, out int kind, out int maj, out int min, out int pat);
+        RawUnpack(packed, out var kind, out var maj, out var min, out var pat);
         return $"{kind}.{maj}.{min}.{pat}";
     }
 
     public static bool TryParse(string s, out int kind, out int maj, out int min, out int pat)
     {
-        kind = 0; maj = 0; min = 0; pat = 0;
+        kind = 0;
+        maj = 0;
+        min = 0;
+        pat = 0;
 
-        if (string.IsNullOrWhiteSpace(s)) return false;
+        if (string.IsNullOrWhiteSpace(s))
+        {
+            return false;
+        }
+
         var parts = s.Split('.');
         var l = parts.Length;
-        if (l is not (3 or 4)) return false;
+        if (l is not (3 or 4))
+        {
+            return false;
+        }
 
         var k = 0;
-        if (l == 4 && !(int.TryParse(parts[0], out k) && KindUtils.IsValid(k))) return false;
-        if (!int.TryParse(parts[l - 3], out int m)) return false;
-        if (!int.TryParse(parts[l - 2], out int n)) return false;
-        if (!int.TryParse(parts[l - 1], out int p)) return false;
-        if (!IsValid(m, n, p)) return false;
+        if (l == 4 && !(int.TryParse(parts[0], out k) && KindUtils.IsValid(k)))
+        {
+            return false;
+        }
 
-        kind = k; maj = m; min = n; pat = p;
+        if (!int.TryParse(parts[l - 3], out var m))
+        {
+            return false;
+        }
+
+        if (!int.TryParse(parts[l - 2], out var n))
+        {
+            return false;
+        }
+
+        if (!int.TryParse(parts[l - 1], out var p))
+        {
+            return false;
+        }
+
+        if (!IsValid(m, n, p))
+        {
+            return false;
+        }
+
+        kind = k;
+        maj = m;
+        min = n;
+        pat = p;
         return true;
     }
 
     public static void Parse(string s, out int kind, out int maj, out int min, out int pat)
     {
         if (!TryParse(s, out kind, out maj, out min, out pat))
+        {
             throw new CannotParseAsPartsException(s, nameof(s));
+        }
     }
 
     public static bool TryParse(string s, out int packed)
     {
         packed = 0;
-        if (!TryParse(s, out int kind, out int maj, out int min, out int pat)) return false;
+        if (!TryParse(s, out var kind, out var maj, out var min, out var pat))
+        {
+            return false;
+        }
+
         packed = RawPack(kind, maj, min, pat);
         return true;
     }
 
     public static int Parse(string s)
-        => TryParse(s, out int packed) ? packed
-        : throw new CannotParseAsPartsException(s, nameof(s));
+        => TryParse(s, out var packed)
+            ? packed
+            : throw new CannotParseAsPartsException(s, nameof(s));
 }

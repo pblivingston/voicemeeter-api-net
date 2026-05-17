@@ -1,33 +1,33 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;
+
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Utilities;
 
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;
-
 public class GetParamGeneric : MockRemote
 {
     [Fact]
-    public void Float_Calls_CorrectOverload()
+    public void FloatCallsCorrectOverload()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
         var param = "Mock.Param";
         var value = 0.75f;
 
-        MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
+        this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
-        ((IRemote)Remote).GetParam(param, out float result);
+        ((IRemote)this.Remote).GetParam(param, out float result);
 
         Assert.Multiple(
             () => Assert.Equal(value, result),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
         );
     }
 
     [Fact]
-    public void Int_Calls_CorrectOverload()
+    public void IntCallsCorrectOverload()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
@@ -35,20 +35,20 @@ public class GetParamGeneric : MockRemote
         var value = 42.0f;
         var expected = 42;
 
-        MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
+        this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
-        ((IRemote)Remote).GetParam(param, out int result);
+        ((IRemote)this.Remote).GetParam(param, out int result);
 
         Assert.Multiple(
             () => Assert.Equal(expected, result),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
         );
     }
 
     [Fact]
-    public void Bool_Calls_CorrectOverload()
+    public void BoolCallsCorrectOverload()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
@@ -56,55 +56,55 @@ public class GetParamGeneric : MockRemote
         var value = 1.0f;
         var expected = true;
 
-        MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
+        this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
-        ((IRemote)Remote).GetParam(param, out bool result);
+        ((IRemote)this.Remote).GetParam(param, out bool result);
 
         Assert.Multiple(
             () => Assert.Equal(expected, result),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
         );
     }
 
     [Fact]
-    public void String_Calls_CorrectOverload()
+    public void StringCallsCorrectOverload()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
         var param = "Mock.Param";
         var value = "Test String";
 
-        MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
+        this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
-        ((IRemote)Remote).GetParam(param, out string result);
+        ((IRemote)this.Remote).GetParam(param, out string result);
 
         Assert.Multiple(
             () => Assert.Equal(value, result),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
         );
     }
 
     [Fact]
-    public void ThrowsException_TypeNotSupported_WhenTypeNotSupported()
+    public void ThrowsExceptionTypeNotSupportedWhenTypeNotSupported()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
         var param = "Mock.Param";
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
-        var ex = Assert.Throws<TypeNotSupportedException>(() => ((IRemote)Remote).GetParam(param, out DateTime _));
+        var ex = Assert.Throws<TypeNotSupportedException>(() => ((IRemote)this.Remote).GetParam(param, out DateTime _));
 
         Assert.Multiple(
             () => Assert.Equal($"value", ex.ParamName),
             () => Assert.Equal(typeof(DateTime), ex.Type),
             () => Assert.Equal(SupportedTypes.ParamTypes, ex.SupportedTypes),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<float>.IsAny), Times.Never()),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never())
+            () => this.MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<float>.IsAny), Times.Never()),
+            () => this.MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never())
         );
     }
 }

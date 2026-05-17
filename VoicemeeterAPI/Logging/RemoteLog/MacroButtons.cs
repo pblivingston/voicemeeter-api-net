@@ -1,9 +1,9 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using Microsoft.Extensions.Logging;
-
 namespace PBLivingston.VoicemeeterAPI.Logging;
+
+using Microsoft.Extensions.Logging;
 
 internal static partial class RemoteLog
 {

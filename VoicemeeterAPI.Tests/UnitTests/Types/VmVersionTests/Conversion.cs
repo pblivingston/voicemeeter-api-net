@@ -1,55 +1,55 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VmVersionTests;
+
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
-
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VmVersionTests;
 
 public class Conversion
 {
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastTo_Int_ReturnsExpected_Packed(Case scenario, CaseRecord data)
+    public void CastToIntReturnsExpectedPacked(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = new VmVersion(data.Packed);
+        var version = new VmVersion(data.VmPacked);
 
-        Assert.Equal(data.Packed, (int)version);
+        Assert.Equal(data.VmPacked, (int)version);
     }
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastFrom_Int_ReturnsExpected_Packed(Case scenario, CaseRecord data)
+    public void CastFromIntReturnsExpectedPacked(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = (VmVersion)data.Packed;
+        var version = (VmVersion)data.VmPacked;
 
-        Assert.Equal(data.Packed, version.Packed);
+        Assert.Equal(data.VmPacked, version.Packed);
     }
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastFrom_Int_ThrowsException_VmPackedOutOfRange(Case scenario, CaseRecord data)
+    public void CastFromIntThrowsExceptionVmPackedOutOfRange(CaseName scenario, CaseRecord data)
     {
-        var runTags = CaseTag.Invalid_Packed;
+        var runTags = CaseTag.InvalidVmPacked;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        var ex = Assert.Throws<VmPackedOutOfRangeException>(() => (VmVersion)data.Packed);
+        var ex = Assert.Throws<VmPackedOutOfRangeException>(() => (VmVersion)data.VmPacked);
 
-        Assert.Equal(data.Packed, ex.ActualValue);
+        Assert.Equal(data.VmPacked, ex.ActualValue);
     }
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastTo_TupleInts_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void CastToTupleIntsReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed | CaseTag.PartsIn;
+        var skipTags = CaseTag.InvalidVmPacked | CaseTag.PartsIn;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = new VmVersion(data.Packed);
+        var version = new VmVersion(data.VmPacked);
 
         var (k, m, n, p) = ((int, int, int, int))version;
 
@@ -63,21 +63,21 @@ public class Conversion
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastFrom_TupleInts_ReturnsExpected_Packed(Case scenario, CaseRecord data)
+    public void CastFromTupleIntsReturnsExpectedPacked(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Parts;
+        var skipTags = CaseTag.InvalidParts;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = (VmVersion)(data.Kind, data.Major, data.Minor, data.Patch);
 
-        Assert.Equal(data.Packed, version.Packed);
+        Assert.Equal(data.VmPacked, version.Packed);
     }
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastFrom_TupleInts_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
+    public void CastFromTupleIntsThrowsExceptionPartsOutOfRange(CaseName scenario, CaseRecord data)
     {
-        var runTags = CaseTag.Invalid_Parts;
+        var runTags = CaseTag.InvalidParts;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
         var ex = Assert.Throws<PartsOutOfRangeException<int>>(() => (VmVersion)(data.Kind, data.Major, data.Minor, data.Patch));
@@ -92,12 +92,12 @@ public class Conversion
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastTo_TupleKind_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void CastToTupleKindReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packed | CaseTag.PartsIn;
+        var skipTags = CaseTag.InvalidVmPacked | CaseTag.PartsIn;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = new VmVersion(data.Packed);
+        var version = new VmVersion(data.VmPacked);
 
         var (k, m, n, p) = ((Kind, int, int, int))version;
 
@@ -111,21 +111,21 @@ public class Conversion
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastFrom_TupleKind_ReturnsExpected_Packed(Case scenario, CaseRecord data)
+    public void CastFromTupleKindReturnsExpectedPacked(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Parts;
+        var skipTags = CaseTag.InvalidParts;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = (VmVersion)(data.K, data.Major, data.Minor, data.Patch);
 
-        Assert.Equal(data.Packed, version.Packed);
+        Assert.Equal(data.VmPacked, version.Packed);
     }
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastFrom_TupleKind_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
+    public void CastFromTupleKindThrowsExceptionPartsOutOfRange(CaseName scenario, CaseRecord data)
     {
-        var runTags = CaseTag.Invalid_Parts;
+        var runTags = CaseTag.InvalidParts;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
         var ex = Assert.Throws<PartsOutOfRangeException<Kind>>(() => (VmVersion)(data.K, data.Major, data.Minor, data.Patch));
@@ -140,12 +140,12 @@ public class Conversion
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastTo_TupleSemantic_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void CastToTupleSemanticReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packs | CaseTag.KindIn;
+        var skipTags = CaseTag.InvalidPacks | CaseTag.KindIn;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = new VmVersion(data.Packed);
+        var version = new VmVersion(data.VmPacked);
 
         var (k, sem) = ((int, SemVersion))version;
 
@@ -157,26 +157,26 @@ public class Conversion
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastFrom_TupleSemantic_ReturnsExpected_Packed(Case scenario, CaseRecord data)
+    public void CastFromTupleSemanticReturnsExpectedPacked(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Kind | CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidKind | CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var sem = new SemVersion(data.SemPacked);
 
         var version = (VmVersion)(data.Kind, sem);
 
-        Assert.Equal(data.Packed, version.Packed);
+        Assert.Equal(data.VmPacked, version.Packed);
     }
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastFrom_TupleSemantic_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
+    public void CastFromTupleSemanticThrowsExceptionPartsOutOfRange(CaseName scenario, CaseRecord data)
     {
-        var runTags = CaseTag.Invalid_Kind;
+        var runTags = CaseTag.InvalidKind;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var sem = new SemVersion(data.SemPacked);
@@ -191,12 +191,12 @@ public class Conversion
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastTo_TupleKindSemantic_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void CastToTupleKindSemanticReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packs | CaseTag.KindIn;
+        var skipTags = CaseTag.InvalidPacks | CaseTag.KindIn;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = new VmVersion(data.Packed);
+        var version = new VmVersion(data.VmPacked);
 
         var (k, sem) = ((Kind, SemVersion))version;
 
@@ -208,26 +208,26 @@ public class Conversion
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastFrom_TupleKindSemantic_ReturnsExpected_Packed(Case scenario, CaseRecord data)
+    public void CastFromTupleKindSemanticReturnsExpectedPacked(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Kind | CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidKind | CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var sem = new SemVersion(data.SemPacked);
 
         var version = (VmVersion)(data.K, sem);
 
-        Assert.Equal(data.Packed, version.Packed);
+        Assert.Equal(data.VmPacked, version.Packed);
     }
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void CastFrom_TupleKindSemantic_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
+    public void CastFromTupleKindSemanticThrowsExceptionPartsOutOfRange(CaseName scenario, CaseRecord data)
     {
-        var runTags = CaseTag.Invalid_Kind;
+        var runTags = CaseTag.InvalidKind;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var sem = new SemVersion(data.SemPacked);

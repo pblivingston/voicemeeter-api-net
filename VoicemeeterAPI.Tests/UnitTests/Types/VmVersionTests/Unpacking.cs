@@ -1,19 +1,19 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VmVersionTests;
+
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
-
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VmVersionTests;
 
 public class Unpacking
 {
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void RawUnpack_Parts_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void RawUnpackPartsReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
         var skipTags = CaseTag.PartsIn;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        VmVersion.RawUnpack(data.Packed, out int k, out int m, out int n, out int p);
+        VmVersion.RawUnpack(data.VmPacked, out var k, out var m, out var n, out var p);
 
         Assert.Multiple(
             () => Assert.Equal(data.Kind, k),
@@ -25,18 +25,27 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void TryUnpack_Ints_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void TryUnpackIntsReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
         var skipTags = CaseTag.PartsIn;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var badTags = CaseTag.Invalid_Packed;
+        var badTags = CaseTag.InvalidVmPacked;
         var shouldSucceed = !data.Tags.HasAny(badTags);
 
-        var kind = 0; var maj = 0; var min = 0; var pat = 0;
-        if (shouldSucceed) { kind = data.Kind; maj = data.Major; min = data.Minor; pat = data.Patch; }
+        var kind = 0;
+        var maj = 0;
+        var min = 0;
+        var pat = 0;
+        if (shouldSucceed)
+        {
+            kind = data.Kind;
+            maj = data.Major;
+            min = data.Minor;
+            pat = data.Patch;
+        }
 
-        var success = VmVersion.TryUnpack(data.Packed, out int k, out int m, out int n, out int p);
+        var success = VmVersion.TryUnpack(data.VmPacked, out int k, out var m, out var n, out var p);
 
         Assert.Multiple(
             () => Assert.Equal(shouldSucceed, success),
@@ -49,12 +58,12 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Unpack_Ints_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void UnpackIntsReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.PartsIn | CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.PartsIn | CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        VmVersion.Unpack(data.Packed, out int k, out int m, out int n, out int p);
+        VmVersion.Unpack(data.VmPacked, out int k, out var m, out var n, out var p);
 
         Assert.Multiple(
             () => Assert.Equal(data.Kind, k),
@@ -66,30 +75,39 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Unpack_Ints_ThrowsException_VmPackedOutOfRange(Case scenario, CaseRecord data)
+    public void UnpackIntsThrowsExceptionVmPackedOutOfRange(CaseName scenario, CaseRecord data)
     {
-        var runTags = CaseTag.Invalid_Packed;
+        var runTags = CaseTag.InvalidVmPacked;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        var ex = Assert.Throws<VmPackedOutOfRangeException>(() => VmVersion.Unpack(data.Packed, out int _, out int _, out int _, out int _));
+        var ex = Assert.Throws<VmPackedOutOfRangeException>(() => VmVersion.Unpack(data.VmPacked, out int _, out var _, out var _, out var _));
 
-        Assert.Equal(data.Packed, ex.ActualValue);
+        Assert.Equal(data.VmPacked, ex.ActualValue);
     }
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void TryUnpack_Kind_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void TryUnpackKindReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
         var skipTags = CaseTag.PartsIn;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var badTags = CaseTag.Invalid_Packed;
+        var badTags = CaseTag.InvalidVmPacked;
         var shouldSucceed = !data.Tags.HasAny(badTags);
 
-        Kind kind = default; var maj = 0; var min = 0; var pat = 0;
-        if (shouldSucceed) { kind = data.K; maj = data.Major; min = data.Minor; pat = data.Patch; }
+        Kind kind = default;
+        var maj = 0;
+        var min = 0;
+        var pat = 0;
+        if (shouldSucceed)
+        {
+            kind = data.K;
+            maj = data.Major;
+            min = data.Minor;
+            pat = data.Patch;
+        }
 
-        var success = VmVersion.TryUnpack(data.Packed, out Kind k, out int m, out int n, out int p);
+        var success = VmVersion.TryUnpack(data.VmPacked, out Kind k, out var m, out var n, out var p);
 
         Assert.Multiple(
             () => Assert.Equal(shouldSucceed, success),
@@ -102,12 +120,12 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Unpack_Kind_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void UnpackKindReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.PartsIn | CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.PartsIn | CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        VmVersion.Unpack(data.Packed, out Kind k, out int m, out int n, out int p);
+        VmVersion.Unpack(data.VmPacked, out Kind k, out var m, out var n, out var p);
 
         Assert.Multiple(
             () => Assert.Equal(data.K, k),
@@ -119,24 +137,24 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Unpack_Kind_ThrowsException_VmPackedOutOfRange(Case scenario, CaseRecord data)
+    public void UnpackKindThrowsExceptionVmPackedOutOfRange(CaseName scenario, CaseRecord data)
     {
-        var runTags = CaseTag.Invalid_Packed;
+        var runTags = CaseTag.InvalidVmPacked;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        var ex = Assert.Throws<VmPackedOutOfRangeException>(() => VmVersion.Unpack(data.Packed, out Kind _, out int _, out int _, out int _));
+        var ex = Assert.Throws<VmPackedOutOfRangeException>(() => VmVersion.Unpack(data.VmPacked, out Kind _, out var _, out var _, out var _));
 
-        Assert.Equal(data.Packed, ex.ActualValue);
+        Assert.Equal(data.VmPacked, ex.ActualValue);
     }
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void RawUnpack_Semantic_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void RawUnpackSemanticReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.KindIn | CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.KindIn | CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        VmVersion.RawUnpack(data.Packed, out int k, out SemVersion s);
+        VmVersion.RawUnpack(data.VmPacked, out var k, out var s);
 
         Assert.Multiple(
             () => Assert.Equal(data.Kind, k),
@@ -146,18 +164,23 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void TryUnpack_Semantic_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void TryUnpackSemanticReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.KindIn | CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.KindIn | CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var badTags = CaseTag.Invalid_Packed;
+        var badTags = CaseTag.InvalidVmPacked;
         var shouldSucceed = !data.Tags.HasAny(badTags);
 
-        var kind = 0; int sem = 0;
-        if (shouldSucceed) { kind = data.Kind; sem = data.SemPacked; }
+        var kind = 0;
+        var sem = 0;
+        if (shouldSucceed)
+        {
+            kind = data.Kind;
+            sem = data.SemPacked;
+        }
 
-        var success = VmVersion.TryUnpack(data.Packed, out int k, out SemVersion s);
+        var success = VmVersion.TryUnpack(data.VmPacked, out int k, out var s);
 
         Assert.Multiple(
             () => Assert.Equal(shouldSucceed, success),
@@ -168,12 +191,12 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Unpack_Semantic_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void UnpackSemanticReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.KindIn | CaseTag.Invalid_Packs;
+        var skipTags = CaseTag.KindIn | CaseTag.InvalidPacks;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        VmVersion.Unpack(data.Packed, out int k, out SemVersion s);
+        VmVersion.Unpack(data.VmPacked, out int k, out var s);
 
         Assert.Multiple(
             () => Assert.Equal(data.Kind, k),
@@ -183,30 +206,35 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Unpack_Semantic_ThrowsException_VmPackedOutOfRange(Case scenario, CaseRecord data)
+    public void UnpackSemanticThrowsExceptionVmPackedOutOfRange(CaseName scenario, CaseRecord data)
     {
-        var runTags = CaseTag.Invalid_Packed;
+        var runTags = CaseTag.InvalidVmPacked;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        var ex = Assert.Throws<VmPackedOutOfRangeException>(() => VmVersion.Unpack(data.Packed, out int _, out SemVersion _));
+        var ex = Assert.Throws<VmPackedOutOfRangeException>(() => VmVersion.Unpack(data.VmPacked, out int _, out var _));
 
-        Assert.Equal(data.Packed, ex.ActualValue);
+        Assert.Equal(data.VmPacked, ex.ActualValue);
     }
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void TryUnpack_KindSemantic_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void TryUnpackKindSemanticReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.KindIn | CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.KindIn | CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var badTags = CaseTag.Invalid_Packed;
+        var badTags = CaseTag.InvalidVmPacked;
         var shouldSucceed = !data.Tags.HasAny(badTags);
 
-        Kind kind = default; int sem = 0;
-        if (shouldSucceed) { kind = data.K; sem = data.SemPacked; }
+        Kind kind = default;
+        var sem = 0;
+        if (shouldSucceed)
+        {
+            kind = data.K;
+            sem = data.SemPacked;
+        }
 
-        var success = VmVersion.TryUnpack(data.Packed, out Kind k, out SemVersion s);
+        var success = VmVersion.TryUnpack(data.VmPacked, out Kind k, out var s);
 
         Assert.Multiple(
             () => Assert.Equal(shouldSucceed, success),
@@ -217,12 +245,12 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Unpack_KindSemantic_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void UnpackKindSemanticReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.KindIn | CaseTag.Invalid_Packs;
+        var skipTags = CaseTag.KindIn | CaseTag.InvalidPacks;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        VmVersion.Unpack(data.Packed, out Kind k, out SemVersion s);
+        VmVersion.Unpack(data.VmPacked, out Kind k, out var s);
 
         Assert.Multiple(
             () => Assert.Equal(data.K, k),
@@ -232,13 +260,13 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Unpack_KindSemantic_ThrowsException_VmPackedOutOfRange(Case scenario, CaseRecord data)
+    public void UnpackKindSemanticThrowsExceptionVmPackedOutOfRange(CaseName scenario, CaseRecord data)
     {
-        var runTags = CaseTag.Invalid_Packed;
+        var runTags = CaseTag.InvalidVmPacked;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        var ex = Assert.Throws<VmPackedOutOfRangeException>(() => VmVersion.Unpack(data.Packed, out Kind _, out SemVersion _));
+        var ex = Assert.Throws<VmPackedOutOfRangeException>(() => VmVersion.Unpack(data.VmPacked, out Kind _, out var _));
 
-        Assert.Equal(data.Packed, ex.ActualValue);
+        Assert.Equal(data.VmPacked, ex.ActualValue);
     }
 }

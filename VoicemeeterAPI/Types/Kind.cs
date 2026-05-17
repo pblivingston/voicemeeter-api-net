@@ -18,10 +18,12 @@ public enum Kind
 public static class KindExt
 {
     /// <inheritdoc cref="KindUtils.ToApp(Kind)"/>
-    public static App ToApp(this Kind kind, bool? is64Bit = null) => KindUtils.ToApp(kind, is64Bit);
+    public static App ToApp(this Kind kind, bool? is64Bit = null)
+        => KindUtils.ToApp(kind, is64Bit);
 
     /// <inheritdoc cref="KindUtils.IsValid(Kind)"/>
-    public static bool IsValid(this Kind kind) => KindUtils.IsValid(kind);
+    public static bool IsValid(this Kind kind)
+        => KindUtils.IsValid(kind);
 }
 
 public static class KindUtils
@@ -32,8 +34,9 @@ public static class KindUtils
     /// <param name="kind"></param>
     /// <returns><see cref="App.Unknown"/> if not a valid Voicemeeter <see cref="Kind"/></returns>
     public static App ToApp(Kind kind, bool? is64Bit = null)
-        => kind is < Kind.None or > Kind.Potato ? App.Unknown
-        : ((App)kind).BitAdjust(is64Bit);
+        => kind is < Kind.None or > Kind.Potato
+            ? App.Unknown
+            : ((App)kind).BitAdjust(is64Bit);
 
     public static bool IsValid(int kind)
         => kind is >= 1 and <= 3;

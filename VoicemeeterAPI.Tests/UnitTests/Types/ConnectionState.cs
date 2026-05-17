@@ -1,13 +1,13 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types;
+
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.ConnectionStateData;
-
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types;
 
 public class ConnectionStateTests
 {
     [Theory]
     [ClassData(typeof(ConnectionStateData))]
-    public void Properties_ReturnExpected_Values(Case scenario, CaseRecord data)
+    public void PropertiesReturnExpectedValues(CaseName scenario, CaseRecord data)
     {
         _ = scenario;
 
@@ -23,7 +23,7 @@ public class ConnectionStateTests
 
     [Theory]
     [ClassData(typeof(ConnectionStateData))]
-    public void LoggedIn_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void LoggedInReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
         _ = scenario;
 
@@ -34,7 +34,7 @@ public class ConnectionStateTests
 
     [Theory]
     [ClassData(typeof(ConnectionStateData))]
-    public void Connected_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void ConnectedReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
         _ = scenario;
 
@@ -44,23 +44,23 @@ public class ConnectionStateTests
     }
 }
 
-public class ConnectionStateData : TheoryData<Case, CaseRecord>
+public class ConnectionStateData : TheoryData<CaseName, CaseRecord>
 {
     public ConnectionStateData()
     {
-        Add(Case.Initial, new(
+        this.Add(CaseName.Initial, new(
             LoginResponse.LoggedOut, false, Kind.None, default, false, false
         ));
-        Add(Case.Connected, new(
+        this.Add(CaseName.Connected, new(
             LoginResponse.Ok, true, Kind.Standard, (VmVersion)0x0101_0202, true, true
         ));
-        Add(Case.VoicemeeterNotRunning, new(
+        this.Add(CaseName.VoicemeeterNotRunning, new(
             LoginResponse.VoicemeeterNotRunning, true, Kind.None, default, true, false
         ));
-        Add(Case.LoggedOut, new(
+        this.Add(CaseName.LoggedOut, new(
             LoginResponse.LoggedOut, true, Kind.Banana, (VmVersion)0x0201_0202, false, false
         ));
-        Add(Case.Unknown, new(
+        this.Add(CaseName.Unknown, new(
             LoginResponse.Unknown, true, Kind.Potato, (VmVersion)0x0301_0202, false, false
         ));
     }
@@ -76,10 +76,10 @@ public class ConnectionStateData : TheoryData<Case, CaseRecord>
     ) : SerializableRecord
     {
         public CaseRecord() : this(LoginResponse.LoggedOut, false, Kind.None, default, false, false) { }
-        public override string ToString() => $"Tags = {Tags}";
+        public override string ToString() => $"Tags = {this.Tags}";
     }
 
-    public enum Case
+    public enum CaseName
     {
         Initial, Connected, VoicemeeterNotRunning, LoggedOut, Unknown
     }

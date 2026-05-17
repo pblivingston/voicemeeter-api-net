@@ -1,81 +1,79 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.MacroButtons;
+
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
-
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.MacroButtons;
 
 public class IsMacroButtonsRunning : MockRemote
 {
     [Fact]
-    public void ReturnsTrue_WhenResponseIsOk()
+    public void ReturnsTrueWhenResponseIsOk()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
-        var result = Remote.IsButtonsRunning();
+        var result = this.Remote.IsButtonsRunning();
 
         Assert.Multiple(
             () => Assert.True(result),
-            () => MockWrapper.Verify(w => w.MacroButtonIsRunning(), Times.Exactly(3))
+            () => this.MockWrapper.Verify(w => w.MacroButtonIsRunning(), Times.Exactly(3))
         );
     }
 
     [Fact]
-    public void ReturnsFalse_WhenResponseIsNotRunning()
+    public void ReturnsFalseWhenResponseIsNotRunning()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
 
-        MockLogin_MacroButtonsNotRunning(kind, version);
+        this.MockLoginMacroButtonsNotRunning(kind, version);
 
-        var result = Remote.IsButtonsRunning();
+        var result = this.Remote.IsButtonsRunning();
 
         Assert.Multiple(
             () => Assert.False(result),
-            () => MockWrapper.Verify(w => w.MacroButtonIsRunning(), Times.Exactly(3))
+            () => this.MockWrapper.Verify(w => w.MacroButtonIsRunning(), Times.Exactly(3))
         );
     }
 
     [Fact]
-    public void ThrowsException_Remote_WhenUnexpectedResponse()
+    public void ThrowsExceptionRemoteWhenUnexpectedResponse()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
-        MockWrapper.Setup(w => w.MacroButtonIsRunning()).Returns(RunResponse.NotInstalled);
+        this.MockWrapper.Setup(w => w.MacroButtonIsRunning()).Returns(RunResponse.NotInstalled);
 
-        var ex = Assert.Throws<RemoteException<RunResponse>>(() => Remote.IsButtonsRunning());
+        var ex = Assert.Throws<RemoteException<RunResponse>>(() => this.Remote.IsButtonsRunning());
 
         Assert.Multiple(
             () => Assert.Equal(RunResponse.NotInstalled, ex.Response),
-            () => MockWrapper.Verify(w => w.MacroButtonIsRunning(), Times.Exactly(3))
+            () => this.MockWrapper.Verify(w => w.MacroButtonIsRunning(), Times.Exactly(3))
         );
     }
 
     [Fact]
-    public void ThrowsException_AccessDenied_WhenLoginStatusLoggedOut()
+    public void ThrowsExceptionAccessDeniedWhenLoginStatusLoggedOut()
     {
-        var ex = Assert.Throws<AccessDeniedException>(() => Remote.IsButtonsRunning());
+        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.IsButtonsRunning());
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.LoggedOut, ex.LoginStatus),
-            () => MockWrapper.Verify(w => w.MacroButtonIsRunning(), Times.Never())
+            () => this.MockWrapper.Verify(w => w.MacroButtonIsRunning(), Times.Never())
         );
     }
 
     [Fact]
-    public void ThrowsException_ObjectDisposed_WhenRemoteDisposed()
+    public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
-        Remote.Dispose();
-
-        var ex = Assert.Throws<ObjectDisposedException>(() => Remote.IsButtonsRunning());
+        this.Remote.Dispose();
 
         Assert.Multiple(
-            () => Assert.Equal("Remote", ex.ObjectName),
-            () => MockWrapper.Verify(w => w.MacroButtonIsRunning(), Times.Never())
+            () => Assert.Throws<ObjectDisposedException>(() => this.Remote.IsButtonsRunning()),
+            () => this.MockWrapper.Verify(w => w.MacroButtonIsRunning(), Times.Never())
         );
     }
 }

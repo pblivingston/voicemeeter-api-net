@@ -1,9 +1,9 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using PBLivingston.VoicemeeterAPI.Exceptions;
-
 namespace PBLivingston.VoicemeeterAPI.Types;
+
+using PBLivingston.VoicemeeterAPI.Exceptions;
 
 /// <summary>
 ///   Applications that can be run with <see cref="Remote.Run(App, int , int)"/>.
@@ -33,10 +33,12 @@ public enum App
 public static class AppExt
 {
     /// <inheritdoc cref="AppUtils.ToKind(App)"/>
-    public static Kind ToKind(this App app) => AppUtils.ToKind(app);
+    public static Kind ToKind(this App app)
+        => AppUtils.ToKind(app);
 
     /// <inheritdoc cref="AppUtils.BitAdjust(App)"/>
-    public static App BitAdjust(this App app, bool? is64Bit = null) => AppUtils.BitAdjust(app, is64Bit);
+    public static App BitAdjust(this App app, bool? is64Bit = null)
+        => AppUtils.BitAdjust(app, is64Bit);
 }
 
 public static class AppUtils
@@ -47,9 +49,11 @@ public static class AppUtils
     /// <param name="app"></param>
     /// <returns><see cref="Kind.Unknown"/> if not a Voicemeeter <see cref="App"/></returns>
     public static Kind ToKind(App app)
-        => app is < App.None or > App.Potatox64 ? Kind.Unknown
-        : app >= App.Standardx64 ? (Kind)(app - 3) // 64-bit App -> 32-bit App
-        : (Kind)app;
+        => app is < App.None or > App.Potatox64
+            ? Kind.Unknown
+            : app >= App.Standardx64
+                ? (Kind)(app - 3) // 64-bit App -> 32-bit App
+                : (Kind)app;
 
     /// <summary>
     ///   If the given app is a Voicemeeter app, adjusts to the correct bit version based on the current operating system.
@@ -60,6 +64,7 @@ public static class AppUtils
     public static int BitAdjust(int app, bool? is64Bit = null)
     {
         var is64 = is64Bit ?? Environment.Is64BitOperatingSystem;
+
         return app switch
         {
             > 0 and <= 3 when is64 => app + 3, // Adjust for 64-bit OS
@@ -69,7 +74,8 @@ public static class AppUtils
     }
 
     /// <inheritdoc cref="BitAdjust(int, bool?)"/>
-    public static App BitAdjust(App app, bool? is64Bit = null) => (App)BitAdjust((int)app, is64Bit);
+    public static App BitAdjust(App app, bool? is64Bit = null)
+        => (App)BitAdjust((int)app, is64Bit);
 
     /// <summary>
     ///   Attempts to parse the given string into an <see cref="App"/> and ensures a Voicemeeter app is the correct bit version based on the current operating system.
@@ -80,7 +86,12 @@ public static class AppUtils
     public static bool TryParseBit(string appName, out App app, bool? is64Bit = null)
     {
         app = App.None;
-        if (!Enum.TryParse(appName, true, out App result)) return false;
+
+        if (!Enum.TryParse(appName, true, out App result))
+        {
+            return false;
+        }
+
         app = BitAdjust(result, is64Bit);
         return true;
     }
@@ -91,6 +102,8 @@ public static class AppUtils
     /// <param name="appName"></param>
     /// <returns></returns>
     /// <exception cref="CannotParseAsTypeException"></exception>
-    public static App ParseBit(string appName, bool? is64Bit = null) => TryParseBit(appName, out App app, is64Bit) ? app
-        : throw new CannotParseAsTypeException(appName, typeof(App), nameof(appName));
+    public static App ParseBit(string appName, bool? is64Bit = null)
+        => TryParseBit(appName, out var app, is64Bit)
+            ? app
+            : throw new CannotParseAsTypeException(appName, typeof(App), nameof(appName));
 }

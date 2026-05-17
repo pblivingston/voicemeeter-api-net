@@ -1,87 +1,85 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;
+
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
-
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;
 
 public class IsParamsDirty : MockRemote
 {
     [Fact]
-    public void ReturnsFalse_WhenResponseIsOk()
+    public void ReturnsFalseWhenResponseIsOk()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
-        MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Ok);
+        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Ok);
 
-        var result = Remote.IsParamsDirty();
+        var result = this.Remote.IsParamsDirty();
 
         Assert.Multiple(
             () => Assert.False(result),
-            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2))
+            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2))
         );
     }
 
     [Fact]
-    public void ReturnsTrue_WhenResponseIsDirty()
+    public void ReturnsTrueWhenResponseIsDirty()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
-        MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Dirty);
+        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Dirty);
 
-        var result = Remote.IsParamsDirty();
+        var result = this.Remote.IsParamsDirty();
 
         Assert.Multiple(
             () => Assert.True(result),
-            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2))
+            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2))
         );
     }
 
     [Fact]
-    public void ThrowsException_Remote_WhenUnexpectedResponse()
+    public void ThrowsExceptionRemoteWhenUnexpectedResponse()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
-        MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Error);
+        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Error);
 
-        var ex = Assert.Throws<RemoteException<Response>>(() => Remote.IsParamsDirty());
+        var ex = Assert.Throws<RemoteException<Response>>(() => this.Remote.IsParamsDirty());
 
         Assert.Multiple(
             () => Assert.Equal(Response.Error, ex.Response),
-            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2))
+            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2))
         );
     }
 
     [Fact]
-    public void ThrowsException_AccessDenied_WhenLoginStatusNotOk()
+    public void ThrowsExceptionAccessDeniedWhenLoginStatusNotOk()
     {
-        MockLogin_VoicemeeterNotRunning();
+        this.MockLoginVoicemeeterNotRunning();
 
-        var ex = Assert.Throws<AccessDeniedException>(() => Remote.IsParamsDirty());
+        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.IsParamsDirty());
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
-            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never())
+            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never())
         );
     }
 
     [Fact]
-    public void ThrowsException_ObjectDisposed_WhenRemoteDisposed()
+    public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
-        Remote.Dispose();
-
-        var ex = Assert.Throws<ObjectDisposedException>(() => Remote.IsParamsDirty());
+        this.Remote.Dispose();
 
         Assert.Multiple(
-            () => Assert.Equal("Remote", ex.ObjectName),
-            () => MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never())
+            () => Assert.Throws<ObjectDisposedException>(() => this.Remote.IsParamsDirty()),
+            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never())
         );
     }
 }

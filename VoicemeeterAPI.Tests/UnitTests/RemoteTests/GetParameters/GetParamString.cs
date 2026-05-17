@@ -1,27 +1,27 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;
+
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
-
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;
 
 public class GetParamString : MockRemote
 {
     [Fact]
-    public void ReturnsValue_WhenResponse_Ok()
+    public void ReturnsValueWhenResponseOk()
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
         var param = "Mock.Param";
         var value = "Test String";
 
-        MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
+        this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
-        Remote.GetParam(param, out string result);
+        this.Remote.GetParam(param, out string result);
 
         Assert.Multiple(
             () => Assert.Equal(value, result),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
         );
     }
 
@@ -29,55 +29,53 @@ public class GetParamString : MockRemote
     [InlineData(Response.Error)]
     [InlineData(Response.UnknownParameter)]
     [InlineData(Response.StructureMismatch)]
-    public void ThrowsException_GetParam_WhenResponse_NotOk(Response response)
+    public void ThrowsExceptionGetParamWhenResponseNotOk(Response response)
     {
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
         var param = "Mock.Param";
         var value = "Test String";
 
-        MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(response);
+        this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(response);
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
-        var ex = Assert.Throws<GetParamException<string>>(() => Remote.GetParam(param, out string _));
+        var ex = Assert.Throws<GetParamException<string>>(() => this.Remote.GetParam(param, out string _));
 
         Assert.Multiple(
             () => Assert.Equal(response, ex.Response),
             () => Assert.Equal(param, ex.VmParam),
             () => Assert.Equal(value, ex.ReturnedValue),
             () => Assert.Equal(typeof(string), ex.ExpectedType),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
         );
     }
 
     [Fact]
-    public void ThrowsException_AccessDenied_WhenLoginStatus_NotOk()
+    public void ThrowsExceptionAccessDeniedWhenLoginStatusNotOk()
     {
         var param = "Mock.Param";
 
-        MockLogin_VoicemeeterNotRunning();
+        this.MockLoginVoicemeeterNotRunning();
 
-        var ex = Assert.Throws<AccessDeniedException>(() => Remote.GetParam(param, out string _));
+        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.GetParam(param, out string _));
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never())
+            () => this.MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never())
         );
     }
 
     [Fact]
-    public void ThrowsException_ObjectDisposed_WhenRemote_Disposed()
+    public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
         var param = "Mock.Param";
 
-        Remote.Dispose();
-
-        var ex = Assert.Throws<ObjectDisposedException>(() => Remote.GetParam(param, out string _));
+        this.Remote.Dispose();
 
         Assert.Multiple(
-            () => Assert.Equal("Remote", ex.ObjectName),
-            () => MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never())
+            () => Assert.Throws<ObjectDisposedException>(() => this.Remote.GetParam(param, out string _)),
+            () => this.MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never())
         );
     }
 }

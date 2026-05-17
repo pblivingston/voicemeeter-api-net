@@ -1,11 +1,11 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
+namespace PBLivingston.VoicemeeterAPI;
+
 using AtgDev.Voicemeeter;
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Exceptions;
-
-namespace PBLivingston.VoicemeeterAPI;
 
 /// <summary>
 ///   Interface for interacting with the VoicemeeterRemote API via <see cref="RemoteApiWrapper"/>.
@@ -15,23 +15,23 @@ public interface IRemote : IDisposable
     /// <summary>
     ///   Triggered when <see cref="LoginStatus"/>, <see cref="RunningKind"/>, or <see cref="RunningVersion"/> have changed.
     /// </summary>
-    event EventHandler<ConnectionStateEventArgs> ConnectionStateChanged;
+    public event EventHandler<ConnectionStateEventArgs> ConnectionStateChanged;
 
     /// <summary>
     ///   Triggered when <see cref="ParamsDirty()"/> returns true.
     /// </summary>
-    event EventHandler ParamsDirty;
+    public event EventHandler ParamsDirty;
 
     /// <summary>
     ///   Triggered when <see cref="ButtonsDirty()"/> returns true.
     /// </summary>
-    event EventHandler ButtonsDirty;
+    public event EventHandler ButtonsDirty;
 
     /// <summary>
     ///   Returns the current connection state.
     /// </summary>
     /// <returns></returns>
-    ConnectionStateEventArgs GetConnectionState();
+    public ConnectionStateEventArgs GetConnectionState();
 
     #region Login
 
@@ -64,7 +64,7 @@ public interface IRemote : IDisposable
     ///   </list>
     /// </remarks>
     /// <inheritdoc cref="IRemote" path="/example"/>
-    LoginResponse Login(int timeoutMs = 2000, int sleepMs = 100);
+    public LoginResponse Login(int timeoutMs = 2000, int sleepMs = 100);
 
     /// <summary>
     ///   Closes communication pipe with VoicemeeterRemote.
@@ -89,7 +89,7 @@ public interface IRemote : IDisposable
     ///   </list>
     /// </remarks>
     /// <inheritdoc cref="IRemote" path="/example"/>
-    LoginResponse Logout(int timeoutMs = 1000, int sleepMs = 100);
+    public LoginResponse Logout(int timeoutMs = 1000, int sleepMs = 100);
 
     /// <summary>
     ///   Runs the specified <see cref="App"/>.
@@ -123,7 +123,7 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    void Run<T>(T app, int timeoutMs = 2000, int sleepMs = 100) where T : notnull;
+    public void Run<T>(T app, int timeoutMs = 2000, int sleepMs = 100) where T : notnull;
 
     #endregion
 
@@ -152,7 +152,7 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    Kind GetKind();
+    public Kind GetKind();
 
     /// <summary>
     ///   Gets the currently running Voicemeeter version.
@@ -177,7 +177,7 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    VmVersion GetVersion();
+    public VmVersion GetVersion();
 
     #endregion
 
@@ -205,7 +205,7 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    bool IsParamsDirty();
+    public bool IsParamsDirty();
 
     /// <summary>
     ///   Gets the requested Voicemeeter parameter.
@@ -239,7 +239,7 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    void GetParam<T>(string param, out T value);
+    public void GetParam<T>(string param, out T value);
 
     #endregion
 
@@ -267,7 +267,7 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    bool IsButtonsDirty();
+    public bool IsButtonsDirty();
 
     #endregion
 }

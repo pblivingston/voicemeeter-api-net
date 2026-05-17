@@ -1,16 +1,16 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.SemVersionTests;
+
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
-
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.SemVersionTests;
 
 public class Construction
 {
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Constructor_Packed_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void ConstructorPackedReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.SemsIn | CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.SemsIn | CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = new SemVersion(data.SemPacked);
@@ -26,9 +26,9 @@ public class Construction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Constructor_Packed_ReturnsExpected_Kind(Case scenario, CaseRecord data)
+    public void ConstructorPackedReturnsExpectedKind(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = new SemVersion(data.SemPacked);
@@ -38,9 +38,9 @@ public class Construction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Constructor_Packed_ReturnsExpected_Semantic(Case scenario, CaseRecord data)
+    public void ConstructorPackedReturnsExpectedSemantic(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = new SemVersion(data.SemPacked);
@@ -50,9 +50,9 @@ public class Construction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Constructor_Packed_ThrowsException_SemPackedOutOfRange(Case scenario, CaseRecord data)
+    public void ConstructorPackedThrowsExceptionSemPackedOutOfRange(CaseName scenario, CaseRecord data)
     {
-        var runTags = CaseTag.Invalid_SemPacked;
+        var runTags = CaseTag.InvalidSemPacked;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
         var ex = Assert.Throws<SemPackedOutOfRangeException>(() => new SemVersion(data.SemPacked));
@@ -62,9 +62,9 @@ public class Construction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Constructor_Sems_ReturnsExpected_Packed(Case scenario, CaseRecord data)
+    public void ConstructorSemsReturnsExpectedPacked(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Sems;
+        var skipTags = CaseTag.InvalidSems;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = new SemVersion(data.Major, data.Minor, data.Patch);
@@ -74,9 +74,9 @@ public class Construction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Constructor_Sems_ThrowsException_PartsOutOfRange(Case scenario, CaseRecord data)
+    public void ConstructorSemsThrowsExceptionPartsOutOfRange(CaseName scenario, CaseRecord data)
     {
-        var runTags = CaseTag.Invalid_Sems;
+        var runTags = CaseTag.InvalidSems;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
         var ex = Assert.Throws<PartsOutOfRangeException>(() => new SemVersion(data.Major, data.Minor, data.Patch));
@@ -90,12 +90,12 @@ public class Construction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Constructor_VmVersion_ReturnsExpected_Packed(Case scenario, CaseRecord data)
+    public void ConstructorVmVersionReturnsExpectedPacked(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_Packs;
+        var skipTags = CaseTag.InvalidPacks;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var vm = new VmVersion(data.Packed);
+        var vm = new VmVersion(data.VmPacked);
         var version = new SemVersion(vm);
 
         Assert.Equal(data.SemPacked, version.Packed);

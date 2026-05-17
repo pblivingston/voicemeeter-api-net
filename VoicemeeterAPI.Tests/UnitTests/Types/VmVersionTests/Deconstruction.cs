@@ -1,21 +1,21 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VmVersionTests;
+
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Utilities;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
 
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VmVersionTests;
-
 public class Deconstruction
 {
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Deconstructor_Sems_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void DeconstructorSemsReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.SemsIn | CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.SemsIn | CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = new VmVersion(data.Packed);
-        ((IVersion)version).Deconstruct(out int m, out int n, out int p);
+        var version = new VmVersion(data.VmPacked);
+        ((IVersion)version).Deconstruct(out var m, out var n, out var p);
 
         Assert.Multiple(
             () => Assert.Equal(data.Major, m),
@@ -26,13 +26,13 @@ public class Deconstruction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Deconstructor_Ints_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void DeconstructorIntsReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.PartsIn | CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.PartsIn | CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = new VmVersion(data.Packed);
-        version.Deconstruct(out int k, out int m, out int n, out int p);
+        var version = new VmVersion(data.VmPacked);
+        version.Deconstruct(out int k, out var m, out var n, out var p);
 
         Assert.Multiple(
             () => Assert.Equal(data.Kind, k),
@@ -44,13 +44,13 @@ public class Deconstruction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Deconstructor_Kind_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void DeconstructorKindReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.PartsIn | CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.PartsIn | CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = new VmVersion(data.Packed);
-        version.Deconstruct(out Kind k, out int m, out int n, out int p);
+        var version = new VmVersion(data.VmPacked);
+        version.Deconstruct(out Kind k, out var m, out var n, out var p);
 
         Assert.Multiple(
             () => Assert.Equal(data.K, k),
@@ -62,13 +62,13 @@ public class Deconstruction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Deconstructor_Semantic_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void DeconstructorSemanticReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.KindIn | CaseTag.Invalid_Packs;
+        var skipTags = CaseTag.KindIn | CaseTag.InvalidPacks;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = new VmVersion(data.Packed);
-        version.Deconstruct(out int k, out SemVersion sem);
+        var version = new VmVersion(data.VmPacked);
+        version.Deconstruct(out int k, out var sem);
 
         Assert.Multiple(
             () => Assert.Equal(data.Kind, k),
@@ -78,13 +78,13 @@ public class Deconstruction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Deconstructor_KindSemantic_ReturnsExpected_Parts(Case scenario, CaseRecord data)
+    public void DeconstructorKindSemanticReturnsExpectedParts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.KindIn | CaseTag.Invalid_Packs;
+        var skipTags = CaseTag.KindIn | CaseTag.InvalidPacks;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = new VmVersion(data.Packed);
-        version.Deconstruct(out Kind k, out SemVersion sem);
+        var version = new VmVersion(data.VmPacked);
+        version.Deconstruct(out Kind k, out var sem);
 
         Assert.Multiple(
             () => Assert.Equal(data.K, k),
@@ -94,14 +94,14 @@ public class Deconstruction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Deconstructor_GenericParts_ReturnsExpected_Ints(Case scenario, CaseRecord data)
+    public void DeconstructorGenericPartsReturnsExpectedInts(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.PartsIn | CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.PartsIn | CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = new VmVersion(data.Packed);
+        var version = new VmVersion(data.VmPacked);
 
-        ((IVersion)version).Deconstruct(out int k, out int m, out int n, out int p);
+        ((IVersion)version).Deconstruct<int>(out var k, out var m, out var n, out var p);
 
         Assert.Multiple(
             () => Assert.Equal(data.Kind, k),
@@ -113,14 +113,14 @@ public class Deconstruction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Deconstructor_GenericParts_ReturnsExpected_Kind(Case scenario, CaseRecord data)
+    public void DeconstructorGenericPartsReturnsExpectedKind(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.PartsIn | CaseTag.Invalid_Packed;
+        var skipTags = CaseTag.PartsIn | CaseTag.InvalidVmPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = new VmVersion(data.Packed);
+        var version = new VmVersion(data.VmPacked);
 
-        ((IVersion)version).Deconstruct(out Kind k, out int m, out int n, out int p);
+        ((IVersion)version).Deconstruct<Kind>(out var k, out var m, out var n, out var p);
 
         Assert.Multiple(
             () => Assert.Equal(data.K, k),
@@ -132,14 +132,14 @@ public class Deconstruction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Deconstructor_GenericSemantic_ReturnsExpected_Semantic(Case scenario, CaseRecord data)
+    public void DeconstructorGenericSemanticReturnsExpectedSemantic(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.KindIn | CaseTag.Invalid_Packs;
+        var skipTags = CaseTag.KindIn | CaseTag.InvalidPacks;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = new VmVersion(data.Packed);
+        var version = new VmVersion(data.VmPacked);
 
-        ((IVersion)version).Deconstruct(out int k, out SemVersion sem);
+        ((IVersion)version).Deconstruct<int>(out var k, out var sem);
 
         Assert.Multiple(
             () => Assert.Equal(data.Kind, k),
@@ -149,14 +149,14 @@ public class Deconstruction
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Deconstructor_GenericSemantic_ReturnsExpected_KindSemantic(Case scenario, CaseRecord data)
+    public void DeconstructorGenericSemanticReturnsExpectedKindSemantic(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.KindIn | CaseTag.Invalid_Packs;
+        var skipTags = CaseTag.KindIn | CaseTag.InvalidPacks;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var version = new VmVersion(data.Packed);
+        var version = new VmVersion(data.VmPacked);
 
-        ((IVersion)version).Deconstruct(out Kind k, out SemVersion sem);
+        ((IVersion)version).Deconstruct<Kind>(out var k, out var sem);
 
         Assert.Multiple(
             () => Assert.Equal(data.K, k),
@@ -165,11 +165,11 @@ public class Deconstruction
     }
 
     [Fact]
-    public void Deconstructor_GenericParts_ThrowsException_TypeNotSupported()
+    public void DeconstructorGenericPartsThrowsExceptionTypeNotSupported()
     {
         var version = new VmVersion(0x0204_0608);
 
-        var ex = Assert.Throws<TypeNotSupportedException>(() => ((IVersion)version).Deconstruct(out bool _, out int _, out int _, out int _));
+        var ex = Assert.Throws<TypeNotSupportedException>(() => ((IVersion)version).Deconstruct<bool>(out var _, out var _, out var _, out var _));
 
         Assert.Multiple(
             () => Assert.Equal(typeof(bool), ex.Type),
@@ -178,11 +178,11 @@ public class Deconstruction
     }
 
     [Fact]
-    public void Deconstructor_GenericSemantic_ThrowsException_TypeNotSupported()
+    public void DeconstructorGenericSemanticThrowsExceptionTypeNotSupported()
     {
         var version = new VmVersion(0x0204_0608);
 
-        var ex = Assert.Throws<TypeNotSupportedException>(() => ((IVersion)version).Deconstruct(out float _, out SemVersion _));
+        var ex = Assert.Throws<TypeNotSupportedException>(() => ((IVersion)version).Deconstruct<float>(out var _, out var _));
 
         Assert.Multiple(
             () => Assert.Equal(typeof(float), ex.Type),

@@ -1,15 +1,15 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.SemVersionTests;
+
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
-
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.SemVersionTests;
 
 public class Validation
 {
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void IsValid_ReturnsExpected_True(Case scenario, CaseRecord data)
+    public void IsValidReturnsExpectedTrue(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = new SemVersion(data.SemPacked);
@@ -19,9 +19,9 @@ public class Validation
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void IsValid_SemVersion_ReturnsExpected_True(Case scenario, CaseRecord data)
+    public void IsValidSemVersionReturnsExpectedTrue(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var version = new SemVersion(data.SemPacked);
@@ -31,11 +31,11 @@ public class Validation
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void IsValid_Packed_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void IsValidPackedReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
         _ = scenario;
 
-        var badTags = CaseTag.Invalid_SemPacked;
+        var badTags = CaseTag.InvalidSemPacked;
         var expected = !data.Tags.HasAny(badTags);
 
         Assert.Equal(expected, SemVersion.IsValid(data.SemPacked));
@@ -43,11 +43,11 @@ public class Validation
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void IsValid_Sems_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void IsValidSemsReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
         _ = scenario;
 
-        var badTags = CaseTag.Invalid_Sems;
+        var badTags = CaseTag.InvalidSems;
         var expected = !data.Tags.HasAny(badTags);
 
         Assert.Equal(expected, SemVersion.IsValid(data.Major, data.Minor, data.Patch));

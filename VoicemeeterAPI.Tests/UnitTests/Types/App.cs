@@ -1,15 +1,15 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types;
+
 using System.Text.Json.Serialization;
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.AppData;
 
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types;
-
 public class AppTests
 {
     [Theory]
     [ClassData(typeof(AppData))]
-    public void ToKind_ReturnsExpected_Kind(Case scenario, CaseRecord data)
+    public void ToKindReturnsExpectedKind(CaseName scenario, CaseRecord data)
     {
         _ = scenario;
 
@@ -18,7 +18,7 @@ public class AppTests
 
     [Theory]
     [ClassData(typeof(AppData))]
-    public void BitAdjust_ReturnsExpected_App32Bit(Case scenario, CaseRecord data)
+    public void BitAdjustReturnsExpectedApp32Bit(CaseName scenario, CaseRecord data)
     {
         _ = scenario;
 
@@ -27,7 +27,7 @@ public class AppTests
 
     [Theory]
     [ClassData(typeof(AppData))]
-    public void BitAdjust_ReturnsExpected_App64Bit(Case scenario, CaseRecord data)
+    public void BitAdjustReturnsExpectedApp64Bit(CaseName scenario, CaseRecord data)
     {
         _ = scenario;
 
@@ -36,7 +36,7 @@ public class AppTests
 
     [Theory]
     [ClassData(typeof(AppData))]
-    public void BitAdjust_ReturnsExpected_App(Case scenario, CaseRecord data)
+    public void BitAdjustReturnsExpectedApp(CaseName scenario, CaseRecord data)
     {
         _ = scenario;
 
@@ -47,17 +47,20 @@ public class AppTests
 
     [Theory]
     [ClassData(typeof(AppData))]
-    public void TryParseBit_ReturnsExpected_App(Case scenario, CaseRecord data)
+    public void TryParseBitReturnsExpectedApp(CaseName scenario, CaseRecord data)
     {
         _ = scenario;
 
-        var badTags = CaseTag.Invalid_String;
+        var badTags = CaseTag.InvalidString;
         var shouldSucceed = !data.Tags.HasAny(badTags);
 
         var expected = App.None;
-        if (shouldSucceed) { expected = Environment.Is64BitOperatingSystem ? data.App64 : data.App32; }
+        if (shouldSucceed)
+        {
+            expected = Environment.Is64BitOperatingSystem ? data.App64 : data.App32;
+        }
 
-        var success = AppUtils.TryParseBit(data.S, out App result);
+        var success = AppUtils.TryParseBit(data.S, out var result);
 
         Assert.Multiple(
             () => Assert.Equal(shouldSucceed, success),
@@ -67,9 +70,9 @@ public class AppTests
 
     [Theory]
     [ClassData(typeof(AppData))]
-    public void ParseBit_ReturnsExpected_App(Case scenario, CaseRecord data)
+    public void ParseBitReturnsExpectedApp(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.Invalid_String;
+        var skipTags = CaseTag.InvalidString;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
         var expected = Environment.Is64BitOperatingSystem ? data.App64 : data.App32;
@@ -79,9 +82,9 @@ public class AppTests
 
     [Theory]
     [ClassData(typeof(AppData))]
-    public void ParseBit_ThrowsException_CannotParseAsType(Case scenario, CaseRecord data)
+    public void ParseBitThrowsExceptionCannotParseAsType(CaseName scenario, CaseRecord data)
     {
-        var runTags = CaseTag.Invalid_String;
+        var runTags = CaseTag.InvalidString;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
         var ex = Assert.Throws<CannotParseAsTypeException>(() => AppUtils.ParseBit(data.S));
@@ -94,23 +97,23 @@ public class AppTests
 }
 
 #region AppData
-public class AppData : TheoryData<Case, CaseRecord>
+public class AppData : TheoryData<CaseName, CaseRecord>
 {
     public AppData()
     {
-        Add(Case.Standard, new(
+        this.Add(CaseName.Standard, new(
             App.Standard, "Standard", Kind.Standard, App.Standard, App.Standardx64
         ));
-        Add(Case.Bananax64, new(
+        this.Add(CaseName.Bananax64, new(
             App.Bananax64, "Bananax64", Kind.Banana, App.Banana, App.Bananax64
         ));
-        Add(Case.None, new(
+        this.Add(CaseName.None, new(
             App.None, "None", Kind.None, App.None, App.None
         ));
-        Add(Case.Unknown, new(
-            App.Unknown, "Test String", Kind.Unknown, App.Unknown, App.Unknown, CaseTag.Invalid_String
+        this.Add(CaseName.Unknown, new(
+            App.Unknown, "Test String", Kind.Unknown, App.Unknown, App.Unknown, CaseTag.InvalidString
         ));
-        Add(Case.MacroButtons, new(
+        this.Add(CaseName.MacroButtons, new(
             App.MacroButtons, "MacroButtons", Kind.Unknown, App.MacroButtons, App.MacroButtons
         ));
     }
@@ -125,10 +128,10 @@ public class AppData : TheoryData<Case, CaseRecord>
     ) : SerializableRecord
     {
         public CaseRecord() : this(default, "", default, default, default) { }
-        public override string ToString() => $"Tags = {Tags}";
+        public override string ToString() => $"Tags = {this.Tags}";
     }
 
-    public enum Case
+    public enum CaseName
     {
         Standard, Bananax64,
         None, Unknown,
@@ -139,7 +142,7 @@ public class AppData : TheoryData<Case, CaseRecord>
     public enum CaseTag
     {
         None = 0,
-        Invalid_String = 1 << 0
+        InvalidString = 1 << 0
     }
 }
 #endregion

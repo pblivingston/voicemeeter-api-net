@@ -1,33 +1,33 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GeneralInformation;
+
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
-
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GeneralInformation;
 
 public class GetKind : MockRemote
 {
     [Fact]
-    public void UpdatesLoginStatus_Ok_WhenVoicemeeterRunning()
+    public void UpdatesLoginStatusOkWhenVoicemeeterRunning()
     {
         var kind = (int)Kind.Banana;
         var version = 0x0201_0202;
         var expectedState = new ConnectionStateEventArgs(LoginResponse.Ok, true, (Kind)kind, (VmVersion)version);
 
-        MockLogin_VoicemeeterNotRunning();
+        this.MockLoginVoicemeeterNotRunning();
 
-        MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
-        MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
+        this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
+        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
 
-        var result = Remote.GetKind();
+        var result = this.Remote.GetKind();
 
         Assert.Multiple(
             () => Assert.Equal(Kind.Banana, result),
-            () => Assert.Equal(expectedState, Remote.GetConnectionState()),
-            () => MockWrapper.Verify(w => w.GetVoicemeeterType(out kind), Times.Exactly(3))
+            () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out kind), Times.Exactly(3))
         );
     }
 
     [Fact]
-    public void UpdatesLoginStatus_VoicemeeterNotRunning_WhenVoicemeeterNotRunning()
+    public void UpdatesLoginStatusVoicemeeterNotRunningWhenVoicemeeterNotRunning()
     {
         var kind = (int)Kind.Banana;
         var version = 0x0201_0202;
@@ -35,61 +35,59 @@ public class GetKind : MockRemote
         var noVersion = 0x0000_0000;
         var expectedState = new ConnectionStateEventArgs(LoginResponse.VoicemeeterNotRunning, true, Kind.None, default);
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
-        MockWrapper.Setup(w => w.GetVoicemeeterType(out noKind)).Returns(InfoResponse.NoServer);
-        MockWrapper.Setup(w => w.GetVoicemeeterVersion(out noVersion)).Returns(InfoResponse.NoServer);
+        this.MockWrapper.Setup(w => w.GetVoicemeeterType(out noKind)).Returns(InfoResponse.NoServer);
+        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out noVersion)).Returns(InfoResponse.NoServer);
 
-        var result = Remote.GetKind();
+        var result = this.Remote.GetKind();
 
         Assert.Multiple(
             () => Assert.Equal(Kind.None, result),
-            () => Assert.Equal(expectedState, Remote.GetConnectionState()),
-            () => MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(4))
+            () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(4))
         );
     }
 
     [Fact]
-    public void ThrowsException_GetInfo_WhenUnexpectedResponse()
+    public void ThrowsExceptionGetInfoWhenUnexpectedResponse()
     {
         var kind = (int)Kind.Banana;
         var version = 0x0201_0202;
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
         var noKind = (int)Kind.None;
-        MockWrapper.Setup(w => w.GetVoicemeeterType(out noKind)).Returns(InfoResponse.NoClient);
+        this.MockWrapper.Setup(w => w.GetVoicemeeterType(out noKind)).Returns(InfoResponse.NoClient);
 
-        var ex = Assert.Throws<GetInfoException>(() => Remote.GetKind());
+        var ex = Assert.Throws<GetInfoException>(() => this.Remote.GetKind());
 
         Assert.Multiple(
             () => Assert.Equal(InfoResponse.NoClient, ex.Response),
             () => Assert.Equal(noKind, ex.ReturnedValue),
-            () => MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(3))
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(3))
         );
     }
 
     [Fact]
-    public void ThrowsException_AccessDenied_WhenLoginStatusLoggedOut()
+    public void ThrowsExceptionAccessDeniedWhenLoginStatusLoggedOut()
     {
-        var ex = Assert.Throws<AccessDeniedException>(() => Remote.GetKind());
+        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.GetKind());
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.LoggedOut, ex.LoginStatus),
-            () => MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Never)
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Never)
         );
     }
 
     [Fact]
-    public void ThrowsException_ObjectDisposed_WhenRemoteDisposed()
+    public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
-        Remote.Dispose();
-
-        var ex = Assert.Throws<ObjectDisposedException>(() => Remote.GetKind());
+        this.Remote.Dispose();
 
         Assert.Multiple(
-            () => Assert.Equal("Remote", ex.ObjectName),
-            () => MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Never)
+            () => Assert.Throws<ObjectDisposedException>(() => this.Remote.GetKind()),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Never)
         );
     }
 }

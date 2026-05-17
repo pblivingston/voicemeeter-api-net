@@ -1,20 +1,18 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
+namespace PBLivingston.VoicemeeterAPI.Utilities;
+
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Logging;
 using PBLivingston.VoicemeeterAPI.Types;
 
-namespace PBLivingston.VoicemeeterAPI.Utilities;
-
 internal static class GeneralDispatch
 {
     public static void On_BitAdjust(ILogger logger, App appBefore, App appAfter)
-    {
-        GeneralLog.BitAdjust(logger, appBefore, appAfter);
-    }
+        => GeneralLog.BitAdjust(logger, appBefore, appAfter);
 
     public static TypeNotSupportedException On_TypeNotSupported(ILogger logger, Type type, string paramName, Type[] supportedTypes, [CallerMemberName] string methodName = "")
     {

@@ -1,13 +1,13 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types;
+
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.KindData;
-
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types;
 
 public class KindTests
 {
     [Theory]
     [ClassData(typeof(KindData))]
-    public void ToApp_ReturnsExpected_App(Case scenario, CaseRecord data)
+    public void ToAppReturnsExpectedApp(CaseName scenario, CaseRecord data)
     {
         _ = scenario;
 
@@ -18,7 +18,7 @@ public class KindTests
 
     [Theory]
     [ClassData(typeof(KindData))]
-    public void IsValid_Int_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void IsValidIntReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
         _ = scenario;
 
@@ -27,7 +27,7 @@ public class KindTests
 
     [Theory]
     [ClassData(typeof(KindData))]
-    public void IsValid_Kind_ReturnsExpected_Bool(Case scenario, CaseRecord data)
+    public void IsValidKindReturnsExpectedBool(CaseName scenario, CaseRecord data)
     {
         _ = scenario;
 
@@ -35,17 +35,17 @@ public class KindTests
     }
 }
 
-public class KindData : TheoryData<Case, CaseRecord>
+public class KindData : TheoryData<CaseName, CaseRecord>
 {
     public KindData()
     {
-        Add(Case.Potato, new(
+        this.Add(CaseName.Potato, new(
             3, Kind.Potato, App.Potato, App.Potatox64, true
         ));
-        Add(Case.None, new(
+        this.Add(CaseName.None, new(
             0, Kind.None, App.None, App.None, false
         ));
-        Add(Case.Unknown, new(
+        this.Add(CaseName.Unknown, new(
             -1, Kind.Unknown, App.Unknown, App.Unknown, false
         ));
     }
@@ -60,10 +60,10 @@ public class KindData : TheoryData<Case, CaseRecord>
     ) : SerializableRecord
     {
         public CaseRecord() : this(0, default, default, default, false) { }
-        public override string ToString() => $"Tags = {Tags}";
+        public override string ToString() => $"Tags = {this.Tags}";
     }
 
-    public enum Case
+    public enum CaseName
     {
         Potato, None, Unknown
     }

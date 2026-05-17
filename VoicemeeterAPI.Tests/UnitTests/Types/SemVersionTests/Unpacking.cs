@@ -1,19 +1,19 @@
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.SemVersionTests;
+
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
-
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.SemVersionTests;
 
 public class Unpacking
 {
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void RawUnpack_ReturnsExpected_Sems(Case scenario, CaseRecord data)
+    public void RawUnpackReturnsExpectedSems(CaseName scenario, CaseRecord data)
     {
         var skipTags = CaseTag.SemsIn;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        SemVersion.RawUnpack(data.SemPacked, out int m, out int n, out int p);
+        SemVersion.RawUnpack(data.SemPacked, out var m, out var n, out var p);
 
         Assert.Multiple(
             () => Assert.Equal(data.Major, m),
@@ -24,15 +24,15 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void TryUnpack_ReturnsExpected_Sems(Case scenario, CaseRecord data)
+    public void TryUnpackReturnsExpectedSems(CaseName scenario, CaseRecord data)
     {
         var skipTags = CaseTag.SemsIn;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        var badTags = CaseTag.Invalid_SemPacked;
+        var badTags = CaseTag.InvalidSemPacked;
         var shouldSucceed = !data.Tags.HasAny(badTags);
 
-        var success = SemVersion.TryUnpack(data.SemPacked, out int m, out int n, out int p);
+        var success = SemVersion.TryUnpack(data.SemPacked, out var m, out var n, out var p);
 
         Assert.Multiple(
             () => Assert.Equal(shouldSucceed, success),
@@ -44,12 +44,12 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Unpack_ReturnsExpected_Sems(Case scenario, CaseRecord data)
+    public void UnpackReturnsExpectedSems(CaseName scenario, CaseRecord data)
     {
-        var skipTags = CaseTag.SemsIn | CaseTag.Invalid_SemPacked;
+        var skipTags = CaseTag.SemsIn | CaseTag.InvalidSemPacked;
         Assert.SkipWhen(data.Tags.HasAny(skipTags), $"Skipping case: {scenario} with any tags: {skipTags}");
 
-        SemVersion.Unpack(data.SemPacked, out int m, out int n, out int p);
+        SemVersion.Unpack(data.SemPacked, out var m, out var n, out var p);
 
         Assert.Multiple(
             () => Assert.Equal(data.Major, m),
@@ -60,12 +60,12 @@ public class Unpacking
 
     [Theory]
     [ClassData(typeof(VersionData))]
-    public void Unpack_ThrowsException_SemPackedOutOfRange(Case scenario, CaseRecord data)
+    public void UnpackThrowsExceptionSemPackedOutOfRange(CaseName scenario, CaseRecord data)
     {
-        var runTags = CaseTag.Invalid_SemPacked;
+        var runTags = CaseTag.InvalidSemPacked;
         Assert.SkipUnless(data.Tags.HasAny(runTags), $"Skipping case: {scenario} without any tags: {runTags}");
 
-        var ex = Assert.Throws<SemPackedOutOfRangeException>(() => SemVersion.Unpack(data.SemPacked, out int _, out int _, out int _));
+        var ex = Assert.Throws<SemPackedOutOfRangeException>(() => SemVersion.Unpack(data.SemPacked, out var _, out var _, out var _));
 
         Assert.Equal(data.SemPacked, ex.ActualValue);
     }

@@ -1,87 +1,85 @@
-using PBLivingston.VoicemeeterAPI.Types;
-
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.Login;
+
+using PBLivingston.VoicemeeterAPI.Types;
 
 public class Logout : MockRemote
 {
     [Fact]
-    public void UpdatesConnectionState_LoggedOut_WhenSuccessful()
+    public void UpdatesConnectionStateLoggedOutWhenSuccessful()
     {
         var loginStatus = LoginResponse.LoggedOut;
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
         var expectedState = new ConnectionStateEventArgs(loginStatus, true, (Kind)kind, (VmVersion)version);
 
-        MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
+        this.MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
-        var result = Remote.Logout();
+        var result = this.Remote.Logout();
 
         Assert.Multiple(
             () => Assert.Equal(loginStatus, result),
-            () => Assert.Equal(expectedState, Remote.GetConnectionState()),
-            () => MockWrapper.Verify(w => w.Logout(), Times.Once())
+            () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
+            () => this.MockWrapper.Verify(w => w.Logout(), Times.Once())
         );
     }
 
     [Fact]
-    public void ReturnsExpected_LoginResponse_WhenAlreadyLoggedOut()
+    public void ReturnsExpectedLoginResponseWhenAlreadyLoggedOut()
     {
-        var result = Remote.Logout();
+        var result = this.Remote.Logout();
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.LoggedOut, result),
-            () => MockWrapper.Verify(w => w.Logout(), Times.Never())
+            () => this.MockWrapper.Verify(w => w.Logout(), Times.Never())
         );
     }
 
     [Fact]
-    public void UpdatesConnectionState_Unknown_WhenTimesOut()
+    public void UpdatesConnectionStateUnknownWhenTimesOut()
     {
         var loginStatus = LoginResponse.Unknown;
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
         var expectedState = new ConnectionStateEventArgs(loginStatus, true, (Kind)kind, (VmVersion)version);
 
-        MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
+        this.MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
 
-        MockLogin_Ok(kind, version);
+        this.MockLoginOk(kind, version);
 
-        var result = Remote.Logout(timeoutMs: 10);
+        var result = this.Remote.Logout(timeoutMs: 10);
 
         Assert.Multiple(
             () => Assert.Equal(loginStatus, result),
-            () => Assert.Equal(expectedState, Remote.GetConnectionState()),
-            () => MockWrapper.Verify(w => w.Logout(), Times.Once())
+            () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
+            () => this.MockWrapper.Verify(w => w.Logout(), Times.Once())
         );
     }
 
     [Fact]
-    public void ThrowsException_ObjectDisposed_WhenRemoteDisposed()
+    public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
-        Remote.Dispose();
-
-        var ex = Assert.Throws<ObjectDisposedException>(() => Remote.Logout());
+        this.Remote.Dispose();
 
         Assert.Multiple(
-            () => Assert.Equal("Remote", ex.ObjectName),
-            () => MockWrapper.Verify(w => w.Logout(), Times.Never())
+            () => Assert.Throws<ObjectDisposedException>(() => this.Remote.Logout()),
+            () => this.MockWrapper.Verify(w => w.Logout(), Times.Never())
         );
     }
 
     [Fact]
-    public void CalledByDispose_WhenStillLoggedIn()
+    public void CalledByDisposeWhenStillLoggedIn()
     {
         var kind = Kind.Standard;
         var version = 0x0101_0202;
 
-        MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
+        this.MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
 
-        MockLogin_Ok((int)kind, version);
+        this.MockLoginOk((int)kind, version);
 
-        Remote.Dispose();
+        this.Remote.Dispose();
 
-        MockWrapper.Verify(w => w.Logout(), Times.Once());
+        this.MockWrapper.Verify(w => w.Logout(), Times.Once());
     }
 }

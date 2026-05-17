@@ -1,9 +1,9 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-using PBLivingston.VoicemeeterAPI.Types;
-
 namespace PBLivingston.VoicemeeterAPI.Exceptions;
+
+using PBLivingston.VoicemeeterAPI.Types;
 
 public class RemoteException(string message)
     : VmApiException(message)
@@ -33,15 +33,11 @@ public class RemoteException<T> : RemoteException
 
     public RemoteException(T response)
         : base($"Response: {response}")
-    {
-        Response = response;
-    }
+        => this.Response = response;
 
     public RemoteException(T response, string message)
         : base($"Response: {response}\r\n{message}")
-    {
-        Response = response;
-    }
+        => this.Response = response;
 }
 
 public class RunException(RunResponse response, App app)
@@ -53,7 +49,7 @@ public class RunException(RunResponse response, App app)
 public class GetInfoException(InfoResponse response, int returnedValue)
     : RemoteException<InfoResponse>(response, $"Returned value: {returnedValue}")
 {
-    public int ReturnedValue = returnedValue;
+    public int ReturnedValue { get; } = returnedValue;
 }
 
 public class GetParamException<T>(Response response, string vmParam, T returnedValue, Type expectedType)
