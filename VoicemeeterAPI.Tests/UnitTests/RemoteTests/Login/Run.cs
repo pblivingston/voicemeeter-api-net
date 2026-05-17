@@ -29,7 +29,7 @@ public class Run : MockRemote
     {
         var k = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var expectedState = new ConnectionStateEventArgs(LoginResponse.Ok, true, (Kind)k, (VmVersion)version);
+        var expectedState = new ConnectionState(LoginResponse.Ok, true, (Kind)k, (VmVersion)version);
 
         this.MockLoginVoicemeeterNotRunning();
 
@@ -62,7 +62,7 @@ public class Run : MockRemote
     {
         var kind = Kind.Standard;
         var version = 0x0101_0202;
-        var expectedState = new ConnectionStateEventArgs(LoginResponse.Ok, true, kind, (VmVersion)version);
+        var expectedState = new ConnectionState(LoginResponse.Ok, true, kind, (VmVersion)version);
         var app = App.MacroButtons;
 
         this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
@@ -155,7 +155,7 @@ public class Run : MockRemote
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var expectedState = new ConnectionStateEventArgs(LoginResponse.Ok, true, (Kind)kind, (VmVersion)version);
+        var expectedState = new ConnectionState(LoginResponse.Ok, true, (Kind)kind, (VmVersion)version);
         var app = App.Standardx64;
 
         this.MockLoginVoicemeeterNotRunning();

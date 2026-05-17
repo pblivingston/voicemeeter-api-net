@@ -67,11 +67,16 @@ public partial class Remote
 
     #region Connection State
 
-    private void On_ConnectionState_Changed(ConnectionStateEventArgs currentState, [CallerMemberName] string methodName = "")
+    private void On_ConnectionState_Changed(ConnectionState currentState, [CallerMemberName] string methodName = "")
     {
-        RemoteLog.ConnectionState_Changed(this.logger, methodName, this.lastState.MemberString, currentState.MemberString);
+        if (this.lastState == currentState)
+        {
+            return;
+        }
 
-        ConnectionStateChanged?.Invoke(this, currentState);
+        RemoteLog.ConnectionState_Changed(this.logger, methodName, this.lastState, currentState);
+
+        ConnectionStateChanged?.Invoke(this, new(this.lastState, currentState));
 
         this.lastState = currentState;
     }

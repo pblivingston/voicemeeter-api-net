@@ -80,7 +80,7 @@ public abstract class MockRemote : IDisposable
     protected void MockLoginOk(int kind, int version)
     {
         var loginStatus = LoginResponse.Ok;
-        var expectedState = new ConnectionStateEventArgs(loginStatus, true, (Kind)kind, (VmVersion)version);
+        var expectedState = new ConnectionState(loginStatus, true, (Kind)kind, (VmVersion)version);
 
         this.MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
         this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
@@ -108,7 +108,7 @@ public abstract class MockRemote : IDisposable
         var kind = (int)Kind.None;
         var version = 0x0000_0000;
         var loginStatus = LoginResponse.VoicemeeterNotRunning;
-        var expectedState = new ConnectionStateEventArgs(loginStatus, true, Kind.None, default);
+        var expectedState = new ConnectionState(loginStatus, true, Kind.None, default);
 
         this.MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
         this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.NoServer);
@@ -130,7 +130,7 @@ public abstract class MockRemote : IDisposable
     protected void MockLoginMacroButtonsNotRunning(int kind, int version)
     {
         var loginStatus = LoginResponse.Ok;
-        var expectedState = new ConnectionStateEventArgs(loginStatus, false, (Kind)kind, (VmVersion)version);
+        var expectedState = new ConnectionState(loginStatus, false, (Kind)kind, (VmVersion)version);
 
         this.MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
         this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
@@ -158,7 +158,7 @@ public abstract class MockRemote : IDisposable
         var kind = (int)Kind.None;
         var version = 0x0000_0000;
         var loginStatus = LoginResponse.VoicemeeterNotRunning;
-        var expectedState = new ConnectionStateEventArgs(loginStatus, false, Kind.None, default);
+        var expectedState = new ConnectionState(loginStatus, false, Kind.None, default);
 
         this.MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
         this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.NoServer);

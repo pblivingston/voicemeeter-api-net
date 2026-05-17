@@ -10,20 +10,34 @@ namespace PBLivingston.VoicemeeterAPI.Types;
 /// <param name="macroButtonsIsRunning"></param>
 /// <param name="runningKind"></param>
 /// <param name="runningVersion"></param>
-public class ConnectionStateEventArgs(LoginResponse loginStatus, bool macroButtonsIsRunning, Kind runningKind, VmVersion runningVersion) : EventArgs, IEquatable<ConnectionStateEventArgs>
+public readonly struct ConnectionState(LoginResponse loginStatus, bool macroButtonsIsRunning, Kind runningKind, VmVersion runningVersion)
+    : IEquatable<ConnectionState>
 {
+    /// <summary>
+    ///   HashCode will be positive if logged in, negative if logged out.
+    /// </summary>
+    /// <remarks>
+    ///   <code>(int)LoginStatus &lt;&lt; 30 | (MacroButtonsIsRunning ? 0 : 1) &lt;&lt; 29 | (int)RunningKind &lt;&lt; 26 | (int)RunningVersion</code>
+    /// </remarks>
+    public int HashCode { get; } = unchecked(
+        ((int)loginStatus << 30) |
+        ((macroButtonsIsRunning ? 0 : 1) << 29) |
+        ((int)runningKind << 26) |
+        ((int)runningVersion)
+    );
+
     /// <summary>
     ///   The login status of the <see cref="IRemote"/> instance.
     /// </summary>
     /// <remarks>
     ///   Ok, VoicemeeterNotRunning, LoggedOut, Unknown
     /// </remarks>
-    public LoginResponse LoginStatus { get; } = loginStatus;
+    public LoginResponse LoginStatus => (LoginResponse)((this.HashCode >> 30) & 0x3);
 
     /// <summary>
     ///
     /// </summary>
-    public bool MacroButtonsIsRunning { get; } = macroButtonsIsRunning;
+    public bool MacroButtonsIsRunning => ((this.HashCode >> 29) & 0x1) == 0;
 
     /// <summary>
     ///   The running Voicemeeter Kind.
@@ -31,12 +45,13 @@ public class ConnectionStateEventArgs(LoginResponse loginStatus, bool macroButto
     /// <remarks>
     ///   None, Standard, Banana, Potato
     /// </remarks>
-    public Kind RunningKind { get; } = runningKind;
+    public Kind RunningKind => (Kind)((this.HashCode >> 26) & 0x3);
 
+    private int VmPacked => this.HashCode & 0x3FFFFFF;
     /// <summary>
     ///   The running Voicemeeter version.
     /// </summary>
-    public VmVersion RunningVersion { get; } = runningVersion;
+    public VmVersion RunningVersion => this.VmPacked == 0 ? default : (VmVersion)this.VmPacked;
 
     /// <summary>
     ///   Simplifies <see cref="LoginStatus"/> checks.
@@ -54,37 +69,42 @@ public class ConnectionStateEventArgs(LoginResponse loginStatus, bool macroButto
     /// </remarks>
     public bool Connected => this.LoginStatus == LoginResponse.Ok;
 
-    public string MemberString => $"LoginStatus: {this.LoginStatus}; MacroButtonsIsRunning: {this.MacroButtonsIsRunning}; RunningKind: {this.RunningKind}; RunningVersion: {this.RunningVersion}";
+    public override string ToString() => $"""
+        LoginStatus: {this.LoginStatus}
+        MacroButtonsIsRunning: {this.MacroButtonsIsRunning}
+        RunningKind: {this.RunningKind}
+        RunningVersion: {this.RunningVersion}
+        """;
 
-    public bool Equals(ConnectionStateEventArgs? other)
-        => other is not null
-        && this.LoginStatus == other.LoginStatus
-        && this.MacroButtonsIsRunning == other.MacroButtonsIsRunning
-        && this.RunningKind == other.RunningKind
-        && this.RunningVersion == other.RunningVersion;
+    public void Deconstruct(out LoginResponse loginStatus, out bool macroButtonsIsRunning, out Kind runningKind, out VmVersion runningVersion)
+    {
+        loginStatus = this.LoginStatus;
+        macroButtonsIsRunning = this.MacroButtonsIsRunning;
+        runningKind = this.RunningKind;
+        runningVersion = this.RunningVersion;
+    }
 
+    public static explicit operator ConnectionState((LoginResponse login, bool macro, Kind kind, VmVersion version) t)
+        => new(t.login, t.macro, t.kind, t.version);
+    public static explicit operator (LoginResponse login, bool macro, Kind kind, VmVersion version)(ConnectionState state)
+        => (state.LoginStatus, state.MacroButtonsIsRunning, state.RunningKind, state.RunningVersion);
+
+    public bool Equals(ConnectionState other)
+        => this.HashCode == other.HashCode;
     public override bool Equals(object? obj)
-        => obj is ConnectionStateEventArgs other
+        => obj is ConnectionState other
         && this.Equals(other);
-
-    /// <summary>
-    ///   Hash will be positive if logged in, negative if logged out.
-    /// </summary>
-    /// <returns></returns>
-    /// <remarks>
-    ///   <code>(int)LoginStatus &lt;&lt; 30 | (MacroButtonsIsRunning ? 0 : 1) &lt;&lt; 29 | (int)RunningKind &lt;&lt; 26 | (int)RunningVersion</code>
-    /// </remarks>
     public override int GetHashCode()
-        => unchecked(
-            ((int)this.LoginStatus << 30) |
-            ((this.MacroButtonsIsRunning ? 0 : 1) << 29) |
-            ((int)this.RunningKind << 26) |
-            (int)this.RunningVersion
-        );
+        => this.HashCode;
 
-    public static bool operator ==(ConnectionStateEventArgs? a, ConnectionStateEventArgs? b)
-        => Equals(a, b);
+    public static bool operator ==(ConnectionState a, ConnectionState b) => a.HashCode == b.HashCode;
+    public static bool operator !=(ConnectionState a, ConnectionState b) => a.HashCode != b.HashCode;
+}
 
-    public static bool operator !=(ConnectionStateEventArgs? a, ConnectionStateEventArgs? b)
-        => !Equals(a, b);
+public class ConnectionStateEventArgs(ConnectionState previousState, ConnectionState currentState)
+    : EventArgs
+{
+    public ConnectionState PreviousState { get; } = previousState;
+    public ConnectionState CurrentState { get; } = currentState;
+    public DateTimeOffset Timestamp { get; } = DateTimeOffset.UtcNow;
 }

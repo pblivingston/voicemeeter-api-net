@@ -37,7 +37,7 @@ public sealed partial class Remote : IRemote
 
     private bool isDisposed;
     private LoginResponse loginStatus = LoginResponse.LoggedOut;
-    private ConnectionStateEventArgs lastState = new(LoginResponse.LoggedOut, false, Kind.None, default);
+    private ConnectionState lastState = new(LoginResponse.LoggedOut, false, Kind.None, default);
 
     /// <inheritdoc/>
     public event EventHandler<ConnectionStateEventArgs>? ConnectionStateChanged;
@@ -101,7 +101,7 @@ public sealed partial class Remote : IRemote
     #region Connection State
 
     /// <inheritdoc/>
-    public ConnectionStateEventArgs GetConnectionState()
+    public ConnectionState GetConnectionState()
     {
         if (!this.lastState.LoggedIn)
         {
@@ -117,12 +117,9 @@ public sealed partial class Remote : IRemote
             throw this.On_ConnectionState_KindMismatch(kind, version);
         }
 
-        ConnectionStateEventArgs state = new(this.loginStatus, mbRunning, kind, version);
+        ConnectionState state = new(this.loginStatus, mbRunning, kind, version);
 
-        if (state != this.lastState)
-        {
-            this.On_ConnectionState_Changed(state);
-        }
+        this.On_ConnectionState_Changed(state);
 
         return state;
     }

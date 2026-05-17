@@ -49,7 +49,7 @@ public partial class Remote
                 throw this.On_Method_Error(this.loginStatus);
         }
 
-        ConnectionStateEventArgs state;
+        ConnectionState state;
         using (this.BeginMethodScope())
         {
             state = new(
@@ -60,10 +60,7 @@ public partial class Remote
             );
         }
 
-        if (state != this.lastState)
-        {
-            this.On_ConnectionState_Changed(state);
-        }
+        this.On_ConnectionState_Changed(state);
 
         return this.loginStatus;
     }
@@ -110,16 +107,13 @@ public partial class Remote
 
         if (!nested)
         {
-            ConnectionStateEventArgs state = new(
+            ConnectionState state = new(
                 this.loginStatus,
                 this.lastState.MacroButtonsIsRunning,
                 this.lastState.RunningKind,
                 this.lastState.RunningVersion
             );
-            if (state != this.lastState)
-            {
-                this.On_ConnectionState_Changed(state);
-            }
+            this.On_ConnectionState_Changed(state);
         }
 
         return this.loginStatus;
@@ -167,16 +161,13 @@ public partial class Remote
                 throw this.On_Run_Error(RunResponse.Timeout, appAdjusted);
             }
 
-            ConnectionStateEventArgs state = new(
+            ConnectionState state = new(
                 this.loginStatus,
                 this.Query_ButtonsRunning(false),
                 kind,
                 version
             );
-            if (state != this.lastState)
-            {
-                this.On_ConnectionState_Changed(state);
-            }
+            this.On_ConnectionState_Changed(state);
         }
 
         if (app == App.MacroButtons)
@@ -188,10 +179,7 @@ public partial class Remote
             }
 
             var state = this.GetConnectionState();
-            if (state != this.lastState)
-            {
-                this.On_ConnectionState_Changed(state);
-            }
+            this.On_ConnectionState_Changed(state);
         }
     }
 

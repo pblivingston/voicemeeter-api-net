@@ -11,7 +11,7 @@ public class ConnectionStateTests
     {
         _ = scenario;
 
-        ConnectionStateEventArgs state = new(data.LoginStatus, data.MacroButtonsIsRunning, data.RunningKind, data.RunningVersion);
+        ConnectionState state = new(data.LoginStatus, data.MacroButtonsIsRunning, data.RunningKind, data.RunningVersion);
 
         Assert.Multiple(
             () => Assert.Equal(data.LoginStatus, state.LoginStatus),
@@ -27,7 +27,7 @@ public class ConnectionStateTests
     {
         _ = scenario;
 
-        ConnectionStateEventArgs state = new(data.LoginStatus, data.MacroButtonsIsRunning, data.RunningKind, data.RunningVersion);
+        ConnectionState state = new(data.LoginStatus, data.MacroButtonsIsRunning, data.RunningKind, data.RunningVersion);
 
         Assert.Equal(data.LoggedIn, state.LoggedIn);
     }
@@ -38,7 +38,7 @@ public class ConnectionStateTests
     {
         _ = scenario;
 
-        ConnectionStateEventArgs state = new(data.LoginStatus, data.MacroButtonsIsRunning, data.RunningKind, data.RunningVersion);
+        ConnectionState state = new(data.LoginStatus, data.MacroButtonsIsRunning, data.RunningKind, data.RunningVersion);
 
         Assert.Equal(data.Connected, state.Connected);
     }

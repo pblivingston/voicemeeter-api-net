@@ -50,11 +50,11 @@ public class VmApiArgumentOutOfRangeException : VmApiArgumentException
     public object? ActualValue { get; }
 
     public VmApiArgumentOutOfRangeException(string paramName, object actualValue, string message)
-        : base($"'{paramName}' was out of range. {message}.")
+        : base($"'{paramName}' was out of range.\n{message}.\nActual Value: {actualValue}")
         => this.ActualValue = actualValue;
 
     public VmApiArgumentOutOfRangeException(string paramName, string message)
-        : base($"'{paramName}' was out of range. {message}.", paramName)
+        : base($"'{paramName}' was out of range.\n{message}.", paramName)
     { }
 
     public VmApiArgumentOutOfRangeException(string message, Exception innerException)
@@ -173,9 +173,9 @@ public class PackedOutOfRangeException(string paramName, int actualValue, string
 { }
 
 public class VmPackedOutOfRangeException(string paramName, int actualValue)
-    : PackedOutOfRangeException(paramName, actualValue, "First byte should be <= 0x03 and > 0x00. Remaining three bytes should be > 0x00_0000")
+    : PackedOutOfRangeException(paramName, actualValue, $"First byte should be <= 0x03 and > 0x00. Remaining three bytes should be > 0x00_0000")
 { }
 
 public class SemPackedOutOfRangeException(string paramName, int actualValue)
-    : PackedOutOfRangeException(paramName, actualValue, "First byte should be 0x00. Remaining three bytes should be > 0x00_0000")
+    : PackedOutOfRangeException(paramName, actualValue, $"First byte should be 0x00. Remaining three bytes should be > 0x00_0000")
 { }

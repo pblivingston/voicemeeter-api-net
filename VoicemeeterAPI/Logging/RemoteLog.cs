@@ -82,9 +82,9 @@ internal static partial class RemoteLog
         EventId = (int)Event.ConnectionState_Changed,
         EventName = nameof(Event.ConnectionState_Changed),
         Level = LogLevel.Information,
-        Message = "Connection State changed during {MethodName}. Last state - {LastStateMembers}. Current state - {CurrentStateMembers}."
+        Message = "Connection State changed during {MethodName}.\n - Last state -\n{LastState}\n - Current state -\n{CurrentState}"
     )]
-    public static partial void ConnectionState_Changed(ILogger logger, string methodName, string lastStateMembers, string currentStateMembers);
+    public static partial void ConnectionState_Changed(ILogger logger, string methodName, ConnectionState lastState, ConnectionState currentState);
 
     [LoggerMessage(
         EventId = (int)Event.ConnectionState_KindMismatch,

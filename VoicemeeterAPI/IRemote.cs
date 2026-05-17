@@ -31,7 +31,7 @@ public interface IRemote : IDisposable
     ///   Returns the current connection state.
     /// </summary>
     /// <returns></returns>
-    public ConnectionStateEventArgs GetConnectionState();
+    public ConnectionState GetConnectionState();
 
     #region Login
 
