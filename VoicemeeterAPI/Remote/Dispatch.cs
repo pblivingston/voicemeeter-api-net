@@ -89,16 +89,44 @@ public partial class Remote
     }
 
     private void On_ConnectionState_StateMismatch(LoginResponse currentLoginStatus, LogLevel level = LogLevel.Warning)
-        => RemoteLog.ConnectionState_StateMismatch_LoginStatus(this.logger, level, currentLoginStatus, this.lastState.LoginStatus);
+    {
+        if (this.LastConnectionState.LoginStatus == currentLoginStatus)
+        {
+            return;
+        }
+
+        RemoteLog.ConnectionState_StateMismatch_LoginStatus(this.logger, level, currentLoginStatus, this.LastConnectionState.LoginStatus);
+    }
 
     private void On_ConnectionState_StateMismatch(bool currentMacroButtonsIsRunning, LogLevel level = LogLevel.Warning)
-        => RemoteLog.ConnectionState_StateMismatch_MacroButtonsIsRunning(this.logger, level, currentMacroButtonsIsRunning, this.lastState.MacroButtonsIsRunning);
+    {
+        if (this.LastConnectionState.MacroButtonsIsRunning == currentMacroButtonsIsRunning)
+        {
+            return;
+        }
+
+        RemoteLog.ConnectionState_StateMismatch_MacroButtonsIsRunning(this.logger, level, currentMacroButtonsIsRunning, this.LastConnectionState.MacroButtonsIsRunning);
+    }
 
     private void On_ConnectionState_StateMismatch(Kind currentRunningKind, LogLevel level = LogLevel.Warning)
-        => RemoteLog.ConnectionState_StateMismatch_RunningKind(this.logger, level, currentRunningKind, this.lastState.RunningKind);
+    {
+        if (this.LastConnectionState.RunningKind == currentRunningKind)
+        {
+            return;
+        }
+
+        RemoteLog.ConnectionState_StateMismatch_RunningKind(this.logger, level, currentRunningKind, this.LastConnectionState.RunningKind);
+    }
 
     private void On_ConnectionState_StateMismatch(VmVersion currentRunningVersion, LogLevel level = LogLevel.Warning)
-        => RemoteLog.ConnectionState_StateMismatch_RunningVersion(this.logger, level, currentRunningVersion, this.lastState.RunningVersion);
+    {
+        if (this.LastConnectionState.RunningVersion == currentRunningVersion)
+        {
+            return;
+        }
+
+        RemoteLog.ConnectionState_StateMismatch_RunningVersion(this.logger, level, currentRunningVersion, this.LastConnectionState.RunningVersion);
+    }
 
     #endregion
 

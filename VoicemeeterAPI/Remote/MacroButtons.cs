@@ -38,10 +38,7 @@ public partial class Remote
                 throw this.On_Method_Error(result);
         }
 
-        if (running != this.lastState.MacroButtonsIsRunning)
-        {
-            this.On_ConnectionState_StateMismatch(running, warning);
-        }
+        this.On_ConnectionState_StateMismatch(running, warning);
 
         return running;
     }

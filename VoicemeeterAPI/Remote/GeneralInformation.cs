@@ -39,10 +39,7 @@ public partial class Remote
 
         this.On_GetInfo_Success(kind, info);
 
-        if (kind != this.lastState.RunningKind)
-        {
-            this.On_ConnectionState_StateMismatch(kind, warning);
-        }
+        this.On_ConnectionState_StateMismatch(kind, warning);
 
         return kind;
     }
@@ -88,10 +85,7 @@ public partial class Remote
 
         this.On_GetInfo_Success(version, info);
 
-        if (version != this.lastState.RunningVersion)
-        {
-            this.On_ConnectionState_StateMismatch(version, warning);
-        }
+        this.On_ConnectionState_StateMismatch(version, warning);
 
         return version;
     }
