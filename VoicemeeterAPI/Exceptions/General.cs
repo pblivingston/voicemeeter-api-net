@@ -49,8 +49,8 @@ public class VmApiArgumentOutOfRangeException : VmApiArgumentException
 {
     public object? ActualValue { get; }
 
-    public VmApiArgumentOutOfRangeException(string paramName, object actualValue, string message)
-        : base($"'{paramName}' was out of range.\n{message}.\nActual Value: {actualValue}")
+    public VmApiArgumentOutOfRangeException(string paramName, object? actualValue, string message)
+        : base($"'{paramName}' was out of range.\n{message}.\nActual Value: {actualValue ?? "null"}")
         => this.ActualValue = actualValue;
 
     public VmApiArgumentOutOfRangeException(string paramName, string message)

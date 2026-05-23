@@ -31,4 +31,12 @@ internal static partial class GeneralLog
         Message = "'{Value}' is not a valid {TypeName}."
     )]
     public static partial void CannotParseAsType(ILogger logger, string value, string typeName);
+
+    [LoggerMessage(
+        EventId = (int)Event.ArgumentOutOfRange,
+        EventName = nameof(Event.ArgumentOutOfRange),
+        Level = LogLevel.Error,
+        Message = "'{Value}' is out of range for {MethodName} param '{ParamName}'."
+    )]
+    public static partial void ArgumentOutOfRange(ILogger logger, string value, string methodName, string paramName);
 }
