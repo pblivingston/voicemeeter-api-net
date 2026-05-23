@@ -44,4 +44,11 @@ internal interface IWrapper : IDisposable
     public RunResponse MacroButtonIsRunning();
     /// <inheritdoc cref="RemoteApiWrapper.MacroButtonIsDirty()" path="/summary"/>
     public Response MacroButtonIsDirty();
+
+    public RunResponse GetApplicationState(App app);
+    public RunResponse ShutdownApplication(App app, bool force);
+    public Response WaitForApplicationInputIdle(App app);
+    public Response WaitForApplicationInputIdle(App app, int milliseconds);
+    public Response WaitForApplicationExit(App app);
+    public Response WaitForApplicationExit(App app, int milliseconds);
 }

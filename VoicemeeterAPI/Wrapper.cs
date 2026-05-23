@@ -15,12 +15,13 @@ using PBLivingston.VoicemeeterAPI.Utilities;
 /// <remarks>
 ///   The primary constructor initializes a new instance of the <see cref="Wrapper"/> class with a provided <see cref="RemoteApiWrapper"/>.
 /// </remarks>
-internal sealed class Wrapper : IWrapper
+internal sealed partial class Wrapper : IWrapper
 {
     private const string VmrName = "VoicemeeterRemote";
     private const string MbName = "VoicemeeterMacroButtons";
 
     private readonly RemoteApiWrapper remoteApiWrapper;
+    private readonly Dictionary<App, ProcessWrapper> apps = [];
     private Process? macroButtons;
 
     public bool Is64Bit { get; } = Environment.Is64BitProcess;
@@ -29,55 +30,64 @@ internal sealed class Wrapper : IWrapper
     private string DllName => VmrName + (this.Is64Bit ? "64.dll" : ".dll");
 
     public Wrapper(RemoteApiWrapper remoteApiWrapper)
-        => this.remoteApiWrapper = remoteApiWrapper
+    {
+        this.remoteApiWrapper = remoteApiWrapper
             ?? throw new ArgumentNullException(nameof(remoteApiWrapper));
+
+        this.InitApps();
+    }
 
     public Wrapper(string installDir)
     {
         this.InstallDir = installDir;
         this.remoteApiWrapper = new RemoteApiWrapper(Path.Combine(this.InstallDir, this.DllName));
+
+        this.InitApps();
     }
 
     public Wrapper()
-        => this.remoteApiWrapper = new RemoteApiWrapper(Path.Combine(this.InstallDir, this.DllName));
+    {
+        this.remoteApiWrapper = new RemoteApiWrapper(Path.Combine(this.InstallDir, this.DllName));
+
+        this.InitApps();
+    }
 
     public void Dispose()
     {
         this.ReleaseMacroButtons();
-
+        this.ReleaseProcesses();
         this.remoteApiWrapper.Dispose();
     }
 
-    /// <inheritdoc/>
-    public LoginResponse Login()
-        => (LoginResponse)this.remoteApiWrapper.Login();
-    /// <inheritdoc/>
-    public LoginResponse Logout()
-        => (LoginResponse)this.remoteApiWrapper.Logout();
-    /// <inheritdoc/>
-    public RunResponse RunVoicemeeter(int app)
-        => (RunResponse)this.remoteApiWrapper.RunVoicemeeter(app);
+    private void InitApps()
+    {
+        this.apps.Add(App.Standard, new(App.Standard, this.InstallDir, "voicemeeter"));
+        this.apps.Add(App.Banana, new(App.Banana, this.InstallDir, "voicemeeterpro"));
+        this.apps.Add(App.Potato, new(App.Potato, this.InstallDir, "voicemeeter8"));
+        this.apps.Add(App.Standardx64, new(App.Standardx64, this.InstallDir, "voicemeeter_x64"));
+        this.apps.Add(App.Bananax64, new(App.Bananax64, this.InstallDir, "voicemeeterpro_x64"));
+        this.apps.Add(App.Potatox64, new(App.Potatox64, this.InstallDir, "voicemeeter8x64"));
+        this.apps.Add(App.DeviceCheck, new(App.DeviceCheck, this.InstallDir, "VBDeviceCheck"));
+        this.apps.Add(App.MacroButtons, new(App.MacroButtons, this.InstallDir, "VoicemeeterMacroButtons"));
+        this.apps.Add(App.StreamerView, new(App.StreamerView, this.InstallDir, "VMStreamerView"));
+        this.apps.Add(App.BUSMatrix8, new(App.BUSMatrix8, this.InstallDir, "VoicemeeterBUSMatrix8"));
+        this.apps.Add(App.BUSGEQ15, new(App.BUSGEQ15, this.InstallDir, "VoicemeeterBUSGEQ15"));
+        this.apps.Add(App.VBAN2MIDI, new(App.VBAN2MIDI, this.InstallDir, "VBAN2MIDI"));
+        this.apps.Add(App.CABLEControlPanel, new(App.CABLEControlPanel, this.InstallDir, "VBCABLE_ControlPanel"));
+        this.apps.Add(App.AUXControlPanel, new(App.AUXControlPanel, this.InstallDir, "VBVMAUX_ControlPanel"));
+        this.apps.Add(App.VAIO3ControlPanel, new(App.VAIO3ControlPanel, this.InstallDir, "VBVMVAIO3_ControlPanel"));
+        this.apps.Add(App.VAIOControlPanel, new(App.VAIOControlPanel, this.InstallDir, "VBVoicemeeterVAIO_ControlPanel"));
+    }
 
-    /// <inheritdoc/>
-    public InfoResponse GetVoicemeeterType(out int type)
-        => (InfoResponse)this.remoteApiWrapper.GetVoicemeeterType(out type);
-    /// <inheritdoc/>
-    public InfoResponse GetVoicemeeterVersion(out int version)
-        => (InfoResponse)this.remoteApiWrapper.GetVoicemeeterVersion(out version);
+    private void ReleaseProcesses()
+    {
+        foreach ((_, var p) in this.apps)
+        {
+            p.Dispose();
+        }
+    }
 
-    /// <inheritdoc/>
-    public Response IsParametersDirty()
-        => (Response)this.remoteApiWrapper.IsParametersDirty();
-    /// <inheritdoc/>
-    public Response GetParameter(string param, out float value)
-        => (Response)this.remoteApiWrapper.GetParameter(param, out value);
-    /// <inheritdoc/>
-    public Response GetParameter(string param, out string value)
-        => (Response)this.remoteApiWrapper.GetParameter(param, out value);
 
-    /// <inheritdoc/>
-    public Response MacroButtonIsDirty()
-        => (Response)this.remoteApiWrapper.MacroButtonIsDirty();
 
     /// <inheritdoc/>
     public RunResponse MacroButtonIsRunning()

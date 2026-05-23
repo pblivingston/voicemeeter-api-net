@@ -10,13 +10,14 @@ using PBLivingston.VoicemeeterAPI.Exceptions;
 /// </summary>
 public enum Response
 {
+    TypeMismatch = -6, //
     StructureMismatch = -5,
+    UnknownApp = -4, //
     UnknownParameter = -3,
     NoServer = -2,
     Error = -1,
     Ok = 0,
-    Dirty = 1,
-    TypeMismatch
+    Dirty = 1
 }
 
 /// <summary>
@@ -25,14 +26,14 @@ public enum Response
 /// </summary>
 public enum LoginResponse
 {
+    Timeout = -4, //
+    AlreadyLoggedOut = -3, //
     AlreadyLoggedIn = -2,
     NoClient = -1,
     Ok = 0,
     VoicemeeterNotRunning = 1,
-    LoggedOut = 2,
-    Unknown = 3,
-    Timeout,
-    AlreadyLoggedOut
+    LoggedOut = 2, //
+    Unknown = 3 //
 }
 
 /// <summary>
@@ -40,11 +41,15 @@ public enum LoginResponse
 /// </summary>
 public enum RunResponse
 {
+    Error = -5, //
+    Timeout = -4, //
+    AlreadyShutDown = -3, //
     UnknownApp = -2,
     NotInstalled = -1,
     Ok = 0,
-    NotRunning,
-    Timeout
+    Hidden = 1, //
+    NotResponding = 2, //
+    NotRunning = 3 //
 }
 
 /// <summary>
