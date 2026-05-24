@@ -20,7 +20,7 @@ public partial class Remote
 
         this.On_Login_Start();
 
-        if (this.lastState.LoggedIn)
+        if (this.LastConnectionState.LoggedIn)
         {
             throw this.On_Method_Error(LoginResponse.AlreadyLoggedIn);
         }
@@ -109,9 +109,9 @@ public partial class Remote
         {
             ConnectionState state = new(
                 this.loginStatus,
-                this.lastState.MacroButtonsIsRunning,
-                this.lastState.RunningKind,
-                this.lastState.RunningVersion
+                this.LastConnectionState.MacroButtonsIsRunning,
+                this.LastConnectionState.RunningKind,
+                this.LastConnectionState.RunningVersion
             );
             this.On_ConnectionState_Changed(state);
         }

@@ -13,22 +13,27 @@ using PBLivingston.VoicemeeterAPI.Exceptions;
 public interface IRemote : IDisposable
 {
     /// <summary>
-    ///   Triggered when <see cref="LoginStatus"/>, <see cref="RunningKind"/>, or <see cref="RunningVersion"/> have changed.
+    ///   Reflects the most recently cached connection state.
+    /// </summary>
+    public ConnectionState LastConnectionState { get; }
+
+    /// <summary>
+    ///   Raised when <see cref="LastConnectionState"/> has changed.
     /// </summary>
     public event EventHandler<ConnectionStateEventArgs> ConnectionStateChanged;
 
     /// <summary>
-    ///   Triggered when <see cref="ParamsDirty()"/> returns true.
+    ///   Raised when <see cref="IsParamsDirty()"/> returns true.
     /// </summary>
     public event EventHandler ParamsDirty;
 
     /// <summary>
-    ///   Triggered when <see cref="ButtonsDirty()"/> returns true.
+    ///   Raised when <see cref="IsButtonsDirty()"/> returns true.
     /// </summary>
     public event EventHandler ButtonsDirty;
 
     /// <summary>
-    ///   Returns the current connection state.
+    ///   Updates <see cref="LastConnectionState"/> and returns the current connection state.
     /// </summary>
     /// <returns></returns>
     public ConnectionState GetConnectionState();

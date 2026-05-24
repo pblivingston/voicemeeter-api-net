@@ -69,16 +69,16 @@ public partial class Remote
 
     private void On_ConnectionState_Changed(ConnectionState currentState, [CallerMemberName] string methodName = "")
     {
-        if (this.lastState == currentState)
+        if (this.LastConnectionState == currentState)
         {
             return;
         }
 
-        RemoteLog.ConnectionState_Changed(this.logger, methodName, this.lastState, currentState);
+        RemoteLog.ConnectionState_Changed(this.logger, methodName, this.LastConnectionState, currentState);
 
-        ConnectionStateChanged?.Invoke(this, new(this.lastState, currentState));
+        ConnectionStateChanged?.Invoke(this, new(this.LastConnectionState, currentState));
 
-        this.lastState = currentState;
+        this.LastConnectionState = currentState;
     }
 
     private KindMismatchException On_ConnectionState_KindMismatch(Kind returnedKind, VmVersion returnedVersion)

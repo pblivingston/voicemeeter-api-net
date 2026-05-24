@@ -37,7 +37,6 @@ public sealed partial class Remote : IRemote
 
     private bool isDisposed;
     private LoginResponse loginStatus = LoginResponse.LoggedOut;
-    private ConnectionState lastState = new(LoginResponse.LoggedOut, false, Kind.None, default);
 
     /// <inheritdoc/>
     public event EventHandler<ConnectionStateEventArgs>? ConnectionStateChanged;
@@ -45,6 +44,9 @@ public sealed partial class Remote : IRemote
     public event EventHandler? ParamsDirty;
     /// <inheritdoc/>
     public event EventHandler? ButtonsDirty;
+
+    /// <inheritdoc/>
+    public ConnectionState LastConnectionState { get; private set; } = new(LoginResponse.LoggedOut, false, Kind.None, default);
 
     #region Construction
 
@@ -103,14 +105,20 @@ public sealed partial class Remote : IRemote
     /// <inheritdoc/>
     public ConnectionState GetConnectionState()
     {
-        if (!this.lastState.LoggedIn)
+        if (!this.LastConnectionState.LoggedIn)
         {
-            return this.lastState;
+            return this.LastConnectionState;
         }
 
-        var kind = this.GetInfo_Kind(true);
-        var version = this.GetInfo_Version(true);
-        var mbRunning = this.Query_ButtonsRunning(true);
+        Kind kind;
+        VmVersion version;
+        bool mbRunning;
+        using (this.BeginMethodScope())
+        {
+            kind = this.GetInfo_Kind(true);
+            version = this.GetInfo_Version(true);
+            mbRunning = this.Query_ButtonsRunning(true);
+        }
 
         if (kind != version.K)
         {
@@ -144,7 +152,7 @@ public sealed partial class Remote : IRemote
             return;
         }
 
-        if (this.lastState.LoggedIn)
+        if (this.LastConnectionState.LoggedIn)
         {
             this.On_Dispose_LoggedIn(this.loginStatus);
 
