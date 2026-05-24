@@ -99,4 +99,43 @@ public partial class Remote
     }
 
     #endregion
+
+    #region Get Application State
+
+    internal RunResponse GetInfo_AppState(App app, bool nested)
+    {
+        this.LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
+
+        var info = nested ? LogLevel.Trace : LogLevel.Information;
+        var warning = nested ? LogLevel.Trace : LogLevel.Warning;
+
+        this.On_GetInfo_Start(app, info);
+
+        var result = this.vmrApi.GetApplicationState(app);
+
+        if (result < RunResponse.Ok)
+        {
+            throw this.On_Method_Error(result);
+        }
+
+        if (result is RunResponse.NotResponding)
+        {
+            this.On_GetInfo_NotResponding(app, warning);
+        }
+        else
+        {
+            this.On_GetInfo_Success(app, result, info);
+        }
+
+        return result;
+    }
+
+    public RunResponse GetAppState(App app)
+    {
+        using var scope = this.BeginInstanceScope();
+
+        return this.GetInfo_AppState(app, false);
+    }
+
+    #endregion
 }

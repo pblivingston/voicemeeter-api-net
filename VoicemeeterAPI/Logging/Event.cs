@@ -55,9 +55,12 @@ internal enum Event
     // 1200-1299 Remote - General Information
 
     GetInfo_Start = 1200, // trace/info
+    GetInfo_Start_AppState, // trace/info
     GetInfo_Success_Kind, // trace/info
     GetInfo_Success_Version, // trace/info
+    GetInfo_Success_AppState, // trace/info
     GetInfo_Error, // error + throw
+    GetInfo_NotResponding, // trace/warning
 
 
     // 1300-1399 Remote - Get Parameters
