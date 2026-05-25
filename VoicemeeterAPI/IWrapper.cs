@@ -45,10 +45,12 @@ internal interface IWrapper : IDisposable
     /// <inheritdoc cref="RemoteApiWrapper.MacroButtonIsDirty()" path="/summary"/>
     public Response MacroButtonIsDirty();
 
+    /// <inheritdoc cref="Wrapper.GetApplicationState(App)"/>
     public RunResponse GetApplicationState(App app);
+    /// <inheritdoc cref="Wrapper.ShutdownApplication(App, bool)"/>
     public RunResponse ShutdownApplication(App app, bool force);
-    public Response WaitForApplicationInputIdle(App app);
-    public Response WaitForApplicationInputIdle(App app, int milliseconds);
-    public Response WaitForApplicationExit(App app);
-    public Response WaitForApplicationExit(App app, int milliseconds);
+    /// <inheritdoc cref="Wrapper.IsApplicationInputIdle(App)"/>
+    public Response IsApplicationInputIdle(App app);
+    /// <inheritdoc cref="Wrapper.WaitForApplicationExit(App, CancellationToken)"/>
+    public Task<RunResponse> WaitForApplicationExit(App app, CancellationToken cancellationToken = default);
 }

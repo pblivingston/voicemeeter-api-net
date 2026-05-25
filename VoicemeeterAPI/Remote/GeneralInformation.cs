@@ -11,12 +11,12 @@ public partial class Remote
     #region Get Voicemeeter Kind
 
     /// <inheritdoc cref="IRemote.GetKind()"/>
-    internal Kind GetInfo_Kind(bool nested)
+    internal Kind GetInfo_Kind(bool trace)
     {
         this.LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
-        var info = nested ? LogLevel.Trace : LogLevel.Information;
-        var warning = nested ? LogLevel.Trace : LogLevel.Warning;
+        var info = trace ? LogLevel.Trace : LogLevel.Information;
+        var warning = trace ? LogLevel.Trace : LogLevel.Warning;
 
         this.On_GetInfo_Start(typeof(Kind), info);
 
@@ -39,6 +39,7 @@ public partial class Remote
 
         this.On_GetInfo_Success(kind, info);
 
+        this.On_ConnectionState_StateMismatch(this.loginStatus, warning);
         this.On_ConnectionState_StateMismatch(kind, warning);
 
         return kind;
@@ -57,12 +58,12 @@ public partial class Remote
     #region Get Voicemeeter Version
 
     /// <inheritdoc cref="IRemote.GetVersion()"/>
-    internal VmVersion GetInfo_Version(bool nested)
+    internal VmVersion GetInfo_Version(bool trace)
     {
         this.LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
-        var info = nested ? LogLevel.Trace : LogLevel.Information;
-        var warning = nested ? LogLevel.Trace : LogLevel.Warning;
+        var info = trace ? LogLevel.Trace : LogLevel.Information;
+        var warning = trace ? LogLevel.Trace : LogLevel.Warning;
 
         this.On_GetInfo_Start(typeof(VmVersion), info);
 
@@ -85,6 +86,7 @@ public partial class Remote
 
         this.On_GetInfo_Success(version, info);
 
+        this.On_ConnectionState_StateMismatch(this.loginStatus, warning);
         this.On_ConnectionState_StateMismatch(version, warning);
 
         return version;
@@ -102,12 +104,12 @@ public partial class Remote
 
     #region Get Application State
 
-    internal RunResponse GetInfo_AppState(App app, bool nested)
+    internal RunResponse GetInfo_AppState(App app, bool trace)
     {
         this.LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
-        var info = nested ? LogLevel.Trace : LogLevel.Information;
-        var warning = nested ? LogLevel.Trace : LogLevel.Warning;
+        var info = trace ? LogLevel.Trace : LogLevel.Information;
+        var warning = trace ? LogLevel.Trace : LogLevel.Warning;
 
         this.On_GetInfo_Start(app, info);
 

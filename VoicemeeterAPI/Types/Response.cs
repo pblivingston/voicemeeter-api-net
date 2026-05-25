@@ -3,11 +3,6 @@
 
 namespace PBLivingston.VoicemeeterAPI.Types;
 
-using PBLivingston.VoicemeeterAPI.Exceptions;
-
-/// <summary>
-///   Responses from <see cref="Remote.ParamsDirty()"/>, <see cref="Remote.ButtonsDirty()"/> ... (more to be added)
-/// </summary>
 public enum Response
 {
     TypeMismatch = -6, //
@@ -20,10 +15,6 @@ public enum Response
     Dirty = 1
 }
 
-/// <summary>
-///   Responses from <see cref="Remote.Login(int, int)"/> and <see cref="Remote.Logout(int, int)"/> for <see cref="LoginException"/>
-///   and values for <see cref="IRemote.LoginStatus"/>.
-/// </summary>
 public enum LoginResponse
 {
     Timeout = -4, //
@@ -36,9 +27,6 @@ public enum LoginResponse
     Unknown = 3 //
 }
 
-/// <summary>
-///   Responses from <see cref="Remote.Run(int, int, int)"/> for <see cref="RunException"/>.
-/// </summary>
 public enum RunResponse
 {
     Error = -5, //
@@ -48,13 +36,10 @@ public enum RunResponse
     NotInstalled = -1,
     Ok = 0,
     Hidden = 1, //
-    NotResponding = 2, //
-    NotRunning = 3 //
+    NotRunning = 2, //
+    NotResponding = 3 //
 }
 
-/// <summary>
-///   Responses from <see cref="Remote.GetKind()"/> and <see cref="Remote.GetVersion()"/>.
-/// </summary>
 public enum InfoResponse
 {
     NoServer = -2,

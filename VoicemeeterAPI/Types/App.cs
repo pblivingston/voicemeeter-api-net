@@ -40,6 +40,10 @@ public static class AppExt
     public static bool IsValid(this App app)
         => AppUtils.IsValid(app);
 
+    /// <inheritdoc cref="AppUtils.IsVoicemeeter(App)"/>
+    public static bool IsVoicemeeter(this App app)
+        => AppUtils.IsVoicemeeter(app);
+
     /// <inheritdoc cref="AppUtils.BitAdjust(App, bool?)"/>
     public static App BitAdjust(this App app, bool? is64Bit = null)
         => AppUtils.BitAdjust(app, is64Bit);
@@ -53,17 +57,23 @@ public static class AppUtils
     /// <param name="app"></param>
     /// <returns><see cref="Kind.Unknown"/> if not a Voicemeeter <see cref="App"/></returns>
     public static Kind ToKind(App app)
-        => app is < App.None or > App.Potatox64
-            ? Kind.Unknown
-            : app >= App.Standardx64
+        => app.IsVoicemeeter()
+            ? app >= App.Standardx64
                 ? (Kind)(app - 3) // 64-bit App -> 32-bit App
-                : (Kind)app;
+                : (Kind)app
+            : Kind.Unknown;
 
     public static bool IsValid(App app)
         => app > App.None && Enum.IsDefined(app);
 
     public static bool IsValid(int app)
         => IsValid((App)app);
+
+    public static bool IsVoicemeeter(App app)
+        => app is >= App.Standard and <= App.Potatox64;
+
+    public static bool IsVoicemeeter(int app)
+        => IsVoicemeeter((App)app);
 
     /// <summary>
     ///   If the given app is a Voicemeeter app, adjusts to the correct bit version based on the current operating system.

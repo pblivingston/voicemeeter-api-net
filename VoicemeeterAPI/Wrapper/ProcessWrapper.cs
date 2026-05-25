@@ -4,40 +4,37 @@
 namespace PBLivingston.VoicemeeterAPI;
 
 using System.Diagnostics;
-using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
 
 internal partial class Wrapper
 {
+    /// <inheritdoc cref="ProcessWrapper.GetState()"/>
+    /// <param name="app"></param>
     public RunResponse GetApplicationState(App app)
         => app.IsValid()
             ? this.apps[app].GetState()
             : RunResponse.UnknownApp;
 
+    /// <inheritdoc cref="ProcessWrapper.Shutdown(bool)"/>
+    /// <param name="app"></param>
     public RunResponse ShutdownApplication(App app, bool force = false)
         => app.IsValid()
             ? this.apps[app].Shutdown(force)
             : RunResponse.UnknownApp;
 
-    public Response WaitForApplicationInputIdle(App app)
+    /// <inheritdoc cref="ProcessWrapper.IsInputIdle()"/>
+    /// <param name="app"></param>
+    public Response IsApplicationInputIdle(App app)
         => app.IsValid()
-            ? this.apps[app].WaitForInputIdle()
+            ? this.apps[app].IsInputIdle()
             : Response.UnknownApp;
 
-    public Response WaitForApplicationInputIdle(App app, int milliseconds)
+    /// <inheritdoc cref="ProcessWrapper.WaitForExit(CancellationToken)"/>
+    /// <param name="app"></param>
+    public async Task<RunResponse> WaitForApplicationExit(App app, CancellationToken cancellationToken = default)
         => app.IsValid()
-            ? this.apps[app].WaitForInputIdle(milliseconds)
-            : Response.UnknownApp;
-
-    public Response WaitForApplicationExit(App app)
-        => app.IsValid()
-            ? this.apps[app].WaitForExit()
-            : Response.UnknownApp;
-
-    public Response WaitForApplicationExit(App app, int milliseconds)
-        => app.IsValid()
-            ? this.apps[app].WaitForExit(milliseconds)
-            : Response.UnknownApp;
+            ? await this.apps[app].WaitForExit(cancellationToken)
+            : RunResponse.UnknownApp;
 
     private class ProcessWrapper(App app, string installDir, string processName) : IDisposable
     {
@@ -52,6 +49,16 @@ internal partial class Wrapper
             this.Process = null;
         }
 
+        /// <summary>
+        ///   Gets the current state of the application.
+        /// </summary>
+        /// <returns>
+        ///   Ok<br/>
+        ///   Hidden<br/>
+        ///   NotRunning<br/>
+        ///   NotResponding<br/>
+        ///   NotInstalled<br/>
+        /// </returns>
         public RunResponse GetState()
         {
             if (!this.ExecutableExists())
@@ -111,26 +118,96 @@ internal partial class Wrapper
                 {
                     return RunResponse.Error;
                 }
-                finally
-                {
-                    this.Dispose();
-                }
             }
 
-            return state;
+            return this.GetState();
         }
 
-        public Response WaitForInputIdle()
-            => this.BoolToResponse(this.WaitForInputIdle_i);
+        /// <summary>
+        ///   Checks if application has entered an idle state.
+        /// </summary>
+        /// <returns>
+        ///   Ok<br/>
+        ///   Dirty<br/>
+        ///   NoServer<br/>
+        ///   Error<br/>
+        /// </returns>
+        public Response IsInputIdle()
+        {
+            var state = this.GetState();
 
-        public Response WaitForInputIdle(int milliseconds)
-            => this.BoolToResponse(() => this.WaitForInputIdle_i(milliseconds));
+            if (state is RunResponse.NotInstalled or RunResponse.NotResponding)
+            {
+                return Response.Error;
+            }
 
-        public Response WaitForExit()
-            => this.BoolToResponse(this.WaitForExit_i);
+            if (this.Process is null)
+            {
+                return Response.NoServer;
+            }
 
-        public Response WaitForExit(int milliseconds)
-            => this.BoolToResponse(() => this.WaitForExit_i(milliseconds));
+            try
+            {
+                return this.Process.WaitForInputIdle(0)
+                    ? Response.Ok
+                    : Response.Dirty;
+            }
+            catch
+            {
+                return Response.Error;
+            }
+        }
+
+        /// <summary>
+        ///   Waits for the application to exit.
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns>
+        ///   Error<br/>
+        ///   Last App State<br/>
+        /// </returns>
+        public async Task<RunResponse> WaitForExit(CancellationToken cancellationToken = default)
+        {
+            var state = this.GetState();
+
+            if (this.Process is null || state is RunResponse.NotResponding)
+            {
+                return state;
+            }
+
+            var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            void OnExited(object? sender, EventArgs e)
+                => tcs.TrySetResult(true);
+
+            try
+            {
+                this.Process.EnableRaisingEvents = true;
+                this.Process.Exited += OnExited;
+
+                state = this.GetState();
+
+                if (state is not (RunResponse.Ok or RunResponse.Hidden))
+                {
+                    return state;
+                }
+
+                using (cancellationToken.Register(() => tcs.TrySetCanceled()))
+                {
+                    return await tcs.Task
+                        ? this.GetState()
+                        : RunResponse.Error;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                return this.GetState();
+            }
+            finally
+            {
+                this.Process?.Exited -= OnExited;
+            }
+        }
 
         #region Helpers
 
@@ -222,73 +299,6 @@ internal partial class Wrapper
             catch { }
 
             return isNull;
-        }
-
-        private Response BoolToResponse(Func<bool> action)
-        {
-            var state = this.GetState();
-
-            if (this.Process is null)
-            {
-                return Response.NoServer;
-            }
-
-            if (state is RunResponse.NotResponding)
-            {
-                return Response.Error;
-            }
-
-            try
-            {
-                return action()
-                    ? Response.Ok
-                    : Response.Dirty;
-            }
-            catch
-            {
-                return Response.Error;
-            }
-        }
-
-        private bool WaitForInputIdle_i()
-        {
-            if (this.Process is null)
-            {
-                throw new VmApiException($"{nameof(this.Process)} is null. This exception should be caught.");
-            }
-
-            return this.Process.WaitForInputIdle();
-        }
-
-        private bool WaitForInputIdle_i(int milliseconds)
-        {
-            if (this.Process is null)
-            {
-                throw new VmApiException($"{nameof(this.Process)} is null. This exception should be caught.");
-            }
-
-            return this.Process.WaitForInputIdle(milliseconds);
-        }
-
-        private bool WaitForExit_i()
-        {
-            if (this.Process is null)
-            {
-                throw new VmApiException($"{nameof(this.Process)} is null. This exception should be caught.");
-            }
-
-            this.Process.WaitForExit();
-            return true;
-        }
-
-        private bool WaitForExit_i(int milliseconds)
-        {
-            if (this.Process is null)
-            {
-                throw new VmApiException($"{nameof(this.Process)} is null. This exception should be caught.");
-            }
-
-            return this.Process.WaitForExit(milliseconds);
         }
 
         #endregion
