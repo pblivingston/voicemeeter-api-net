@@ -78,9 +78,9 @@ internal sealed partial class Wrapper : IWrapper
 
     private void ReleaseApps()
     {
-        foreach ((_, var p) in this.apps)
+        foreach (var a in this.apps)
         {
-            p.Dispose();
+            a.Value.Dispose();
         }
     }
 }

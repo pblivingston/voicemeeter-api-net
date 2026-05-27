@@ -268,7 +268,7 @@ internal partial class Wrapper
             try
             {
                 this.Process?.Refresh();
-                isHidden = (this.Process?.MainWindowHandle ?? -1) == 0;
+                isHidden = (int)(this.Process?.MainWindowHandle ?? new IntPtr(-1)) == 0;
             }
             catch { }
 
