@@ -16,36 +16,37 @@ internal enum Event
     // 1000-1999 Remote
 
     ConnectionState_Changed = 1000, // info
-    ConnectionState_KindMismatch, // critical
     ConnectionState_StateMismatch_LoginStatus, // trace/warning
-    ConnectionState_StateMismatch_MacroButtonsIsRunning, // trace/warning
+    ConnectionState_StateMismatch_ButtonsState, // trace/warning
     ConnectionState_StateMismatch_RunningKind, // trace/warning
     ConnectionState_StateMismatch_RunningVersion, // trace/warning
 
-    Dispose_Start = 1010, // debug
+    GetConnectionState_Start = 1010, // info
+    GetConnectionState_KindMismatch, // critical
+
+    Dispose_Start = 1020, // debug
     Dispose_LoggedIn, // debug
     Dispose_AlreadyDisposed, // error
     Dispose_Success, // debug
 
-    Guard_ObjectDisposed = 1080, // critical + throw
+    Guard_ObjectDisposed = 1090, // critical + throw
     Guard_AccessDenied, // error + throw
-
-    Retry_Start = 1090, // debug
-    Retry_Attempt, // trace
-    Retry_Success, // debug
-    Retry_Timeout, // debug
 
 
     // 1100-1199 Remote - Login
 
     Login_Start = 1100, // info
     Login_VmNotRunning, // warning
+    Login_MbNotRunning, // warning
 
     Logout_Start = 1110, // info
-    Logout_Timeout, // error
 
     Run_Start = 1120, // info
     Run_Error, // error + throw
+
+    WaitForVoicemeeter_Start = 1180, // info
+    WaitForVoicemeeter_Detected, // info
+    WaitForVoicemeeter_Timeout, // warning
 
     WaitForRunning_Start = 1190, // info
     WaitForRunning_Detected, // info
@@ -84,8 +85,6 @@ internal enum Event
 
     // 1800-1899 Remote - Macro Buttons
 
-    MbRunning_NotRunning = 1800, // trace/warning
-
     // 1900-1999 Remote - Misc.
 
     Method_Success = 1900, // info
@@ -96,7 +95,6 @@ internal enum Event
 
     Query_Start = 1910, // trace/info
     Query_Success_Response, // trace/info
-    Query_Success_RunResponse, // trace/info
 
     // 2000-2999 Voicemeeter object model logging
 

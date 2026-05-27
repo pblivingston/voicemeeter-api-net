@@ -33,15 +33,6 @@ internal interface IWrapper : IDisposable
     /// <inheritdoc cref="RemoteApiWrapper.GetParameter(string, out string)" path="/summary"/>
     public Response GetParameter(string param, out string value);
 
-    /// <summary>
-    ///   Check if MacroButtons is running.
-    /// </summary>
-    /// <returns>
-    ///   Ok<br/>
-    ///   NotRunning<br/>
-    ///   NotInstalled<br/>
-    /// </returns>
-    public RunResponse MacroButtonIsRunning();
     /// <inheritdoc cref="RemoteApiWrapper.MacroButtonIsDirty()" path="/summary"/>
     public Response MacroButtonIsDirty();
 

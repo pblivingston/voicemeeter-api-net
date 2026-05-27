@@ -3,7 +3,6 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-using System.Diagnostics;
 using AtgDev.Voicemeeter;
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Utilities;
@@ -18,11 +17,9 @@ using PBLivingston.VoicemeeterAPI.Utilities;
 internal sealed partial class Wrapper : IWrapper
 {
     private const string VmrName = "VoicemeeterRemote";
-    private const string MbName = "VoicemeeterMacroButtons";
 
     private readonly RemoteApiWrapper remoteApiWrapper;
     private readonly Dictionary<App, ProcessWrapper> apps = [];
-    private Process? macroButtons;
 
     public bool Is64Bit { get; } = Environment.Is64BitProcess;
     public string InstallDir { get; } = PathHelperExt.GetInstallDirectory();
@@ -54,8 +51,8 @@ internal sealed partial class Wrapper : IWrapper
 
     public void Dispose()
     {
-        this.ReleaseMacroButtons();
-        this.ReleaseProcesses();
+        this.ReleaseApps();
+
         this.remoteApiWrapper.Dispose();
     }
 
@@ -79,80 +76,11 @@ internal sealed partial class Wrapper : IWrapper
         this.apps.Add(App.VAIOControlPanel, new(App.VAIOControlPanel, this.InstallDir, "VBVoicemeeterVAIO_ControlPanel"));
     }
 
-    private void ReleaseProcesses()
+    private void ReleaseApps()
     {
         foreach ((_, var p) in this.apps)
         {
             p.Dispose();
         }
-    }
-
-
-
-    /// <inheritdoc/>
-    public RunResponse MacroButtonIsRunning()
-    {
-        if (this.MacroButtonsHasExited())
-        {
-            this.ReleaseMacroButtons();
-
-            if (!this.MacroButtonsExists())
-            {
-                return RunResponse.NotInstalled;
-            }
-
-            this.macroButtons = this.GetMacroButtons();
-        }
-
-        return this.macroButtons is null ? RunResponse.NotRunning : RunResponse.Ok;
-    }
-
-    private bool MacroButtonsExists()
-        => File.Exists(Path.Combine(this.InstallDir, MbName + ".exe"));
-
-    private bool MacroButtonsHasExited()
-    {
-        var isClosed = true;
-        try
-        {
-            this.macroButtons?.Refresh();
-            isClosed = this.macroButtons?.HasExited ?? true;
-        }
-        catch { }
-
-        return isClosed;
-    }
-
-    private Process? GetMacroButtons()
-    {
-        var processes = Process.GetProcessesByName(MbName);
-        Process? target = null;
-
-        foreach (var p in processes)
-        {
-            var isValid = false;
-            try
-            {
-                isValid = p.MainModule?.FileName.StartsWith(this.InstallDir, StringComparison.OrdinalIgnoreCase) ?? false;
-            }
-            catch { }
-
-            if (isValid && target is null)
-            {
-                target = p;
-            }
-            else
-            {
-                p.Dispose();
-            }
-        }
-
-        return target;
-    }
-
-    private void ReleaseMacroButtons()
-    {
-        this.macroButtons?.Dispose();
-        this.macroButtons = null;
     }
 }

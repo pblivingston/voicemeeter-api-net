@@ -67,13 +67,6 @@ internal static partial class RemoteLog
     )]
     public static partial void Query_Success_Response(ILogger logger, LogLevel level, string methodName, Response response);
 
-    [LoggerMessage(
-        EventId = (int)Event.Query_Success_RunResponse,
-        EventName = nameof(Event.Query_Success_RunResponse),
-        Message = "{MethodName} successful. Response: {Response}"
-    )]
-    public static partial void Query_Success_RunResponse(ILogger logger, LogLevel level, string methodName, RunResponse response);
-
     #endregion
 
     #region Connection State
@@ -82,45 +75,57 @@ internal static partial class RemoteLog
         EventId = (int)Event.ConnectionState_Changed,
         EventName = nameof(Event.ConnectionState_Changed),
         Level = LogLevel.Information,
-        Message = "Connection State changed during {MethodName}.\n - Last state -\n{LastState}\n - Current state -\n{CurrentState}"
+        Message = "LastConnectionState changed during {MethodName}.\n - Previous state -\n{PreviousState}\n - Current state -\n{CurrentState}"
     )]
-    public static partial void ConnectionState_Changed(ILogger logger, string methodName, ConnectionState lastState, ConnectionState currentState);
-
-    [LoggerMessage(
-        EventId = (int)Event.ConnectionState_KindMismatch,
-        EventName = nameof(Event.ConnectionState_KindMismatch),
-        Level = LogLevel.Critical,
-        Message = "Kind and version did not match when getting Connection State. GetKind returned: {ReturnedKind}; GetVersion returned: {ReturnedVersion}"
-    )]
-    public static partial void ConnectionState_KindMismatch(ILogger logger, Kind returnedKind, VmVersion returnedVersion);
+    public static partial void ConnectionState_Changed(ILogger logger, string methodName, ConnectionState previousState, ConnectionState currentState);
 
     [LoggerMessage(
         EventId = (int)Event.ConnectionState_StateMismatch_LoginStatus,
         EventName = nameof(Event.ConnectionState_StateMismatch_LoginStatus),
-        Message = "LoginStatus did not match last Connection State. Recommend calling GetConnectionState. Current LoginStatus: {CurrentLoginStatus}; Last LoginStatus: {LastLoginStatus}"
+        Message = "LoginStatus did not match previous Connection State. Recommend calling GetConnectionState. Current LoginStatus: {CurrentLoginStatus}; Previous LoginStatus: {PreviousLoginStatus}"
     )]
-    public static partial void ConnectionState_StateMismatch_LoginStatus(ILogger logger, LogLevel level, LoginResponse currentLoginStatus, LoginResponse lastLoginStatus);
+    public static partial void ConnectionState_StateMismatch_LoginStatus(ILogger logger, LogLevel level, LoginResponse currentLoginStatus, LoginResponse previousLoginStatus);
 
     [LoggerMessage(
-        EventId = (int)Event.ConnectionState_StateMismatch_MacroButtonsIsRunning,
-        EventName = nameof(Event.ConnectionState_StateMismatch_MacroButtonsIsRunning),
-        Message = "MacroButtonsIsRunning did not match last Connection State. Recommend calling GetConnectionState. Current MacroButtonsIsRunning: {CurrentMacroButtonsIsRunning}; Last MacroButtonsIsRunning: {LastMacroButtonsIsRunning}"
+        EventId = (int)Event.ConnectionState_StateMismatch_ButtonsState,
+        EventName = nameof(Event.ConnectionState_StateMismatch_ButtonsState),
+        Message = "ButtonsState did not match previous Connection State. Recommend calling GetConnectionState. Current ButtonsState: {CurrentButtonsState}; Previous ButtonsState: {PreviousButtonsState}"
     )]
-    public static partial void ConnectionState_StateMismatch_MacroButtonsIsRunning(ILogger logger, LogLevel level, bool currentMacroButtonsIsRunning, bool lastMacroButtonsIsRunning);
+    public static partial void ConnectionState_StateMismatch_ButtonsState(ILogger logger, LogLevel level, RunResponse currentButtonsState, RunResponse previousButtonsState);
 
     [LoggerMessage(
         EventId = (int)Event.ConnectionState_StateMismatch_RunningKind,
         EventName = nameof(Event.ConnectionState_StateMismatch_RunningKind),
-        Message = "RunningKind did not match last Connection State. Recommend calling GetConnectionState. Current RunningKind: {CurrentRunningKind}; Last RunningKind: {LastRunningKind}"
+        Message = "RunningKind did not match previous Connection State. Recommend calling GetConnectionState. Current RunningKind: {CurrentRunningKind}; Previous RunningKind: {PreviousRunningKind}"
     )]
-    public static partial void ConnectionState_StateMismatch_RunningKind(ILogger logger, LogLevel level, Kind currentRunningKind, Kind lastRunningKind);
+    public static partial void ConnectionState_StateMismatch_RunningKind(ILogger logger, LogLevel level, Kind currentRunningKind, Kind previousRunningKind);
 
     [LoggerMessage(
         EventId = (int)Event.ConnectionState_StateMismatch_RunningVersion,
         EventName = nameof(Event.ConnectionState_StateMismatch_RunningVersion),
-        Message = "RunningVersion did not match last Connection State. Recommend calling GetConnectionState. Current RunningVersion: {CurrentRunningVersion}; Last RunningVersion: {LastRunningVersion}"
+        Message = "RunningVersion did not match previous Connection State. Recommend calling GetConnectionState. Current RunningVersion: {CurrentRunningVersion}; Previous RunningVersion: {PreviousRunningVersion}"
     )]
-    public static partial void ConnectionState_StateMismatch_RunningVersion(ILogger logger, LogLevel level, VmVersion currentRunningVersion, VmVersion lastRunningVersion);
+    public static partial void ConnectionState_StateMismatch_RunningVersion(ILogger logger, LogLevel level, VmVersion currentRunningVersion, VmVersion previousRunningVersion);
+
+    #endregion
+
+    #region Get Connection State
+
+    [LoggerMessage(
+        EventId = (int)Event.GetConnectionState_Start,
+        EventName = nameof(Event.GetConnectionState_Start),
+        Level = LogLevel.Information,
+        Message = "Getting connection state..."
+    )]
+    public static partial void GetConnectionState_Start(ILogger logger);
+
+    [LoggerMessage(
+        EventId = (int)Event.GetConnectionState_KindMismatch,
+        EventName = nameof(Event.GetConnectionState_KindMismatch),
+        Level = LogLevel.Critical,
+        Message = "Kind and version did not match when getting Connection State. GetKind returned: {ReturnedKind}; GetVersion returned: {ReturnedVersion}"
+    )]
+    public static partial void GetConnectionState_KindMismatch(ILogger logger, Kind returnedKind, VmVersion returnedVersion);
 
     #endregion
 
@@ -177,42 +182,6 @@ internal static partial class RemoteLog
         Message = "Access denied. LoginStatus: {LoginStatus}"
     )]
     public static partial void Guard_AccessDenied(ILogger logger, LoginResponse loginStatus);
-
-    #endregion
-
-    #region Retry
-
-    [LoggerMessage(
-        EventId = (int)Event.Retry_Start,
-        EventName = nameof(Event.Retry_Start),
-        Level = LogLevel.Debug,
-        Message = "Starting retry loop..."
-    )]
-    public static partial void Retry_Start(ILogger logger);
-
-    [LoggerMessage(
-        EventId = (int)Event.Retry_Attempt,
-        EventName = nameof(Event.Retry_Attempt),
-        Level = LogLevel.Trace,
-        Message = "Attempt {Attempt} failed. Retrying..."
-    )]
-    public static partial void Retry_Attempt(ILogger logger, int attempt);
-
-    [LoggerMessage(
-        EventId = (int)Event.Retry_Success,
-        EventName = nameof(Event.Retry_Success),
-        Level = LogLevel.Debug,
-        Message = "Attempt {Attempt} successful."
-    )]
-    public static partial void Retry_Success(ILogger logger, int attempt);
-
-    [LoggerMessage(
-        EventId = (int)Event.Retry_Timeout,
-        EventName = nameof(Event.Retry_Timeout),
-        Level = LogLevel.Debug,
-        Message = "Retry timed out after {Attempts} attempts."
-    )]
-    public static partial void Retry_Timeout(ILogger logger, int attempts);
 
     #endregion
 }

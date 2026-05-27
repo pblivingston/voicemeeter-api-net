@@ -60,9 +60,6 @@ public partial class Remote
     private void On_Query_Success(Response result, LogLevel level = LogLevel.Trace, [CallerMemberName] string methodName = "")
         => RemoteLog.Query_Success_Response(this.logger, level, methodName, result);
 
-    private void On_Query_Success(RunResponse result, LogLevel level = LogLevel.Trace, [CallerMemberName] string methodName = "")
-        => RemoteLog.Query_Success_RunResponse(this.logger, level, methodName, result);
-
     #endregion
 
     #region Connection State
@@ -81,13 +78,6 @@ public partial class Remote
         this.LastConnectionState = currentState;
     }
 
-    private KindMismatchException On_ConnectionState_KindMismatch(Kind returnedKind, VmVersion returnedVersion)
-    {
-        RemoteLog.ConnectionState_KindMismatch(this.logger, returnedKind, returnedVersion);
-
-        return new KindMismatchException(returnedKind, returnedVersion);
-    }
-
     private void On_ConnectionState_StateMismatch(LoginResponse currentLoginStatus, LogLevel level = LogLevel.Warning)
     {
         if (this.LastConnectionState.LoginStatus == currentLoginStatus)
@@ -98,14 +88,14 @@ public partial class Remote
         RemoteLog.ConnectionState_StateMismatch_LoginStatus(this.logger, level, currentLoginStatus, this.LastConnectionState.LoginStatus);
     }
 
-    private void On_ConnectionState_StateMismatch(bool currentMacroButtonsIsRunning, LogLevel level = LogLevel.Warning)
+    private void On_ConnectionState_StateMismatch(RunResponse currentButtonsState, LogLevel level = LogLevel.Warning)
     {
-        if (this.LastConnectionState.MacroButtonsIsRunning == currentMacroButtonsIsRunning)
+        if (this.LastConnectionState.ButtonsState == currentButtonsState)
         {
             return;
         }
 
-        RemoteLog.ConnectionState_StateMismatch_MacroButtonsIsRunning(this.logger, level, currentMacroButtonsIsRunning, this.LastConnectionState.MacroButtonsIsRunning);
+        RemoteLog.ConnectionState_StateMismatch_ButtonsState(this.logger, level, currentButtonsState, this.LastConnectionState.ButtonsState);
     }
 
     private void On_ConnectionState_StateMismatch(Kind currentRunningKind, LogLevel level = LogLevel.Warning)
@@ -126,6 +116,20 @@ public partial class Remote
         }
 
         RemoteLog.ConnectionState_StateMismatch_RunningVersion(this.logger, level, currentRunningVersion, this.LastConnectionState.RunningVersion);
+    }
+
+    #endregion
+
+    #region Get Connection State
+
+    private void On_GetConnectionState_Start()
+        => RemoteLog.GetConnectionState_Start(this.logger);
+
+    private KindMismatchException On_GetConnectionState_KindMismatch(Kind returnedKind, VmVersion returnedVersion)
+    {
+        RemoteLog.GetConnectionState_KindMismatch(this.logger, returnedKind, returnedVersion);
+
+        return new KindMismatchException(returnedKind, returnedVersion);
     }
 
     #endregion
@@ -161,22 +165,6 @@ public partial class Remote
 
         return new AccessDeniedException(loginStatus);
     }
-
-    #endregion
-
-    #region Retry
-
-    private void On_Retry_Start()
-        => RemoteLog.Retry_Start(this.logger);
-
-    private void On_Retry_Attempt(int attempt)
-        => RemoteLog.Retry_Attempt(this.logger, attempt);
-
-    private void On_Retry_Success(int attempt)
-        => RemoteLog.Retry_Success(this.logger, attempt);
-
-    private void On_Retry_Timeout(int attempts)
-        => RemoteLog.Retry_Timeout(this.logger, attempts);
 
     #endregion
 }

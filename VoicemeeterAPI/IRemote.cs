@@ -36,6 +36,7 @@ public interface IRemote : IDisposable
     ///   Updates <see cref="LastConnectionState"/> and returns the current connection state.
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="ObjectDisposedException"></exception>
     public ConnectionState GetConnectionState();
 
     #region Login
@@ -43,21 +44,18 @@ public interface IRemote : IDisposable
     /// <summary>
     ///   Opens communication pipe with VoicemeeterRemote.
     /// </summary>
-    /// <param name="timeoutMs">Time to wait for a running Voicemeeter instance to be detected.</param>
-    /// <param name="sleepMs">Time between attempts checking for a running Voicemeeter instance.</param>
+    /// <returns>
+    ///   Ok<br/>
+    ///   VoicemeeterNotRunning<br/>
+    /// </returns>
     /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="RemoteAccessException">
-    ///   Throws if <see cref="LoginStatus"/> is <see cref="LoginResponse.Unknown"/>.
+    /// <exception cref="AccessDeniedException">
+    ///   Throws if login status is unknown.
     /// </exception>
-    /// <exception cref="RemoteException">
-    ///   Throws if <see cref="LoggedIn"/>.
-    /// </exception>
-    /// <exception cref="LoginException">
-    ///   <para>Throws if the API call returns an error or the process times out.</para>
+    /// <exception cref="RemoteException{LoginResponse}">
+    ///   Throws if already logged in or the API call returns an error.
     /// </exception>
     /// <remarks>
-    ///   <para>Updates <see cref="LoginStatus"/> on successful login.</para>
-    ///   <para>If API call returns <see cref="LoginResponse.Ok"/>, waits for the running Voicemeeter instance to be detected.</para>
     ///   <para>Calls:</para>
     ///   <list type="bullet">
     ///     <item><description>
@@ -69,20 +67,27 @@ public interface IRemote : IDisposable
     ///   </list>
     /// </remarks>
     /// <inheritdoc cref="IRemote" path="/example"/>
-    public LoginResponse Login(int timeoutMs = 2000, int sleepMs = 100);
+    public LoginResponse Login();
+
+    /// <summary>
+    ///   Opens communication pipe with VoicemeeterRemote. If Voicemeeter is running, confirms it is reachable.
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <exception cref="RemoteException{LoginResponse}">
+    ///   Throws if already logged in, the API call returns an error, or waiting for Voicemeeter is cancelled or times out.
+    /// </exception>
+    /// <inheritdoc cref="Login()"/>
+    public Task<LoginResponse> LoginAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     ///   Closes communication pipe with VoicemeeterRemote.
     /// </summary>
-    /// <param name="timeoutMs">Time to wait before giving up logout attempts.</param>
-    /// <param name="sleepMs">Time between logout attempts.</param>
+    /// <returns>
+    ///   LoggedOut<br/>
+    ///   Unknown<br/>
+    /// </returns>
     /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="RemoteException">
-    ///   Throws if <see cref="LoginStatus"/> is already <see cref="LoginResponse.LoggedOut"/>.
-    /// </exception>
     /// <remarks>
-    ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.LoggedOut"/> on successful logout.</para>
-    ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.Unknown"/> if logout times out.</para>
     ///   <para>Calls:</para>
     ///   <list type="bullet">
     ///     <item><description>
@@ -94,29 +99,26 @@ public interface IRemote : IDisposable
     ///   </list>
     /// </remarks>
     /// <inheritdoc cref="IRemote" path="/example"/>
-    public LoginResponse Logout(int timeoutMs = 1000, int sleepMs = 100);
+    public LoginResponse Logout();
 
     /// <summary>
     ///   Runs the specified <see cref="App"/>.
     /// </summary>
     /// <typeparam name="T">int, <see cref="App"/>, <see cref="Kind"/>, or string</typeparam>
     /// <param name="app"></param>
-    /// <param name="timeoutMs">Time to wait for a Voicemeeter app to start.</param>
-    /// <param name="sleepMs">Time between attempts checking for a running Voicemeeter instance.</param>
-    /// <exception cref="ArgumentException">
-    ///   Throws if the given type is not supported or parsing a given string fails.
-    /// </exception>
+    /// <exception cref="TypeNotSupportedException"></exception>
+    /// <exception cref="CannotParseAsTypeException"></exception>
     /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="RemoteAccessException">
-    ///   Throws if not <see cref="LoggedIn"/>.
+    /// <exception cref="AccessDeniedException">
+    ///   Throws if not logged in.
     /// </exception>
     /// <exception cref="RunException">
-    ///   Throws if the API call returns an error or the process times out.
+    ///   Throws if the <see cref="App"/> is already running but not responding or the API call returns an error.
     /// </exception>
     /// <remarks>
     ///   <para>
-    ///     If the app is a Voicemeeter app (e.g. 3, <see cref="App.Bananax64"/>, <see cref="Kind.Potato"/>, "Standard", etc.),
-    ///     automatically adjusts for OS bitness where necessary and waits for the process to start.
+    ///     If the app is Voicemeeter (e.g. 3, <see cref="App.Bananax64"/>, <see cref="Kind.Potato"/>, "Standard", etc.),
+    ///     automatically adjusts for OS bitness where necessary.
     ///   </para>
     ///   <para>Calls:</para>
     ///   <list type="bullet">
@@ -128,7 +130,21 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    public void Run<T>(T app, int timeoutMs = 2000, int sleepMs = 100) where T : notnull;
+    public void Run<T>(T app) where T : notnull;
+
+    /// <summary>
+    ///   Runs the specified <see cref="App"/> and waits for it to start. If the <see cref="App"/> is Voicemeeter, confirms it is reachable.
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns>
+    ///   Ok<br/>
+    ///   Hidden<br/>
+    /// </returns>
+    /// <exception cref="RunException">
+    ///   Throws if the <see cref="App"/> is already running but not responding, the API call returns an error, or waiting for <see cref="App"/> is cancelled or times out.
+    /// </exception>
+    /// <inheritdoc cref="Run{T}(T)"/>
+    public Task<RunResponse> RunAsync<T>(T app, CancellationToken cancellationToken = default) where T : notnull;
 
     #endregion
 
@@ -139,14 +155,13 @@ public interface IRemote : IDisposable
     /// </summary>
     /// <returns></returns>
     /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="RemoteAccessException">
-    ///   Throws if not <see cref="LoggedIn"/>.
+    /// <exception cref="AccessDeniedException">
+    ///   Throws if not logged in.
     /// </exception>
-    /// <exception cref="RemoteException">
+    /// <exception cref="GetInfoException">
     ///   Throws if the API call returns an error or an invalid kind value.
     /// </exception>
     /// <remarks>
-    ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.Ok"/> on successful call.</para>
     ///   <para>Calls:</para>
     ///   <list type="bullet">
     ///     <item><description>
@@ -162,16 +177,15 @@ public interface IRemote : IDisposable
     /// <summary>
     ///   Gets the currently running Voicemeeter version.
     /// </summary>
-    /// <returns><see cref="VmVersion"/></returns>
+    /// <returns></returns>
     /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="RemoteAccessException">
-    ///   Throws if not <see cref="LoggedIn"/>.
+    /// <exception cref="AccessDeniedException">
+    ///   Throws if not logged in.
     /// </exception>
-    /// <exception cref="RemoteException">
+    /// <exception cref="GetInfoException">
     ///   Throws if the API call returns an error or an invalid version value.
     /// </exception>
     /// <remarks>
-    ///   <para>Updates <see cref="LoginStatus"/> to <see cref="LoginResponse.Ok"/> on successful call.</para>
     ///   <para>Calls:</para>
     ///   <list type="bullet">
     ///     <item><description>
@@ -184,6 +198,20 @@ public interface IRemote : IDisposable
     /// </remarks>
     public VmVersion GetVersion();
 
+    /// <summary>
+    ///   Gets the state of the requested <see cref="App"/>.
+    /// </summary>
+    /// <param name="app"></param>
+    /// <returns>
+    ///   Ok<br/>
+    ///   Hidden<br/>
+    ///   NotRunning<br/>
+    ///   NotResponding<br/>
+    /// </returns>
+    /// <exception cref="ObjectDisposedException"></exception>
+    /// <exception cref="RemoteException{RunResponse}"></exception>
+    public RunResponse GetAppState(App app);
+
     #endregion
 
     #region Get Parameters
@@ -193,10 +221,10 @@ public interface IRemote : IDisposable
     /// </summary>
     /// <returns></returns>
     /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="RemoteAccessException">
-    ///   Throws if <see cref="LoginStatus"/> is not <see cref="LoginResponse.Ok"/>.
+    /// <exception cref="AccessDeniedException">
+    ///   Throws if not logged in or Voicemeeter is not running.
     /// </exception>
-    /// <exception cref="RemoteException">
+    /// <exception cref="RemoteException{Response}">
     ///   Throws if the API call returns an error.
     /// </exception>
     /// <remarks>
@@ -215,17 +243,18 @@ public interface IRemote : IDisposable
     /// <summary>
     ///   Gets the requested Voicemeeter parameter.
     /// </summary>
+    /// <typeparam name="T">float, int, bool, or string</typeparam>
     /// <param name="param"></param>
     /// <param name="value"></param>
-    /// <exception cref="NotSupportedException">
+    /// <exception cref="TypeNotSupportedException">
     ///   Throws if the given value type is not supported.
     /// </exception>
     /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="RemoteAccessException">
-    ///   Throws if <see cref="LoginStatus"/> is not <see cref="LoginResponse.Ok"/>.
+    /// <exception cref="AccessDeniedException">
+    ///   Throws if not logged in or Voicemeeter is not running.
     /// </exception>
-    /// <exception cref="RemoteException">
-    ///   Throws if the API call returns an error.
+    /// <exception cref="GetParamException{T}">
+    ///   Throws if the API call returns an error or the requested parameter does not return the requested type.
     /// </exception>
     /// <remarks>
     ///   <para>Calls:</para>
@@ -244,7 +273,7 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    public void GetParam<T>(string param, out T value);
+    public void GetParam<T>(string param, out T value) where T : notnull;
 
     #endregion
 
@@ -255,10 +284,10 @@ public interface IRemote : IDisposable
     /// </summary>
     /// <returns></returns>
     /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="RemoteAccessException">
-    ///   Throws if <see cref="LoginStatus"/> is not <see cref="LoginResponse.Ok"/>.
+    /// <exception cref="AccessDeniedException">
+    ///   Throws if not logged in or Voicemeeter is not running.
     /// </exception>
-    /// <exception cref="RemoteException">
+    /// <exception cref="RemoteException{Response}">
     ///   Throws if the API call returns an error.
     /// </exception>
     /// <remarks>

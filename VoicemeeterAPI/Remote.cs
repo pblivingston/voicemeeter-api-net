@@ -3,7 +3,6 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using AtgDev.Utils.Native;
 using AtgDev.Voicemeeter;
@@ -46,7 +45,7 @@ public sealed partial class Remote : IRemote
     public event EventHandler? ButtonsDirty;
 
     /// <inheritdoc/>
-    public ConnectionState LastConnectionState { get; private set; } = new(LoginResponse.LoggedOut, false, Kind.None, default);
+    public ConnectionState LastConnectionState { get; private set; } = new(LoginResponse.LoggedOut, RunResponse.NotRunning, Kind.None, default);
 
     #region Construction
 
@@ -102,9 +101,13 @@ public sealed partial class Remote : IRemote
 
     #region Connection State
 
-    /// <inheritdoc/>
-    public ConnectionState GetConnectionState()
+    /// <inheritdoc cref="IRemote.GetConnectionState()"/>
+    internal ConnectionState GetConnectionState_i()
     {
+        this.LoginGuard(requiredStatus: LoginResponse.Unknown);
+
+        this.On_GetConnectionState_Start();
+
         if (!this.LastConnectionState.LoggedIn)
         {
             return this.LastConnectionState;
@@ -112,24 +115,34 @@ public sealed partial class Remote : IRemote
 
         Kind kind;
         VmVersion version;
-        bool mbRunning;
+        RunResponse mbState;
         using (this.BeginMethodScope())
         {
             kind = this.GetInfo_Kind(true);
             version = this.GetInfo_Version(true);
-            mbRunning = this.Query_ButtonsRunning(true);
+            mbState = this.GetInfo_AppState(App.MacroButtons, true);
         }
 
         if (kind != version.K)
         {
-            throw this.On_ConnectionState_KindMismatch(kind, version);
+            throw this.On_GetConnectionState_KindMismatch(kind, version);
         }
 
-        ConnectionState state = new(this.loginStatus, mbRunning, kind, version);
+        this.On_Method_Success();
+
+        ConnectionState state = new(this.loginStatus, mbState, kind, version);
 
         this.On_ConnectionState_Changed(state);
 
         return state;
+    }
+
+    /// <inheritdoc/>
+    public ConnectionState GetConnectionState()
+    {
+        using var scope = this.BeginInstanceScope();
+
+        return this.GetConnectionState_i();
     }
 
     #endregion
@@ -158,7 +171,7 @@ public sealed partial class Remote : IRemote
 
             using (this.BeginMethodScope())
             {
-                this.Logout(timeoutMs: 0, nested: true);
+                this.Logout_i(true);
             }
         }
 
@@ -172,7 +185,7 @@ public sealed partial class Remote : IRemote
 
     #endregion
 
-    #region Helpers
+    #region Login Guard
 
     private void LoginGuard(LoginResponse requiredStatus = LoginResponse.Ok, [CallerMemberName] string methodName = "")
     {
@@ -187,63 +200,6 @@ public sealed partial class Remote : IRemote
         {
             throw this.On_Guard_AccessDenied(this.loginStatus);
         }
-    }
-
-    private bool Retry(Func<bool> action, int timeoutMs = 1000, int sleepMs = 100, [CallerMemberName] string methodName = "")
-    {
-        using var scope = this.BeginMethodScope(methodName);
-
-        this.On_Retry_Start();
-
-        var attempt = 1;
-        var timeout = TimeSpan.FromMilliseconds(timeoutMs);
-        var stopwatch = Stopwatch.StartNew();
-        do
-        {
-            if (action())
-            {
-                this.On_Retry_Success(attempt);
-                return true;
-            }
-
-            this.On_Retry_Attempt(attempt++);
-
-            Thread.Sleep(sleepMs);
-        }
-        while (stopwatch.Elapsed < timeout);
-
-        this.On_Retry_Timeout(attempt);
-        return false;
-    }
-
-    private (T LastResult, bool Success) Retry<T>(Func<(T Result, bool Success)> action, int timeoutMs = 1000, int sleepMs = 100, [CallerMemberName] string methodName = "")
-    {
-        using var scope = this.BeginMethodScope(methodName);
-
-        this.On_Retry_Start();
-
-        (T, bool Success) res;
-        var attempt = 1;
-        var timeout = TimeSpan.FromMilliseconds(timeoutMs);
-        var stopwatch = Stopwatch.StartNew();
-        do
-        {
-            res = action();
-
-            if (res.Success)
-            {
-                this.On_Retry_Success(attempt);
-                return res;
-            }
-
-            this.On_Retry_Attempt(attempt++);
-
-            Thread.Sleep(sleepMs);
-        }
-        while (stopwatch.Elapsed < timeout);
-
-        this.On_Retry_Timeout(attempt);
-        return res;
     }
 
     #endregion

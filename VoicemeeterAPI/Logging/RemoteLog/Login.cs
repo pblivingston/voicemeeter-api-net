@@ -26,6 +26,14 @@ internal static partial class RemoteLog
     )]
     public static partial void Login_VmNotRunning(ILogger logger);
 
+    [LoggerMessage(
+        EventId = (int)Event.Login_MbNotRunning,
+        EventName = nameof(Event.Login_MbNotRunning),
+        Level = LogLevel.Warning,
+        Message = "MacroButtons is not running or not responding."
+    )]
+    public static partial void Login_MbNotRunning(ILogger logger);
+
     #endregion
 
     #region Logout
@@ -37,14 +45,6 @@ internal static partial class RemoteLog
         Message = "Logging out..."
     )]
     public static partial void Logout_Start(ILogger logger);
-
-    [LoggerMessage(
-        EventId = (int)Event.Logout_Timeout,
-        EventName = nameof(Event.Logout_Timeout),
-        Level = LogLevel.Error,
-        Message = "Logout timed out. Last reponse: {LastResponse}"
-    )]
-    public static partial void Logout_Timeout(ILogger logger, LoginResponse lastResponse);
 
     #endregion
 
@@ -71,28 +71,52 @@ internal static partial class RemoteLog
     #region WaitForRunning
 
     [LoggerMessage(
-        EventId = (int)Event.WaitForRunning_Start,
-        EventName = nameof(Event.WaitForRunning_Start),
+        EventId = (int)Event.WaitForVoicemeeter_Start,
+        EventName = nameof(Event.WaitForVoicemeeter_Start),
         Level = LogLevel.Information,
         Message = "Waiting for running Voicemeeter..."
     )]
-    public static partial void WaitForRunning_Start(ILogger logger);
+    public static partial void WaitForVoicemeeter_Start(ILogger logger);
+
+    [LoggerMessage(
+        EventId = (int)Event.WaitForVoicemeeter_Detected,
+        EventName = nameof(Event.WaitForVoicemeeter_Detected),
+        Level = LogLevel.Information,
+        Message = "Voicemeeter {Kind} v{Version} is running."
+    )]
+    public static partial void WaitForVoicemeeter_Detected(ILogger logger, Kind kind, VmVersion version);
+
+    [LoggerMessage(
+        EventId = (int)Event.WaitForVoicemeeter_Timeout,
+        EventName = nameof(Event.WaitForVoicemeeter_Timeout),
+        Level = LogLevel.Warning,
+        Message = "Timed out waiting for Voicemeeter."
+    )]
+    public static partial void WaitForVoicemeeter_Timeout(ILogger logger);
+
+    [LoggerMessage(
+        EventId = (int)Event.WaitForRunning_Start,
+        EventName = nameof(Event.WaitForRunning_Start),
+        Level = LogLevel.Information,
+        Message = "Waiting for {App} to open..."
+    )]
+    public static partial void WaitForRunning_Start(ILogger logger, App app);
 
     [LoggerMessage(
         EventId = (int)Event.WaitForRunning_Detected,
         EventName = nameof(Event.WaitForRunning_Detected),
         Level = LogLevel.Information,
-        Message = "Voicemeeter {Kind} v{Version} is running."
+        Message = "{App} is running and {AppState}."
     )]
-    public static partial void WaitForRunning_Detected(ILogger logger, Kind kind, VmVersion version);
+    public static partial void WaitForRunning_Detected(ILogger logger, App app, RunResponse appState);
 
     [LoggerMessage(
         EventId = (int)Event.WaitForRunning_Timeout,
         EventName = nameof(Event.WaitForRunning_Timeout),
         Level = LogLevel.Warning,
-        Message = "Timed out waiting for Voicemeeter."
+        Message = "Timed out waiting for {App}."
     )]
-    public static partial void WaitForRunning_Timeout(ILogger logger);
+    public static partial void WaitForRunning_Timeout(ILogger logger, App app);
 
     #endregion
 }

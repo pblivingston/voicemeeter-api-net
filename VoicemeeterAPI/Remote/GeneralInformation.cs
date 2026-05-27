@@ -104,6 +104,7 @@ public partial class Remote
 
     #region Get Application State
 
+    /// <inheritdoc cref="IRemote.GetAppState(App)"/>
     internal RunResponse GetInfo_AppState(App app, bool trace)
     {
         this.LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
@@ -129,9 +130,37 @@ public partial class Remote
             this.On_GetInfo_Success(app, result, info);
         }
 
+        if (app.IsVoicemeeter())
+        {
+            if (app == this.LastConnectionState.RunningKind.ToApp(this.vmrApi.Is64Bit))
+            {
+                this.loginStatus = result < RunResponse.NotRunning
+                    ? LoginResponse.Ok
+                    : LoginResponse.VoicemeeterNotRunning;
+
+                this.On_ConnectionState_StateMismatch(this.loginStatus, warning);
+
+                if (this.loginStatus is LoginResponse.VoicemeeterNotRunning)
+                {
+                    this.On_ConnectionState_StateMismatch(Kind.None, warning);
+                }
+            }
+
+            if (result < RunResponse.NotRunning)
+            {
+                this.On_ConnectionState_StateMismatch(app.ToKind(), warning);
+            }
+        }
+
+        if (app is App.MacroButtons)
+        {
+            this.On_ConnectionState_StateMismatch(result, warning);
+        }
+
         return result;
     }
 
+    /// <inheritdoc/>
     public RunResponse GetAppState(App app)
     {
         using var scope = this.BeginInstanceScope();

@@ -11,11 +11,8 @@ public partial class Remote
 {
     #region Login
 
-    /// <inheritdoc/>
-    public LoginResponse Login(int timeoutMs = 2000, int sleepMs = 100)
+    private LoginResponse Login_p()
     {
-        using var scope = this.BeginInstanceScope();
-
         this.LoginGuard(requiredStatus: LoginResponse.LoggedOut);
 
         this.On_Login_Start();
@@ -25,42 +22,76 @@ public partial class Remote
             throw this.On_Method_Error(LoginResponse.AlreadyLoggedIn);
         }
 
-        this.loginStatus = this.vmrApi.Login();
+        var result = this.vmrApi.Login();
 
-        var kind = Kind.None;
-        VmVersion version = default;
-
-        switch (this.loginStatus)
+        if (result is not (LoginResponse.Ok or LoginResponse.VoicemeeterNotRunning))
         {
-            case LoginResponse.Ok:
-                if (!this.WaitForRunning(out kind, out version, timeoutMs, sleepMs))
-                {
-                    throw this.On_Method_Error(LoginResponse.Timeout);
-                }
+            throw this.On_Method_Error(result);
+        }
 
-                this.On_Method_Success();
-                break;
+        return result;
+    }
 
-            case LoginResponse.VoicemeeterNotRunning:
-                this.On_Login_VmNotRunning();
-                break;
+    /// <inheritdoc/>
+    public LoginResponse Login()
+    {
+        using var scope = this.BeginInstanceScope();
 
-            default:
-                throw this.On_Method_Error(this.loginStatus);
+        this.loginStatus = this.Login_p();
+
+        if (this.loginStatus is LoginResponse.VoicemeeterNotRunning)
+        {
+            this.On_Login_VmNotRunning();
+        }
+        else
+        {
+            this.On_Method_Success();
         }
 
         ConnectionState state;
         using (this.BeginMethodScope())
         {
-            state = new(
-                this.loginStatus,
-                this.Query_ButtonsRunning(false),
-                kind,
-                version
-            );
+            state = this.GetConnectionState_i();
         }
 
-        this.On_ConnectionState_Changed(state);
+        if (!state.ButtonsRunning)
+        {
+            this.On_Login_MbNotRunning();
+        }
+
+        return this.loginStatus;
+    }
+
+    /// <inheritdoc/>
+    public async Task<LoginResponse> LoginAsync(CancellationToken cancellationToken = default)
+    {
+        using var scope = this.BeginInstanceScope();
+
+        this.loginStatus = this.Login_p();
+
+        if (this.loginStatus is LoginResponse.VoicemeeterNotRunning)
+        {
+            this.On_Login_VmNotRunning();
+        }
+        else if (await this.WaitForVoicemeeter(cancellationToken))
+        {
+            this.On_Method_Success();
+        }
+        else
+        {
+            throw this.On_Method_Error(LoginResponse.Timeout);
+        }
+
+        ConnectionState state;
+        using (this.BeginMethodScope())
+        {
+            state = this.GetConnectionState_i();
+        }
+
+        if (!state.ButtonsRunning)
+        {
+            this.On_Login_MbNotRunning();
+        }
 
         return this.loginStatus;
     }
@@ -69,8 +100,8 @@ public partial class Remote
 
     #region Logout
 
-    /// <inheritdoc cref="IRemote.Logout(int, int)"/>
-    internal LoginResponse Logout(bool nested, int timeoutMs = 1000, int sleepMs = 100)
+    /// <inheritdoc cref="IRemote.Logout()"/>
+    internal LoginResponse Logout_i(bool disposing)
     {
         this.LoginGuard(requiredStatus: LoginResponse.Unknown);
 
@@ -82,34 +113,24 @@ public partial class Remote
             return this.loginStatus;
         }
 
-        (LoginResponse, bool) Attempt()
+        var result = this.vmrApi.Logout();
+
+        if (result == LoginResponse.Ok)
         {
-            var result = this.vmrApi.Logout();
-
-            this.loginStatus = result is LoginResponse.Ok
-                ? LoginResponse.LoggedOut
-                : LoginResponse.Unknown;
-
-            if (this.loginStatus == LoginResponse.LoggedOut)
-            {
-                this.On_Method_Success(methodName: nameof(Logout));
-                return (result, true);
-            }
-
-            return (result, false);
+            this.loginStatus = LoginResponse.LoggedOut;
+            this.On_Method_Success();
+        }
+        else
+        {
+            this.loginStatus = LoginResponse.Unknown;
+            this.On_Method_Error(result);
         }
 
-        (var response, var success) = this.Retry(Attempt, timeoutMs, sleepMs);
-        if (!success)
-        {
-            this.On_Logout_Timeout(response);
-        }
-
-        if (!nested)
+        if (!disposing)
         {
             ConnectionState state = new(
                 this.loginStatus,
-                this.LastConnectionState.MacroButtonsIsRunning,
+                this.LastConnectionState.ButtonsState,
                 this.LastConnectionState.RunningKind,
                 this.LastConnectionState.RunningVersion
             );
@@ -120,22 +141,19 @@ public partial class Remote
     }
 
     /// <inheritdoc/>
-    public LoginResponse Logout(int timeoutMs = 1000, int sleepMs = 100)
+    public LoginResponse Logout()
     {
         using var scope = this.BeginInstanceScope();
 
-        return this.Logout(false, timeoutMs, sleepMs);
+        return this.Logout_i(false);
     }
 
     #endregion
 
     #region Run Voicemeeter
 
-    /// <inheritdoc cref="IRemote.Run{T}(T, int, int)"/>
-    public void Run(App app, int timeoutMs = 2000, int sleepMs = 100)
+    private App Run_p(App app)
     {
-        using var scope = this.BeginInstanceScope();
-
         this.LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
         var appAdjusted = app.BitAdjust(this.vmrApi.Is64Bit);
@@ -147,6 +165,22 @@ public partial class Remote
 
         this.On_Run_Start(appAdjusted);
 
+        RunResponse state;
+        using (this.BeginMethodScope())
+        {
+            state = this.GetInfo_AppState(appAdjusted, true);
+        }
+
+        if (state is RunResponse.Ok)
+        {
+            return appAdjusted;
+        }
+
+        if (state is RunResponse.NotResponding)
+        {
+            throw this.On_Run_Error(state, appAdjusted);
+        }
+
         var result = this.vmrApi.RunVoicemeeter((int)appAdjusted);
 
         if (result != RunResponse.Ok)
@@ -154,73 +188,69 @@ public partial class Remote
             throw this.On_Run_Error(result, appAdjusted);
         }
 
-        if (app <= App.Potatox64)
-        {
-            if (!this.WaitForRunning(out var kind, out var version, timeoutMs, sleepMs))
-            {
-                throw this.On_Run_Error(RunResponse.Timeout, appAdjusted);
-            }
+        return appAdjusted;
+    }
 
-            ConnectionState state = new(
-                this.loginStatus,
-                this.Query_ButtonsRunning(false),
-                kind,
-                version
-            );
-            this.On_ConnectionState_Changed(state);
+    #region Run
+
+    /// <inheritdoc cref="IRemote.Run{T}(T)"/>
+    public void Run(App app)
+    {
+        using var scope = this.BeginInstanceScope();
+
+        var a = this.Run_p(app);
+
+        this.On_Method_Success();
+
+        if (a.IsVoicemeeter())
+        {
+            this.On_ConnectionState_StateMismatch(LoginResponse.Ok);
         }
 
-        if (app == App.MacroButtons)
+        if (a is App.MacroButtons)
         {
-            this.On_Method_YieldForSettle();
-            while (this.Query_ButtonsDirty())
-            {
-                Thread.Yield();
-            }
-
-            var state = this.GetConnectionState();
-            this.On_ConnectionState_Changed(state);
+            this.On_ConnectionState_StateMismatch(RunResponse.Ok);
         }
     }
 
-    /// <inheritdoc cref="IRemote.Run{T}(T, int, int)"/>
-    public void Run(int app, int timeoutMs = 2000, int sleepMs = 100)
-        => this.Run((App)app, timeoutMs, sleepMs);
+    /// <inheritdoc cref="IRemote.Run{T}(T)"/>
+    public void Run(int app)
+        => this.Run((App)app);
 
-    /// <inheritdoc cref="IRemote.Run{T}(T, int, int)"/>
-    public void Run(Kind kind, int timeoutMs = 2000, int sleepMs = 100)
-        => this.Run(kind.ToApp(this.vmrApi.Is64Bit), timeoutMs, sleepMs);
+    /// <inheritdoc cref="IRemote.Run{T}(T)"/>
+    public void Run(Kind kind)
+        => this.Run(kind.ToApp(this.vmrApi.Is64Bit));
 
-    /// <inheritdoc cref="IRemote.Run{T}(T, int, int)"/>
-    public void Run(string app, int timeoutMs = 2000, int sleepMs = 100)
+    /// <inheritdoc cref="IRemote.Run{T}(T)"/>
+    public void Run(string app)
     {
         if (!Enum.TryParse(app, true, out App a))
         {
             throw GeneralDispatch.On_CannotParseAsType(this.logger, app, typeof(App), nameof(app));
         }
 
-        this.Run(a, timeoutMs, sleepMs);
+        this.Run(a);
     }
 
     /// <inheritdoc/>
-    void IRemote.Run<T>(T app, int timeoutMs, int sleepMs)
+    void IRemote.Run<T>(T app)
     {
         switch (app)
         {
-            case int i:
-                this.Run(i, timeoutMs, sleepMs);
+            case App a:
+                this.Run(a);
                 break;
 
-            case App a:
-                this.Run(a, timeoutMs, sleepMs);
+            case int i:
+                this.Run(i);
                 break;
 
             case Kind k:
-                this.Run(k, timeoutMs, sleepMs);
+                this.Run(k);
                 break;
 
             case string s:
-                this.Run(s, timeoutMs, sleepMs);
+                this.Run(s);
                 break;
 
             default:
@@ -233,42 +263,163 @@ public partial class Remote
 
     #endregion
 
+    #region RunAsync
+
+    /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
+    public async Task<RunResponse> RunAsync(App app, CancellationToken cancellationToken = default)
+    {
+        using var scope = this.BeginInstanceScope();
+
+        var a = this.Run_p(app);
+
+        var success = a.IsVoicemeeter()
+            ? await this.WaitForVoicemeeter(cancellationToken)
+            : await this.WaitForRunning(a, cancellationToken);
+
+        if (!success)
+        {
+            throw this.On_Run_Error(RunResponse.Timeout, a);
+        }
+
+        this.On_Method_Success();
+
+        return this.GetInfo_AppState(a, false);
+    }
+
+    /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
+    public async Task<RunResponse> RunAsync(int app, CancellationToken cancellationToken = default)
+        => await this.RunAsync((App)app, cancellationToken);
+
+    /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
+    public async Task<RunResponse> RunAsync(Kind kind, CancellationToken cancellationToken = default)
+        => await this.RunAsync(kind.ToApp(this.vmrApi.Is64Bit), cancellationToken);
+
+    /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
+    public async Task<RunResponse> RunAsync(string app, CancellationToken cancellationToken = default)
+    {
+        if (!Enum.TryParse(app, true, out App a))
+        {
+            throw GeneralDispatch.On_CannotParseAsType(this.logger, app, typeof(App), nameof(app));
+        }
+
+        return await this.RunAsync(a, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    async Task<RunResponse> IRemote.RunAsync<T>(T app, CancellationToken cancellationToken)
+    {
+        switch (app)
+        {
+            case App a:
+                return await this.RunAsync(a, cancellationToken);
+
+            case int i:
+                return await this.RunAsync(i, cancellationToken);
+
+            case Kind k:
+                return await this.RunAsync(k, cancellationToken);
+
+            case string s:
+                return await this.RunAsync(s, cancellationToken);
+
+            default:
+                using (this.BeginInstanceScope())
+                {
+                    throw GeneralDispatch.On_TypeNotSupported(this.logger, typeof(T), nameof(app), SupportedTypes.RunTypes);
+                }
+        }
+    }
+
+    #endregion
+
+    #endregion
+
     #region Helpers
 
-    private bool WaitForRunning(out Kind kind, out VmVersion version, int timeoutMs = 2000, int sleepMs = 100, [CallerMemberName] string methodName = "")
+    private async Task<bool> WaitForVoicemeeter(CancellationToken cancellationToken = default, [CallerMemberName] string methodName = "")
     {
         using var scope = this.BeginMethodScope(methodName);
 
-        this.On_WaitForRunning_Start();
+        this.On_WaitForVoicemeeter_Start();
 
-        ((Kind, VmVersion), bool) Attempt()
+        try
         {
-            var k = this.GetInfo_Kind(true);
-            var v = this.GetInfo_Version(true);
-
-            if (k.IsValid() && v.IsValid() && k == v.K)
+            Kind k;
+            VmVersion v;
+            using (this.BeginMethodScope())
             {
-                this.On_WaitForRunning_Detected(k, v);
-                return ((k, v), true);
+                do
+                {
+                    await Task.Delay(100, cancellationToken);
+
+                    k = this.GetInfo_Kind(true);
+                    v = this.GetInfo_Version(true);
+                }
+                while (!(k.IsValid() && v.IsValid() && k == v.K));
             }
 
-            return ((k, v), false);
-        }
+            this.On_WaitForVoicemeeter_Detected(k, v);
 
-        ((kind, version), var success) = this.Retry(Attempt, timeoutMs, sleepMs);
-        if (success)
-        {
             this.On_Method_YieldForSettle();
-            while (this.Query_ParamsDirty() || this.Query_ButtonsDirty())
+            using (this.BeginMethodScope())
             {
-                Thread.Yield();
+                while (this.Query_ParamsDirty() || this.Query_ButtonsDirty())
+                {
+                    await Task.Delay(50, cancellationToken);
+                }
             }
 
             return true;
         }
+        catch (OperationCanceledException)
+        {
+            this.On_WaitForVoicemeeter_Timeout();
+            return false;
+        }
+    }
 
-        this.On_WaitForRunning_Timeout();
-        return false;
+    private async Task<bool> WaitForRunning(App app, CancellationToken cancellationToken = default, [CallerMemberName] string methodName = "")
+    {
+        using var scope = this.BeginMethodScope(methodName);
+
+        this.On_WaitForRunning_Start(app);
+
+        try
+        {
+            RunResponse state;
+            using (this.BeginMethodScope())
+            {
+                do
+                {
+                    await Task.Delay(100, cancellationToken);
+
+                    state = this.GetInfo_AppState(app, true);
+                }
+                while (!(state is RunResponse.Ok or RunResponse.Hidden
+                        && this.vmrApi.IsApplicationInputIdle(app) is Response.Ok));
+            }
+
+            this.On_WaitForRunning_Detected(app, state);
+
+            if (app is App.MacroButtons)
+            {
+                this.On_Method_YieldForSettle();
+                using (this.BeginMethodScope())
+                {
+                    while (this.Query_ButtonsDirty())
+                    {
+                        await Task.Delay(50, cancellationToken);
+                    }
+                }
+            }
+
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            this.On_WaitForRunning_Timeout(app);
+            return false;
+        }
     }
 
     #endregion

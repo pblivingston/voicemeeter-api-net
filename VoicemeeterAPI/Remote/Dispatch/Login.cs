@@ -17,15 +17,15 @@ public partial class Remote
     private void On_Login_VmNotRunning()
         => RemoteLog.Login_VmNotRunning(this.logger);
 
+    private void On_Login_MbNotRunning()
+        => RemoteLog.Login_MbNotRunning(this.logger);
+
     #endregion
 
     #region Logout
 
     private void On_Logout_Start()
         => RemoteLog.Logout_Start(this.logger);
-
-    private void On_Logout_Timeout(LoginResponse lastResponse)
-        => RemoteLog.Logout_Timeout(this.logger, lastResponse);
 
     #endregion
 
@@ -45,14 +45,23 @@ public partial class Remote
 
     #region WaitForRunning
 
-    private void On_WaitForRunning_Start()
-        => RemoteLog.WaitForRunning_Start(this.logger);
+    private void On_WaitForVoicemeeter_Start()
+        => RemoteLog.WaitForVoicemeeter_Start(this.logger);
 
-    private void On_WaitForRunning_Detected(Kind kind, VmVersion version)
-        => RemoteLog.WaitForRunning_Detected(this.logger, kind, version);
+    private void On_WaitForVoicemeeter_Detected(Kind kind, VmVersion version)
+        => RemoteLog.WaitForVoicemeeter_Detected(this.logger, kind, version);
 
-    private void On_WaitForRunning_Timeout()
-        => RemoteLog.WaitForRunning_Timeout(this.logger);
+    private void On_WaitForVoicemeeter_Timeout()
+        => RemoteLog.WaitForVoicemeeter_Timeout(this.logger);
+
+    private void On_WaitForRunning_Start(App app)
+        => RemoteLog.WaitForRunning_Start(this.logger, app);
+
+    private void On_WaitForRunning_Detected(App app, RunResponse appState)
+        => RemoteLog.WaitForRunning_Detected(this.logger, app, appState);
+
+    private void On_WaitForRunning_Timeout(App app)
+        => RemoteLog.WaitForRunning_Timeout(this.logger, app);
 
     #endregion
 }
