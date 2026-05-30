@@ -70,7 +70,7 @@ public interface IRemote : IDisposable
     public LoginResponse Login();
 
     /// <summary>
-    ///   Opens communication pipe with VoicemeeterRemote. If Voicemeeter is running, confirms it is reachable.
+    ///   Opens communication pipe with VoicemeeterRemote. If Voicemeeter is running, confirms it is reachable. Waits up to 15 seconds.
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <exception cref="RemoteException{LoginResponse}">
@@ -133,7 +133,7 @@ public interface IRemote : IDisposable
     public void Run<T>(T app) where T : notnull;
 
     /// <summary>
-    ///   Runs the specified <see cref="App"/> and waits for it to start. If the <see cref="App"/> is Voicemeeter, confirms it is reachable.
+    ///   Runs the specified <see cref="App"/> and waits for it to start. If the <see cref="App"/> is Voicemeeter, confirms it is reachable. Waits up to 15 seconds.
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns>

@@ -342,32 +342,41 @@ public partial class Remote
 
         this.On_WaitForVoicemeeter_Start();
 
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        cts.CancelAfter(TimeSpan.FromSeconds(15));
+
         try
         {
             Kind k;
             VmVersion v;
-            using (this.BeginMethodScope())
+            do
             {
-                do
-                {
-                    await Task.Delay(100, cancellationToken);
+                await Task.Delay(100, cts.Token);
 
+                using (this.BeginMethodScope())
+                {
                     k = this.GetInfo_Kind(true);
                     v = this.GetInfo_Version(true);
                 }
-                while (!(k.IsValid() && v.IsValid() && k == v.K));
             }
+            while (!(k.IsValid() && v.IsValid() && k == v.K));
 
             this.On_WaitForVoicemeeter_Detected(k, v);
 
             this.On_Method_YieldForSettle();
-            using (this.BeginMethodScope())
+            bool pDirty;
+            bool bDirty;
+            do
             {
-                while (this.Query_ParamsDirty() || this.Query_ButtonsDirty())
+                await Task.Delay(50, cts.Token);
+
+                using (this.BeginMethodScope())
                 {
-                    await Task.Delay(50, cancellationToken);
+                    pDirty = this.Query_ParamsDirty();
+                    bDirty = this.Query_ButtonsDirty();
                 }
             }
+            while (pDirty || bDirty);
 
             return true;
         }
@@ -384,33 +393,40 @@ public partial class Remote
 
         this.On_WaitForRunning_Start(app);
 
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        cts.CancelAfter(TimeSpan.FromSeconds(15));
+
         try
         {
             RunResponse state;
-            using (this.BeginMethodScope())
+            do
             {
-                do
-                {
-                    await Task.Delay(100, cancellationToken);
+                await Task.Delay(100, cts.Token);
 
+                using (this.BeginMethodScope())
+                {
                     state = this.GetInfo_AppState(app, true);
                 }
-                while (!(state is RunResponse.Ok or RunResponse.Hidden
-                        && this.vmrApi.IsApplicationInputIdle(app) is Response.Ok));
             }
+            while (!(state is RunResponse.Ok or RunResponse.Hidden
+                        && this.vmrApi.IsApplicationInputIdle(app) is Response.Ok));
 
             this.On_WaitForRunning_Detected(app, state);
 
             if (app is App.MacroButtons)
             {
                 this.On_Method_YieldForSettle();
-                using (this.BeginMethodScope())
+                bool dirty;
+                do
                 {
-                    while (this.Query_ButtonsDirty())
+                    await Task.Delay(50, cts.Token);
+
+                    using (this.BeginMethodScope())
                     {
-                        await Task.Delay(50, cancellationToken);
+                        dirty = this.Query_ButtonsDirty();
                     }
                 }
+                while (dirty);
             }
 
             return true;
