@@ -38,8 +38,8 @@ internal interface IWrapper : IDisposable
 
     /// <inheritdoc cref="Wrapper.GetApplicationState(App)"/>
     public RunResponse GetApplicationState(App app);
-    /// <inheritdoc cref="Wrapper.ShutdownApplication(App, bool)"/>
-    public RunResponse ShutdownApplication(App app, bool force);
+    /// <inheritdoc cref="Wrapper.CloseApplication(App, bool)"/>
+    public RunResponse CloseApplication(App app, bool force);
     /// <inheritdoc cref="Wrapper.IsApplicationInputIdle(App)"/>
     public Response IsApplicationInputIdle(App app);
     /// <inheritdoc cref="Wrapper.WaitForApplicationExit(App, CancellationToken)"/>

@@ -15,11 +15,11 @@ internal partial class Wrapper
             ? this.apps[app].GetState()
             : RunResponse.UnknownApp;
 
-    /// <inheritdoc cref="ProcessWrapper.Shutdown(bool)"/>
+    /// <inheritdoc cref="ProcessWrapper.Close(bool)"/>
     /// <param name="app"></param>
-    public RunResponse ShutdownApplication(App app, bool force = false)
+    public RunResponse CloseApplication(App app, bool force = false)
         => app.IsValid()
-            ? this.apps[app].Shutdown(force)
+            ? this.apps[app].Close(force)
             : RunResponse.UnknownApp;
 
     /// <inheritdoc cref="ProcessWrapper.IsInputIdle()"/>
@@ -38,6 +38,8 @@ internal partial class Wrapper
 
     private class ProcessWrapper(App app, string installDir, string processName) : IDisposable
     {
+        private readonly Lock cacheLock = new();
+
         public App App { get; } = app;
         public string InstallDir { get; } = installDir;
         public string ProcessName { get; } = processName;
@@ -45,8 +47,11 @@ internal partial class Wrapper
 
         public void Dispose()
         {
-            this.Process?.Dispose();
-            this.Process = null;
+            lock (this.cacheLock)
+            {
+                this.Process?.Dispose();
+                this.Process = null;
+            }
         }
 
         /// <summary>
@@ -66,61 +71,7 @@ internal partial class Wrapper
                 return RunResponse.NotInstalled;
             }
 
-            this.GetProcess();
-
-            if (this.Process is null)
-            {
-                return RunResponse.NotRunning;
-            }
-
-            if (!this.IsResponding() || this.IsMainModuleNull())
-            {
-                return RunResponse.NotResponding;
-            }
-
-            if (this.IsHidden())
-            {
-                return RunResponse.Hidden;
-            }
-
-            return RunResponse.Ok;
-        }
-
-        /// <summary>
-        ///   Attempts to close the process and releases the process.
-        /// </summary>
-        /// <param name="force"></param>
-        /// <returns>
-        ///   Error<br/>
-        ///   Last App State<br/>
-        /// </returns>
-        /// <remarks>
-        ///   If app has tray mode enabled, force will be required to shut it down.
-        /// </remarks>
-        public RunResponse Shutdown(bool force = false)
-        {
-            var state = this.GetState();
-
-            if (this.Process is not null)
-            {
-                try
-                {
-                    if (force)
-                    {
-                        this.Process.Kill();
-                    }
-                    else if (state is RunResponse.Ok && !this.Process.CloseMainWindow())
-                    {
-                        return RunResponse.Error;
-                    }
-                }
-                catch
-                {
-                    return RunResponse.Error;
-                }
-            }
-
-            return this.GetState();
+            return GetState(this.GetProcess());
         }
 
         /// <summary>
@@ -133,28 +84,47 @@ internal partial class Wrapper
         ///   Error<br/>
         /// </returns>
         public Response IsInputIdle()
+            => IsInputIdle(this.GetProcess());
+
+        /// <summary>
+        ///   Attempts to close the process and releases the process.
+        /// </summary>
+        /// <param name="force"></param>
+        /// <returns>
+        ///   Error<br/>
+        ///   Last App State<br/>
+        /// </returns>
+        /// <remarks>
+        ///   If app has tray mode enabled, force will be required to shut it down.
+        /// </remarks>
+        public RunResponse Close(bool force = false)
         {
-            var state = this.GetState();
+            var process = this.GetProcess();
+            var state = GetState(process);
 
-            if (state is RunResponse.NotInstalled or RunResponse.NotResponding)
+            if (process is null || (state is not RunResponse.Ok && !force))
             {
-                return Response.Error;
-            }
-
-            if (this.Process is null)
-            {
-                return Response.NoServer;
+                return state;
             }
 
             try
             {
-                return this.Process.WaitForInputIdle(0)
-                    ? Response.Ok
-                    : Response.Dirty;
+                if (state is RunResponse.Ok && process.CloseMainWindow())
+                {
+                    return state;
+                }
+
+                if (force)
+                {
+                    process.Kill();
+                    return state;
+                }
+
+                return RunResponse.Error;
             }
             catch
             {
-                return Response.Error;
+                return RunResponse.Error;
             }
         }
 
@@ -168,12 +138,16 @@ internal partial class Wrapper
         /// </returns>
         public async Task<RunResponse> WaitForExit(CancellationToken cancellationToken = default)
         {
-            var state = this.GetState();
+            var process = this.GetProcess();
+            var state = GetState(process);
 
-            if (this.Process is null || state is RunResponse.NotResponding)
+            if (process is null || state is RunResponse.NotResponding)
             {
                 return state;
             }
+
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(TimeSpan.FromSeconds(15));
 
             var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -182,123 +156,125 @@ internal partial class Wrapper
 
             try
             {
-                this.Process.EnableRaisingEvents = true;
-                this.Process.Exited += OnExited;
+                process.EnableRaisingEvents = true;
+                process.Exited += OnExited;
 
-                state = this.GetState();
-
-                if (state is not (RunResponse.Ok or RunResponse.Hidden))
+                if (process.HasExited)
                 {
-                    return state;
+                    return GetState(process);
                 }
 
-                using (cancellationToken.Register(() => tcs.TrySetCanceled()))
-                {
-                    return await tcs.Task
-                        ? this.GetState()
-                        : RunResponse.Error;
-                }
+                using var registration = cts.Token.Register(() => tcs.TrySetCanceled());
+
+                return await tcs.Task
+                    ? GetState(process)
+                    : RunResponse.Error;
             }
             catch (OperationCanceledException)
             {
-                return this.GetState();
+                return GetState(process);
             }
             finally
             {
-                this.Process?.Exited -= OnExited;
+                process.Exited -= OnExited;
             }
         }
 
         #region Helpers
 
-        private Process? GetProcess()
-        {
-            if (this.IsClosed())
-            {
-                this.Dispose();
-            }
-
-            if (this.Process is null && this.ExecutableExists())
-            {
-                var processes = Process.GetProcessesByName(this.ProcessName);
-
-                foreach (var p in processes)
-                {
-                    if (this.Process is null)
-                    {
-                        try
-                        {
-                            var f = p.MainModule?.FileName;
-                            if ((this.App is App.MacroButtons && p.MainModule is null)
-                                || (f is not null && f.StartsWith(this.InstallDir, StringComparison.OrdinalIgnoreCase)))
-                            {
-                                this.Process = p;
-                                continue;
-                            }
-                        }
-                        catch { }
-                    }
-
-                    p.Dispose();
-                }
-            }
-
-            return this.Process;
-        }
-
         private bool ExecutableExists()
             => File.Exists(Path.Combine(this.InstallDir, this.ProcessName + ".exe"));
 
-        private bool IsClosed()
+        private Process? GetProcess()
         {
-            var isClosed = true;
-            try
+            lock (this.cacheLock)
             {
-                this.Process?.Refresh();
-                isClosed = this.Process?.HasExited ?? true;
-            }
-            catch { }
+                try
+                {
+                    this.Process?.Refresh();
+                    if (this.Process?.HasExited ?? true)
+                    {
+                        this.Process?.Dispose();
+                        this.Process = null;
+                    }
+                }
+                catch { }
 
-            return isClosed;
+                if (this.Process is null && this.ExecutableExists())
+                {
+                    var processes = Process.GetProcessesByName(this.ProcessName);
+
+                    foreach (var p in processes)
+                    {
+                        if (this.Process is null)
+                        {
+                            try
+                            {
+                                var f = p.MainModule?.FileName;
+                                if ((this.App is App.MacroButtons && p.MainModule is null)
+                                    || (f is not null && f.StartsWith(this.InstallDir, StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    this.Process = p;
+                                    continue;
+                                }
+                            }
+                            catch { }
+                        }
+
+                        p.Dispose();
+                    }
+                }
+
+                return this.Process;
+            }
         }
 
-        private bool IsHidden()
+        private static RunResponse GetState(Process? process)
         {
-            var isHidden = false;
-            try
+            if (process is null)
             {
-                this.Process?.Refresh();
-                isHidden = (int)(this.Process?.MainWindowHandle ?? new IntPtr(-1)) == 0;
+                return RunResponse.NotRunning;
             }
-            catch { }
 
-            return isHidden;
+            process.Refresh();
+
+            if (!process.Responding || process.MainModule is null)
+            {
+                return RunResponse.NotResponding;
+            }
+
+            if (process.MainWindowHandle == IntPtr.Zero)
+            {
+                return RunResponse.Hidden;
+            }
+
+            return RunResponse.Ok;
         }
 
-        private bool IsResponding()
+        private static Response IsInputIdle(Process? process)
         {
-            var isResponding = false;
+            var state = GetState(process);
+
+            if (process is null)
+            {
+                return Response.NoServer;
+            }
+
+            if (state is RunResponse.NotResponding)
+            {
+                return Response.Error;
+            }
+
             try
             {
-                this.Process?.Refresh();
-                isResponding = this.Process?.Responding ?? false;
+                return process.WaitForInputIdle(0)
+                    ? Response.Ok
+                    : Response.Dirty;
             }
-            catch { }
-
-            return isResponding;
-        }
-
-        private bool IsMainModuleNull()
-        {
-            var isNull = true;
-            try
+            catch
             {
-                this.Process?.Refresh();
-                isNull = this.Process?.MainModule is null;
+                return Response.Error;
             }
-            catch { }
-
-            return isNull;
         }
 
         #endregion
