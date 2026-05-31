@@ -64,7 +64,18 @@ public static class AppUtils
             : Kind.Unknown;
 
     public static bool IsValid(App app)
-        => app > App.None && Enum.IsDefined(app);
+    {
+        if (app <= App.None)
+        {
+            return false;
+        }
+
+#if NET5_0_OR_GREATER
+        return Enum.IsDefined(app);
+#else
+        return Enum.IsDefined(typeof(App), app);
+#endif
+    }
 
     public static bool IsValid(int app)
         => IsValid((App)app);

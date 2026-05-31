@@ -38,7 +38,7 @@ internal partial class Wrapper
 
     private class ProcessWrapper(App app, string installDir, string processName) : IDisposable
     {
-        private readonly Lock cacheLock = new();
+        private readonly LockObject cacheLock = new();
 
         public App App { get; } = app;
         public string InstallDir { get; } = installDir;
