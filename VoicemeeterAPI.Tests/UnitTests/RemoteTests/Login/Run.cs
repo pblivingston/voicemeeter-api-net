@@ -29,7 +29,7 @@ public class Run : MockRemote
     {
         var k = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var expectedState = new ConnectionState(LoginResponse.Ok, true, (Kind)k, (VmVersion)version);
+        var expectedState = new ConnectionState(LoginResponse.Ok, RunResponse.Ok, (Kind)k, (VmVersion)version);
 
         this.MockLoginVoicemeeterNotRunning();
 
@@ -62,14 +62,14 @@ public class Run : MockRemote
     {
         var kind = Kind.Standard;
         var version = 0x0101_0202;
-        var expectedState = new ConnectionState(LoginResponse.Ok, true, kind, (VmVersion)version);
+        var expectedState = new ConnectionState(LoginResponse.Ok, RunResponse.Ok, kind, (VmVersion)version);
         var app = App.MacroButtons;
 
         this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
 
         this.MockLoginMacroButtonsNotRunning((int)kind, version);
 
-        this.MockWrapper.Setup(w => w.MacroButtonIsRunning()).Returns(RunResponse.Ok);
+        this.MockWrapper.Setup(w => w.GetApplicationState(App.MacroButtons)).Returns(RunResponse.Ok);
 
         this.MockWrapper.SetupSequence(w => w.MacroButtonIsDirty())
             .Returns(Response.Dirty)
@@ -155,7 +155,7 @@ public class Run : MockRemote
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var expectedState = new ConnectionState(LoginResponse.Ok, true, (Kind)kind, (VmVersion)version);
+        var expectedState = new ConnectionState(LoginResponse.Ok, RunResponse.Ok, (Kind)kind, (VmVersion)version);
         var app = App.Standardx64;
 
         this.MockLoginVoicemeeterNotRunning();
@@ -194,7 +194,7 @@ public class Run : MockRemote
 
         this.MockLoginVoicemeeterNotRunning();
 
-        var ex = Assert.Throws<RunException>(() => this.Remote.Run(Kind.Standard, timeoutMs: 10));
+        var ex = Assert.Throws<RunException>(() => this.Remote.Run(Kind.Standard));
 
         Assert.Multiple(
             () => Assert.Equal(app, ex.App),

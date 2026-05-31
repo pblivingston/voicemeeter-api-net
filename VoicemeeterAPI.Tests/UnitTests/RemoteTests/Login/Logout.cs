@@ -10,7 +10,7 @@ public class Logout : MockRemote
         var loginStatus = LoginResponse.LoggedOut;
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var expectedState = new ConnectionState(loginStatus, true, (Kind)kind, (VmVersion)version);
+        var expectedState = new ConnectionState(loginStatus, RunResponse.Ok, (Kind)kind, (VmVersion)version);
 
         this.MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
 
@@ -42,13 +42,13 @@ public class Logout : MockRemote
         var loginStatus = LoginResponse.Unknown;
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var expectedState = new ConnectionState(loginStatus, true, (Kind)kind, (VmVersion)version);
+        var expectedState = new ConnectionState(loginStatus, RunResponse.Ok, (Kind)kind, (VmVersion)version);
 
         this.MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
 
         this.MockLoginOk(kind, version);
 
-        var result = this.Remote.Logout(timeoutMs: 10);
+        var result = this.Remote.Logout();
 
         Assert.Multiple(
             () => Assert.Equal(loginStatus, result),
