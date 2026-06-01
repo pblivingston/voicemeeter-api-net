@@ -5,7 +5,7 @@ using PBLivingston.VoicemeeterAPI.Types;
 public class Logout : MockRemote
 {
     [Fact]
-    public void UpdatesConnectionStateLoggedOutWhenSuccessful()
+    public void UpdatesLoginStatusLoggedOutWhenSuccessful()
     {
         var loginStatus = LoginResponse.LoggedOut;
         var kind = (int)Kind.Standard;
@@ -14,13 +14,13 @@ public class Logout : MockRemote
 
         this.MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         var result = this.Remote.Logout();
 
         Assert.Multiple(
             () => Assert.Equal(loginStatus, result),
-            () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
+            () => Assert.Equal(expectedState, this.Remote.LastConnectionState),
             () => this.MockWrapper.Verify(w => w.Logout(), Times.Once())
         );
     }
@@ -37,7 +37,7 @@ public class Logout : MockRemote
     }
 
     [Fact]
-    public void UpdatesConnectionStateUnknownWhenTimesOut()
+    public void UpdatesLoginStatusUnknownWhenLogoutFails()
     {
         var loginStatus = LoginResponse.Unknown;
         var kind = (int)Kind.Standard;
@@ -46,13 +46,13 @@ public class Logout : MockRemote
 
         this.MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         var result = this.Remote.Logout();
 
         Assert.Multiple(
             () => Assert.Equal(loginStatus, result),
-            () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
+            () => Assert.Equal(expectedState, this.Remote.LastConnectionState),
             () => this.MockWrapper.Verify(w => w.Logout(), Times.Once())
         );
     }
@@ -76,7 +76,7 @@ public class Logout : MockRemote
 
         this.MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
 
-        this.MockLoginOk((int)kind, version);
+        this.MockLogin((int)kind, version);
 
         this.Remote.Dispose();
 

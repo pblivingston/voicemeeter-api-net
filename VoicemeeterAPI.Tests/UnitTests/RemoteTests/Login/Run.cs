@@ -15,7 +15,7 @@ public class Run : MockRemote
 
         this.MockWrapper.Setup(w => w.RunVoicemeeter(app)).Returns(RunResponse.Ok);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         this.Remote.Run(app);
 
@@ -31,7 +31,7 @@ public class Run : MockRemote
         var version = 0x0101_0202;
         var expectedState = new ConnectionState(LoginResponse.Ok, RunResponse.Ok, (Kind)k, (VmVersion)version);
 
-        this.MockLoginVoicemeeterNotRunning();
+        this.MockLogin();
 
         this.MockWrapper.Setup(w => w.Is64Bit).Returns(is64Bit);
         this.MockWrapper.Setup(w => w.RunVoicemeeter((int)launched)).Returns(RunResponse.Ok);
@@ -67,7 +67,7 @@ public class Run : MockRemote
 
         this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
 
-        this.MockLoginMacroButtonsNotRunning((int)kind, version);
+        this.MockLogin(RunResponse.NotRunning, (int)kind, version);
 
         this.MockWrapper.Setup(w => w.GetApplicationState(App.MacroButtons)).Returns(RunResponse.Ok);
 
@@ -93,7 +93,7 @@ public class Run : MockRemote
 
         this.MockWrapper.Setup(w => w.RunVoicemeeter(app)).Returns(RunResponse.UnknownApp);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         var ex = Assert.Throws<RunException>(() => this.Remote.Run(app));
 
@@ -113,7 +113,7 @@ public class Run : MockRemote
 
         this.MockWrapper.Setup(w => w.RunVoicemeeter(app)).Returns(RunResponse.NotInstalled);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         var ex = Assert.Throws<RunException>(() => this.Remote.Run(app));
 
@@ -158,7 +158,7 @@ public class Run : MockRemote
         var expectedState = new ConnectionState(LoginResponse.Ok, RunResponse.Ok, (Kind)kind, (VmVersion)version);
         var app = App.Standardx64;
 
-        this.MockLoginVoicemeeterNotRunning();
+        this.MockLogin();
 
         this.MockWrapper.Setup(w => w.Is64Bit).Returns(true);
         this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
@@ -192,7 +192,7 @@ public class Run : MockRemote
         this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.NoServer);
         this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.NoServer);
 
-        this.MockLoginVoicemeeterNotRunning();
+        this.MockLogin();
 
         var ex = Assert.Throws<RunException>(() => this.Remote.Run(Kind.Standard));
 
@@ -224,7 +224,7 @@ public class Run : MockRemote
 
         this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         ((IRemote)this.Remote).Run(app);
 
@@ -240,7 +240,7 @@ public class Run : MockRemote
 
         this.MockWrapper.Setup(w => w.RunVoicemeeter(app)).Returns(RunResponse.Ok);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         ((IRemote)this.Remote).Run(app);
 
@@ -254,7 +254,7 @@ public class Run : MockRemote
         var version = 0x0101_0202;
         var app = App.Standardx64;
 
-        this.MockLoginVoicemeeterNotRunning();
+        this.MockLogin();
 
         this.MockWrapper.Setup(w => w.Is64Bit).Returns(true);
         this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
@@ -277,7 +277,7 @@ public class Run : MockRemote
 
         this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         ((IRemote)this.Remote).Run("CABLEControlPanel");
 

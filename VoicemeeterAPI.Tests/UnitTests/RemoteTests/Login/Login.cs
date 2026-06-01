@@ -106,7 +106,7 @@ public class Login : MockRemote
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.Login());
 
@@ -124,7 +124,7 @@ public class Login : MockRemote
 
         this.MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         this.Remote.Logout();
 

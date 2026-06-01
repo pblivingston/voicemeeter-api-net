@@ -15,7 +15,7 @@ public class GetParamFloat : MockRemote
 
         this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         this.Remote.GetParam(param, out float result);
 
@@ -38,7 +38,7 @@ public class GetParamFloat : MockRemote
 
         this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(response);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         var ex = Assert.Throws<GetParamException<float>>(() => this.Remote.GetParam(param, out float _));
 
@@ -56,7 +56,7 @@ public class GetParamFloat : MockRemote
     {
         var param = "Mock.Param";
 
-        this.MockLoginVoicemeeterNotRunning();
+        this.MockLogin();
 
         var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.GetParam(param, out float _));
 
@@ -91,7 +91,7 @@ public class GetParamFloat : MockRemote
 
         this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         this.Remote.GetParam(param, out int result);
 
@@ -112,7 +112,7 @@ public class GetParamFloat : MockRemote
 
         this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         var ex = Assert.Throws<GetParamException<float>>(() => this.Remote.GetParam(param, out int _));
 
@@ -136,7 +136,7 @@ public class GetParamFloat : MockRemote
 
         this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         this.Remote.GetParam(param, out bool result);
 
@@ -158,7 +158,7 @@ public class GetParamFloat : MockRemote
 
         this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         var ex = Assert.Throws<GetParamException<float>>(() => this.Remote.GetParam(param, out bool _));
 

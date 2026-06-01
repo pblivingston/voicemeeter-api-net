@@ -12,7 +12,7 @@ public class GetVersion : MockRemote
         var version = 0x0201_0202;
         var expectedState = new ConnectionState(LoginResponse.Ok, RunResponse.Ok, (Kind)kind, (VmVersion)version);
 
-        this.MockLoginVoicemeeterNotRunning();
+        this.MockLogin();
 
         this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
         this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
@@ -35,7 +35,7 @@ public class GetVersion : MockRemote
         var noVersion = 0x0000_0000;
         var expectedState = new ConnectionState(LoginResponse.VoicemeeterNotRunning, RunResponse.Ok, Kind.None, default);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         this.MockWrapper.Setup(w => w.GetVoicemeeterType(out noKind)).Returns(InfoResponse.NoServer);
         this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out noVersion)).Returns(InfoResponse.NoServer);
@@ -55,7 +55,7 @@ public class GetVersion : MockRemote
         var kind = (int)Kind.Banana;
         var version = 0x0201_0202;
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         var noVersion = 0;
         this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out noVersion)).Returns(InfoResponse.NoClient);

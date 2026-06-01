@@ -16,7 +16,7 @@ public class GetParamGeneric : MockRemote
 
         this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         ((IRemote)this.Remote).GetParam(param, out float result);
 
@@ -37,7 +37,7 @@ public class GetParamGeneric : MockRemote
 
         this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         ((IRemote)this.Remote).GetParam(param, out int result);
 
@@ -58,7 +58,7 @@ public class GetParamGeneric : MockRemote
 
         this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         ((IRemote)this.Remote).GetParam(param, out bool result);
 
@@ -78,7 +78,7 @@ public class GetParamGeneric : MockRemote
 
         this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         ((IRemote)this.Remote).GetParam(param, out string result);
 
@@ -95,7 +95,7 @@ public class GetParamGeneric : MockRemote
         var version = 0x0301_0202;
         var param = "Mock.Param";
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         var ex = Assert.Throws<TypeNotSupportedException>(() => ((IRemote)this.Remote).GetParam(param, out DateTime _));
 

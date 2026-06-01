@@ -11,7 +11,7 @@ public class IsParamsDirty : MockRemote
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Ok);
 
@@ -29,7 +29,7 @@ public class IsParamsDirty : MockRemote
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Dirty);
 
@@ -47,7 +47,7 @@ public class IsParamsDirty : MockRemote
         var kind = (int)Kind.Potato;
         var version = 0x0301_0202;
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Error);
 
@@ -62,7 +62,7 @@ public class IsParamsDirty : MockRemote
     [Fact]
     public void ThrowsExceptionAccessDeniedWhenLoginStatusNotOk()
     {
-        this.MockLoginVoicemeeterNotRunning();
+        this.MockLogin();
 
         var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.IsParamsDirty());
 

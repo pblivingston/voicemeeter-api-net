@@ -15,7 +15,7 @@ public class GetParamString : MockRemote
 
         this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         this.Remote.GetParam(param, out string result);
 
@@ -38,7 +38,7 @@ public class GetParamString : MockRemote
 
         this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(response);
 
-        this.MockLoginOk(kind, version);
+        this.MockLogin(kind, version);
 
         var ex = Assert.Throws<GetParamException<string>>(() => this.Remote.GetParam(param, out string _));
 
@@ -56,7 +56,7 @@ public class GetParamString : MockRemote
     {
         var param = "Mock.Param";
 
-        this.MockLoginVoicemeeterNotRunning();
+        this.MockLogin();
 
         var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.GetParam(param, out string _));
 
