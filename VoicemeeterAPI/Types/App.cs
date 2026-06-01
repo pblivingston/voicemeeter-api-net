@@ -57,7 +57,7 @@ public static class AppUtils
     /// <param name="app"></param>
     /// <returns><see cref="Kind.Unknown"/> if not a Voicemeeter <see cref="App"/></returns>
     public static Kind ToKind(App app)
-        => app.IsVoicemeeter()
+        => app.IsVoicemeeter() || app is App.None
             ? app >= App.Standardx64
                 ? (Kind)(app - 3) // 64-bit App -> 32-bit App
                 : (Kind)app
