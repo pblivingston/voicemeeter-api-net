@@ -15,16 +15,16 @@ public partial class Remote
     {
         this.LoginGuard(requiredStatus: LoginResponse.LoggedOut);
 
-        this.On_Login_Start();
-
-        if (this.LastConnectionState.LoggedIn)
+        if (this.loginStatus < LoginResponse.LoggedOut)
         {
-            throw this.On_Method_Error(LoginResponse.AlreadyLoggedIn);
+            throw this.On_Guard_AccessDenied(this.loginStatus);
         }
+
+        this.On_Login_Start();
 
         var result = this.vmrApi.Login();
 
-        if (result is not (LoginResponse.Ok or LoginResponse.VoicemeeterNotRunning))
+        if (result < LoginResponse.Ok)
         {
             throw this.On_Method_Error(result);
         }
