@@ -19,7 +19,7 @@ public class IsParamsDirty : MockRemote
 
         Assert.Multiple(
             () => Assert.False(result),
-            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2))
+            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Once())
         );
     }
 
@@ -37,7 +37,7 @@ public class IsParamsDirty : MockRemote
 
         Assert.Multiple(
             () => Assert.True(result),
-            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2))
+            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Once())
         );
     }
 
@@ -55,7 +55,7 @@ public class IsParamsDirty : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(Response.Error, ex.Response),
-            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(2))
+            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Once())
         );
     }
 

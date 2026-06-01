@@ -86,8 +86,6 @@ public abstract class MockRemote : IDisposable
         this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
         this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
         this.MockWrapper.Setup(w => w.GetApplicationState(App.MacroButtons)).Returns(RunResponse.Ok);
-        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Ok);
-        this.MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Ok);
 
         var result = this.Remote.Login();
 
@@ -97,9 +95,7 @@ public abstract class MockRemote : IDisposable
             () => this.MockWrapper.Verify(w => w.Login(), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out kind), Times.Exactly(2)),
             () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out version), Times.Exactly(2)),
-            () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Exactly(2)),
-            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Exactly(2))
         );
     }
 
@@ -121,8 +117,8 @@ public abstract class MockRemote : IDisposable
             () => Assert.Equal(loginStatus, result),
             () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
             () => this.MockWrapper.Verify(w => w.Login(), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out kind), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out version), Times.Once()),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out kind), Times.Exactly(2)),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out version), Times.Exactly(2)),
             () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Exactly(2))
         );
     }
@@ -136,8 +132,6 @@ public abstract class MockRemote : IDisposable
         this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
         this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
         this.MockWrapper.Setup(w => w.GetApplicationState(App.MacroButtons)).Returns(RunResponse.NotRunning);
-        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Ok);
-        this.MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Ok);
 
         var result = this.Remote.Login();
 
@@ -147,9 +141,7 @@ public abstract class MockRemote : IDisposable
             () => this.MockWrapper.Verify(w => w.Login(), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out kind), Times.Exactly(2)),
             () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out version), Times.Exactly(2)),
-            () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Exactly(2)),
-            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Exactly(2))
         );
     }
 
@@ -171,8 +163,8 @@ public abstract class MockRemote : IDisposable
             () => Assert.Equal(loginStatus, result),
             () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
             () => this.MockWrapper.Verify(w => w.Login(), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out kind), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out version), Times.Once()),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out kind), Times.Exactly(2)),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out version), Times.Exactly(2)),
             () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Exactly(2))
         );
     }

@@ -19,7 +19,7 @@ public class IsButtonsDirty : MockRemote
 
         Assert.Multiple(
             () => Assert.False(result),
-            () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(2))
+            () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Once())
         );
     }
 
@@ -37,7 +37,7 @@ public class IsButtonsDirty : MockRemote
 
         Assert.Multiple(
             () => Assert.True(result),
-            () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(2))
+            () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Once())
         );
     }
 
@@ -55,7 +55,7 @@ public class IsButtonsDirty : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(Response.Error, ex.Response),
-            () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(2))
+            () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Once())
         );
     }
 

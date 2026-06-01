@@ -108,7 +108,7 @@ public sealed partial class Remote : IRemote
 
         this.On_GetConnectionState_Start();
 
-        if (!this.LastConnectionState.LoggedIn)
+        if (this.loginStatus >= LoginResponse.LoggedOut)
         {
             return this.LastConnectionState;
         }
