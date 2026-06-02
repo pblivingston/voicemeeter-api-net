@@ -12,7 +12,14 @@ using PBLivingston.VoicemeeterAPI.Types;
 internal static class GeneralDispatch
 {
     public static void On_BitAdjust(ILogger logger, App appBefore, App appAfter)
-        => GeneralLog.BitAdjust(logger, appBefore, appAfter);
+    {
+        if (appBefore == appAfter)
+        {
+            return;
+        }
+
+        GeneralLog.BitAdjust(logger, appBefore, appAfter);
+    }
 
     public static TypeNotSupportedException On_TypeNotSupported(ILogger logger, Type type, string paramName, Type[] supportedTypes, [CallerMemberName] string methodName = "")
     {

@@ -63,6 +63,11 @@ public static class AppUtils
                 : (Kind)app
             : Kind.Unknown;
 
+    /// <summary>
+    ///   True if <see cref="App"/> is greater than None and defined.
+    /// </summary>
+    /// <param name="app"></param>
+    /// <returns></returns>
     public static bool IsValid(App app)
     {
         if (app <= App.None)
@@ -77,12 +82,19 @@ public static class AppUtils
 #endif
     }
 
+    /// <inheritdoc cref="IsValid(App)"/>
     public static bool IsValid(int app)
         => IsValid((App)app);
 
+    /// <summary>
+    ///   True if <see cref="App"/> is Voicemeeter.
+    /// </summary>
+    /// <param name="app"></param>
+    /// <returns></returns>
     public static bool IsVoicemeeter(App app)
         => app is >= App.Standard and <= App.Potatox64;
 
+    /// <inheritdoc cref="IsVoicemeeter(App)"/>
     public static bool IsVoicemeeter(int app)
         => IsVoicemeeter((App)app);
 

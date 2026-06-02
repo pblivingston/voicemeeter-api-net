@@ -11,15 +11,19 @@ public class Run : MockRemote
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var app = (int)App.AUXControlPanel;
+        var app = App.MacroButtons;
 
-        this.MockWrapper.Setup(w => w.RunVoicemeeter(app)).Returns(RunResponse.Ok);
+        this.MockWrapper.Setup(w => w.GetApplicationState(app)).Returns(RunResponse.NotRunning);
+        this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
 
-        this.MockLogin(kind, version);
+        this.MockLogin(RunResponse.NotRunning, kind, version);
 
         this.Remote.Run(app);
 
-        this.MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once());
+        Assert.Multiple(
+            () => this.MockWrapper.Verify(w => w.GetApplicationState(app), Times.Exactly(2)),
+            () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once())
+        );
     }
 
     [Theory]
@@ -27,60 +31,36 @@ public class Run : MockRemote
     [InlineData(App.Standardx64, false, App.Standard)]
     public void LaunchesAdjustedAppWhenAppIsVoicemeeter(App requested, bool is64Bit, App launched)
     {
-        var k = (int)Kind.Standard;
-        var version = 0x0101_0202;
-        var expectedState = new ConnectionState(LoginResponse.Ok, RunResponse.Ok, (Kind)k, (VmVersion)version);
-
         this.MockLogin();
 
         this.MockWrapper.Setup(w => w.Is64Bit).Returns(is64Bit);
         this.MockWrapper.Setup(w => w.RunVoicemeeter((int)launched)).Returns(RunResponse.Ok);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType(out k)).Returns(InfoResponse.Ok);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
-
-        this.MockWrapper.SetupSequence(w => w.IsParametersDirty())
-            .Returns(Response.Dirty)
-            .Returns(Response.Ok);
-        this.MockWrapper.SetupSequence(w => w.MacroButtonIsDirty())
-            .Returns(Response.Dirty)
-            .Returns(Response.Ok);
 
         this.Remote.Run(requested);
 
         Assert.Multiple(
-            () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
-            () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)launched), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out k), Times.Exactly(3)),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out version), Times.Exactly(3)),
-            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Exactly(3)),
-            () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(2))
+            () => this.MockWrapper.Verify(w => w.Is64Bit, Times.Once()),
+            () => this.MockWrapper.Verify(w => w.GetApplicationState(launched), Times.Never()),
+            () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)launched), Times.Once())
         );
     }
 
     [Fact]
-    public void UpdatesConnectionStateWhenAppIsMacroButtons()
+    public void DoesNothingWhenAppStateIsOk()
     {
-        var kind = Kind.Standard;
+        var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var expectedState = new ConnectionState(LoginResponse.Ok, RunResponse.Ok, kind, (VmVersion)version);
-        var app = App.MacroButtons;
+        var app = App.AUXControlPanel;
 
-        this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
+        this.MockWrapper.Setup(w => w.GetApplicationState(app)).Returns(RunResponse.Ok);
 
-        this.MockLogin(RunResponse.NotRunning, (int)kind, version);
-
-        this.MockWrapper.Setup(w => w.GetApplicationState(App.MacroButtons)).Returns(RunResponse.Ok);
-
-        this.MockWrapper.SetupSequence(w => w.MacroButtonIsDirty())
-            .Returns(Response.Dirty)
-            .Returns(Response.Ok);
+        this.MockLogin(kind, version);
 
         this.Remote.Run(app);
 
         Assert.Multiple(
-            () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
-            () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Exactly(3))
+            () => this.MockWrapper.Verify(w => w.GetApplicationState(app), Times.Once()),
+            () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Never())
         );
     }
 
@@ -89,18 +69,36 @@ public class Run : MockRemote
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var app = (int)App.Unknown;
-
-        this.MockWrapper.Setup(w => w.RunVoicemeeter(app)).Returns(RunResponse.UnknownApp);
+        var app = App.Unknown;
 
         this.MockLogin(kind, version);
 
         var ex = Assert.Throws<RunException>(() => this.Remote.Run(app));
 
         Assert.Multiple(
-            () => Assert.Equal(app, (int)ex.App),
+            () => Assert.Equal(app, ex.App),
             () => Assert.Equal(RunResponse.UnknownApp, ex.Response),
-            () => this.MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once())
+            () => this.MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never())
+        );
+    }
+
+    [Fact]
+    public void ThrowsExceptionRunWhenAppStateNotResponding()
+    {
+        var kind = (int)Kind.Standard;
+        var version = 0x0101_0202;
+        var app = App.VAIOControlPanel;
+
+        this.MockWrapper.Setup(w => w.GetApplicationState(app)).Returns(RunResponse.NotResponding);
+
+        this.MockLogin(kind, version);
+
+        var ex = Assert.Throws<RunException>(() => this.Remote.Run(app));
+
+        Assert.Multiple(
+            () => Assert.Equal(app, ex.App),
+            () => Assert.Equal(RunResponse.NotResponding, ex.Response),
+            () => this.MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never())
         );
     }
 
@@ -109,99 +107,49 @@ public class Run : MockRemote
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var app = (int)App.StreamerView;
+        var app = App.StreamerView;
 
-        this.MockWrapper.Setup(w => w.RunVoicemeeter(app)).Returns(RunResponse.NotInstalled);
+        this.MockWrapper.Setup(w => w.GetApplicationState(app)).Returns(RunResponse.NotRunning);
+        this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.NotInstalled);
 
         this.MockLogin(kind, version);
 
         var ex = Assert.Throws<RunException>(() => this.Remote.Run(app));
 
         Assert.Multiple(
-            () => Assert.Equal(app, (int)ex.App),
+            () => Assert.Equal(app, ex.App),
             () => Assert.Equal(RunResponse.NotInstalled, ex.Response),
-            () => this.MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once())
+            () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once())
         );
     }
 
     [Fact]
     public void ThrowsExceptionAccessDeniedWhenLoginStatusLoggedOut()
     {
-        var app = (int)App.DeviceCheck;
+        var app = App.DeviceCheck;
 
         var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.Run(app));
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.LoggedOut, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Never())
+            () => this.MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never())
         );
     }
 
     [Fact]
     public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
-        var app = (int)App.BUSGEQ15;
+        var app = App.BUSGEQ15;
 
         this.Remote.Dispose();
 
         Assert.Multiple(
             () => Assert.Throws<ObjectDisposedException>(() => this.Remote.Run(app)),
-            () => this.MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Never())
+            () => this.MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never())
         );
     }
 
-    [Fact]
-    public void KindUpdatesConnectionStateOkWhenAllConditionsMet()
-    {
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-        var expectedState = new ConnectionState(LoginResponse.Ok, RunResponse.Ok, (Kind)kind, (VmVersion)version);
-        var app = App.Standardx64;
-
-        this.MockLogin();
-
-        this.MockWrapper.Setup(w => w.Is64Bit).Returns(true);
-        this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
-
-        this.MockWrapper.SetupSequence(w => w.IsParametersDirty())
-            .Returns(Response.Dirty)
-            .Returns(Response.Ok);
-        this.MockWrapper.SetupSequence(w => w.MacroButtonIsDirty())
-            .Returns(Response.Dirty)
-            .Returns(Response.Ok);
-
-        this.Remote.Run(Kind.Standard);
-
-        Assert.Multiple(
-            () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
-            () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once())
-        );
-    }
-
-    [Fact]
-    public void KindThrowsExceptionRunWhenWaitForRunningTimesOut()
-    {
-        var kind = (int)Kind.None;
-        var version = 0;
-        var app = App.Standardx64;
-
-        this.MockWrapper.Setup(w => w.Is64Bit).Returns(true);
-        this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.NoServer);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.NoServer);
-
-        this.MockLogin();
-
-        var ex = Assert.Throws<RunException>(() => this.Remote.Run(Kind.Standard));
-
-        Assert.Multiple(
-            () => Assert.Equal(app, ex.App),
-            () => Assert.Equal(RunResponse.Timeout, ex.Response),
-            () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once())
-        );
-    }
+    #region String
 
     [Fact]
     public void StringThrowsExceptionCannotParseAsTypeWhenInvalidString()
@@ -215,6 +163,10 @@ public class Run : MockRemote
         );
     }
 
+    #endregion
+
+    #region Generic
+
     [Fact]
     public void GenericAppCallsCorrectOverload()
     {
@@ -222,6 +174,7 @@ public class Run : MockRemote
         var version = 0x0101_0202;
         var app = App.BUSMatrix8;
 
+        this.MockWrapper.Setup(w => w.GetApplicationState(app)).Returns(RunResponse.NotRunning);
         this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
 
         this.MockLogin(kind, version);
@@ -238,6 +191,7 @@ public class Run : MockRemote
         var version = 0x0101_0202;
         var app = (int)App.VBAN2MIDI;
 
+        this.MockWrapper.Setup(w => w.GetApplicationState((App)app)).Returns(RunResponse.NotRunning);
         this.MockWrapper.Setup(w => w.RunVoicemeeter(app)).Returns(RunResponse.Ok);
 
         this.MockLogin(kind, version);
@@ -250,20 +204,15 @@ public class Run : MockRemote
     [Fact]
     public void GenericKindCallsCorrectOverload()
     {
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
+        var kind = Kind.Standard;
         var app = App.Standardx64;
 
         this.MockLogin();
 
         this.MockWrapper.Setup(w => w.Is64Bit).Returns(true);
         this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
-        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Ok);
-        this.MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Ok);
 
-        ((IRemote)this.Remote).Run(Kind.Standard);
+        ((IRemote)this.Remote).Run(kind);
 
         this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once());
     }
@@ -275,11 +224,12 @@ public class Run : MockRemote
         var version = 0x0101_0202;
         var app = App.CABLEControlPanel;
 
+        this.MockWrapper.Setup(w => w.GetApplicationState(app)).Returns(RunResponse.NotRunning);
         this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
 
         this.MockLogin(kind, version);
 
-        ((IRemote)this.Remote).Run("CABLEControlPanel");
+        ((IRemote)this.Remote).Run(app.ToString());
 
         this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once());
     }
@@ -295,4 +245,6 @@ public class Run : MockRemote
             () => this.MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never())
         );
     }
+
+    #endregion
 }

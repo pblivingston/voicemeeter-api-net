@@ -156,29 +156,34 @@ public partial class Remote
     {
         this.LoginGuard(requiredStatus: LoginResponse.VoicemeeterNotRunning);
 
+        if (!app.IsValid())
+        {
+            throw this.On_Run_Error(RunResponse.UnknownApp, app);
+        }
+
         var appAdjusted = app.BitAdjust(this.vmrApi.Is64Bit);
 
-        if (appAdjusted != app)
-        {
-            GeneralDispatch.On_BitAdjust(this.logger, app, appAdjusted);
-        }
+        GeneralDispatch.On_BitAdjust(this.logger, app, appAdjusted);
 
         this.On_Run_Start(appAdjusted);
 
-        RunResponse state;
-        using (this.BeginMethodScope())
+        if (!appAdjusted.IsVoicemeeter())
         {
-            state = this.GetInfo_AppState(appAdjusted, true);
-        }
+            RunResponse state;
+            using (this.BeginMethodScope())
+            {
+                state = this.GetInfo_AppState(appAdjusted, true);
+            }
 
-        if (state is RunResponse.Ok)
-        {
-            return appAdjusted;
-        }
+            if (state is RunResponse.Ok)
+            {
+                return appAdjusted;
+            }
 
-        if (state is RunResponse.NotResponding)
-        {
-            throw this.On_Run_Error(state, appAdjusted);
+            if (state is RunResponse.NotResponding)
+            {
+                throw this.On_Run_Error(state, appAdjusted);
+            }
         }
 
         var result = this.vmrApi.RunVoicemeeter((int)appAdjusted);
