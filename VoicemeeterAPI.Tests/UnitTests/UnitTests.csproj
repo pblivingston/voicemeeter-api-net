@@ -4,9 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
-    <RootNamespace>UnitTests</RootNamespace>
     <TargetFramework>net8.0</TargetFramework>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <RootNamespace>PBLivingston.VoicemeeterAPI.Tests.UnitTests</RootNamespace>
     <AssemblyName>PBLivingston.VoicemeeterAPI.Tests.UnitTests</AssemblyName>
     <LangVersion>latest</LangVersion>
