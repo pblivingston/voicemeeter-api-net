@@ -16,8 +16,8 @@ public class GetConnectionState : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(2)),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Exactly(2)),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Exactly(2)),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Exactly(2)),
             () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Exactly(2))
         );
     }
@@ -37,8 +37,8 @@ public class GetConnectionState : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Once()),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Once()),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Once())
         );
     }
@@ -51,16 +51,16 @@ public class GetConnectionState : MockRemote
 
         this.MockLogin();
 
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
+        this.MockWrapper.Setup(w => w.GetVoicemeeterType()).Returns((InfoResponse.Ok, kind));
+        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((InfoResponse.Ok, version));
 
         var ex = Assert.Throws<KindMismatchException>(() => this.Remote.GetConnectionState());
 
         Assert.Multiple(
             () => Assert.Equal((Kind)kind, ex.ReturnedKind),
             () => Assert.Equal((VmVersion)version, ex.ReturnedVersion),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(2)),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Exactly(2)),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Exactly(2)),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Exactly(2)),
             () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Exactly(2))
         );
     }
@@ -72,8 +72,8 @@ public class GetConnectionState : MockRemote
 
         Assert.Multiple(
             () => Assert.Throws<ObjectDisposedException>(() => this.Remote.GetConnectionState()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Never()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Never()),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Never()),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Never()),
             () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Never())
         );
     }

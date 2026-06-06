@@ -18,21 +18,33 @@ internal partial class Wrapper
         => (RunResponse)this.remoteApiWrapper.RunVoicemeeter(app);
 
     /// <inheritdoc/>
-    public InfoResponse GetVoicemeeterType(out int type)
-        => (InfoResponse)this.remoteApiWrapper.GetVoicemeeterType(out type);
+    public (InfoResponse, int) GetVoicemeeterType()
+    {
+        var response = (InfoResponse)this.remoteApiWrapper.GetVoicemeeterType(out var type);
+        return (response, type);
+    }
     /// <inheritdoc/>
-    public InfoResponse GetVoicemeeterVersion(out int version)
-        => (InfoResponse)this.remoteApiWrapper.GetVoicemeeterVersion(out version);
+    public (InfoResponse, int) GetVoicemeeterVersion()
+    {
+        var response = (InfoResponse)this.remoteApiWrapper.GetVoicemeeterVersion(out var version);
+        return (response, version);
+    }
 
     /// <inheritdoc/>
     public Response IsParametersDirty()
         => (Response)this.remoteApiWrapper.IsParametersDirty();
     /// <inheritdoc/>
-    public Response GetParameter(string param, out float value)
-        => (Response)this.remoteApiWrapper.GetParameter(param, out value);
+    public (Response, float) GetParameter_Float(string param)
+    {
+        var response = (Response)this.remoteApiWrapper.GetParameter(param, out float value);
+        return (response, value);
+    }
     /// <inheritdoc/>
-    public Response GetParameter(string param, out string value)
-        => (Response)this.remoteApiWrapper.GetParameter(param, out value);
+    public (Response, string) GetParameter_String(string param)
+    {
+        var response = (Response)this.remoteApiWrapper.GetParameter(param, out string value);
+        return (response, value);
+    }
 
     /// <inheritdoc/>
     public Response MacroButtonIsDirty()

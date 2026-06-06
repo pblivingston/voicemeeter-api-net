@@ -13,7 +13,7 @@ public class GetParamFloat : MockRemote
         var param = "Mock.Param";
         var value = 0.75f;
 
-        this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
+        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((Response.Ok, value));
 
         this.MockLogin(kind, version);
 
@@ -21,7 +21,7 @@ public class GetParamFloat : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(value, result),
-            () => this.MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Once())
         );
     }
 
@@ -36,7 +36,7 @@ public class GetParamFloat : MockRemote
         var param = "Mock.Param";
         var value = 0.75f;
 
-        this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(response);
+        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((response, value));
 
         this.MockLogin(kind, version);
 
@@ -47,7 +47,7 @@ public class GetParamFloat : MockRemote
             () => Assert.Equal(param, ex.VmParam),
             () => Assert.Equal(value, ex.ReturnedValue),
             () => Assert.Equal(typeof(float), ex.ExpectedType),
-            () => this.MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Once())
         );
     }
 
@@ -62,7 +62,7 @@ public class GetParamFloat : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<float>.IsAny), Times.Never())
+            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Never())
         );
     }
 
@@ -75,7 +75,7 @@ public class GetParamFloat : MockRemote
 
         Assert.Multiple(
             () => Assert.Throws<ObjectDisposedException>(() => this.Remote.GetParam(param, out float _)),
-            () => this.MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<float>.IsAny), Times.Never())
+            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Never())
         );
     }
 
@@ -89,7 +89,7 @@ public class GetParamFloat : MockRemote
         var version = 0x0301_0202;
         var param = "Mock.IntParam";
 
-        this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
+        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((Response.Ok, value));
 
         this.MockLogin(kind, version);
 
@@ -97,7 +97,7 @@ public class GetParamFloat : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(expected, result),
-            () => this.MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Once())
         );
     }
 
@@ -110,7 +110,7 @@ public class GetParamFloat : MockRemote
         var version = 0x0301_0202;
         var param = "Mock.IntParam";
 
-        this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
+        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((Response.Ok, value));
 
         this.MockLogin(kind, version);
 
@@ -121,7 +121,7 @@ public class GetParamFloat : MockRemote
             () => Assert.Equal(param, ex.VmParam),
             () => Assert.Equal(value, ex.ReturnedValue),
             () => Assert.Equal(typeof(int), ex.ExpectedType),
-            () => this.MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Once())
         );
     }
 
@@ -134,7 +134,7 @@ public class GetParamFloat : MockRemote
         var version = 0x0301_0202;
         var param = "Mock.BoolParam";
 
-        this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
+        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((Response.Ok, value));
 
         this.MockLogin(kind, version);
 
@@ -142,7 +142,7 @@ public class GetParamFloat : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(expected, result),
-            () => this.MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Once())
         );
     }
 
@@ -156,7 +156,7 @@ public class GetParamFloat : MockRemote
         var version = 0x0301_0202;
         var param = "Mock.BoolParam";
 
-        this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
+        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((Response.Ok, value));
 
         this.MockLogin(kind, version);
 
@@ -167,7 +167,7 @@ public class GetParamFloat : MockRemote
             () => Assert.Equal(param, ex.VmParam),
             () => Assert.Equal(value, ex.ReturnedValue),
             () => Assert.Equal(typeof(bool), ex.ExpectedType),
-            () => this.MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Once())
         );
     }
 }

@@ -22,16 +22,16 @@ internal interface IWrapper : IDisposable
     public RunResponse RunVoicemeeter(int app);
 
     /// <inheritdoc cref="RemoteApiWrapper.GetVoicemeeterType(out int)" path="/summary"/>
-    public InfoResponse GetVoicemeeterType(out int type);
+    public (InfoResponse, int) GetVoicemeeterType();
     /// <inheritdoc cref="RemoteApiWrapper.GetVoicemeeterVersion(out int)" path="/summary"/>
-    public InfoResponse GetVoicemeeterVersion(out int version);
+    public (InfoResponse, int) GetVoicemeeterVersion();
 
     /// <inheritdoc cref="RemoteApiWrapper.IsParametersDirty()" path="/summary"/>
     public Response IsParametersDirty();
     /// <inheritdoc cref="RemoteApiWrapper.GetParameter(string, out float)" path="/summary"/>
-    public Response GetParameter(string param, out float value);
+    public (Response, float) GetParameter_Float(string param);
     /// <inheritdoc cref="RemoteApiWrapper.GetParameter(string, out string)" path="/summary"/>
-    public Response GetParameter(string param, out string value);
+    public (Response, string) GetParameter_String(string param);
 
     /// <inheritdoc cref="RemoteApiWrapper.MacroButtonIsDirty()" path="/summary"/>
     public Response MacroButtonIsDirty();

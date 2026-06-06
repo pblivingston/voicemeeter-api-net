@@ -56,7 +56,7 @@ public partial class Remote
 
         this.On_GetParam_Start(param);
 
-        var result = this.wrapper.GetParameter(param, out value);
+        (var result, value) = this.wrapper.GetParameter_Float(param);
 
         if (result != Response.Ok)
         {
@@ -121,7 +121,7 @@ public partial class Remote
 
         this.On_GetParam_Start(param);
 
-        var result = this.wrapper.GetParameter(param, out value);
+        (var result, value) = this.wrapper.GetParameter_String(param);
 
         if (result != Response.Ok)
         {

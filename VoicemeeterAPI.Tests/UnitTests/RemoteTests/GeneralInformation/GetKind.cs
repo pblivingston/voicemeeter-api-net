@@ -14,15 +14,15 @@ public class GetKind : MockRemote
 
         this.MockLogin();
 
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
+        this.MockWrapper.Setup(w => w.GetVoicemeeterType()).Returns((InfoResponse.Ok, kind));
+        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((InfoResponse.Ok, version));
 
         var result = this.Remote.GetKind();
 
         Assert.Multiple(
             () => Assert.Equal(Kind.Banana, result),
             () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out kind), Times.Exactly(3))
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Exactly(3))
         );
     }
 
@@ -37,15 +37,15 @@ public class GetKind : MockRemote
 
         this.MockLogin(kind, version);
 
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType(out noKind)).Returns(InfoResponse.NoServer);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out noVersion)).Returns(InfoResponse.NoServer);
+        this.MockWrapper.Setup(w => w.GetVoicemeeterType()).Returns((InfoResponse.NoServer, noKind));
+        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((InfoResponse.NoServer, noVersion));
 
         var result = this.Remote.GetKind();
 
         Assert.Multiple(
             () => Assert.Equal(Kind.None, result),
             () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(3))
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Exactly(3))
         );
     }
 
@@ -58,14 +58,14 @@ public class GetKind : MockRemote
         this.MockLogin(kind, version);
 
         var noKind = (int)Kind.None;
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType(out noKind)).Returns(InfoResponse.NoClient);
+        this.MockWrapper.Setup(w => w.GetVoicemeeterType()).Returns((InfoResponse.NoClient, noKind));
 
         var ex = Assert.Throws<GetInfoException>(() => this.Remote.GetKind());
 
         Assert.Multiple(
             () => Assert.Equal(InfoResponse.NoClient, ex.Response),
             () => Assert.Equal(noKind, ex.ReturnedValue),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(2))
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Exactly(2))
         );
     }
 
@@ -76,7 +76,7 @@ public class GetKind : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.LoggedOut, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Never)
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Never)
         );
     }
 
@@ -87,7 +87,7 @@ public class GetKind : MockRemote
 
         Assert.Multiple(
             () => Assert.Throws<ObjectDisposedException>(() => this.Remote.GetKind()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Never)
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Never)
         );
     }
 }

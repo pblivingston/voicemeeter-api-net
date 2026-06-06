@@ -13,7 +13,7 @@ public class GetParamString : MockRemote
         var param = "Mock.Param";
         var value = "Test String";
 
-        this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(Response.Ok);
+        this.MockWrapper.Setup(w => w.GetParameter_String(param)).Returns((Response.Ok, value));
 
         this.MockLogin(kind, version);
 
@@ -21,7 +21,7 @@ public class GetParamString : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(value, result),
-            () => this.MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetParameter_String(param), Times.Once())
         );
     }
 
@@ -36,7 +36,7 @@ public class GetParamString : MockRemote
         var param = "Mock.Param";
         var value = "Test String";
 
-        this.MockWrapper.Setup(w => w.GetParameter(param, out value)).Returns(response);
+        this.MockWrapper.Setup(w => w.GetParameter_String(param)).Returns((response, value));
 
         this.MockLogin(kind, version);
 
@@ -47,7 +47,7 @@ public class GetParamString : MockRemote
             () => Assert.Equal(param, ex.VmParam),
             () => Assert.Equal(value, ex.ReturnedValue),
             () => Assert.Equal(typeof(string), ex.ExpectedType),
-            () => this.MockWrapper.Verify(w => w.GetParameter(param, out value), Times.Once())
+            () => this.MockWrapper.Verify(w => w.GetParameter_String(param), Times.Once())
         );
     }
 
@@ -62,7 +62,7 @@ public class GetParamString : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never())
+            () => this.MockWrapper.Verify(w => w.GetParameter_String(param), Times.Never())
         );
     }
 
@@ -75,7 +75,7 @@ public class GetParamString : MockRemote
 
         Assert.Multiple(
             () => Assert.Throws<ObjectDisposedException>(() => this.Remote.GetParam(param, out string _)),
-            () => this.MockWrapper.Verify(w => w.GetParameter(param, out It.Ref<string>.IsAny), Times.Never())
+            () => this.MockWrapper.Verify(w => w.GetParameter_String(param), Times.Never())
         );
     }
 }

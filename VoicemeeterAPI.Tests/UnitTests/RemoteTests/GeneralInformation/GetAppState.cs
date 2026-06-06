@@ -17,8 +17,8 @@ public class GetAppState : MockRemote
 
         this.MockWrapper.Setup(w => w.Is64Bit).Returns(true);
         this.MockWrapper.Setup(w => w.GetApplicationState(app)).Returns(RunResponse.Ok);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
+        this.MockWrapper.Setup(w => w.GetVoicemeeterType()).Returns((InfoResponse.Ok, kind));
+        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((InfoResponse.Ok, version));
 
         var result = this.Remote.GetAppState(app);
 
@@ -43,8 +43,8 @@ public class GetAppState : MockRemote
 
         this.MockWrapper.Setup(w => w.Is64Bit).Returns(true);
         this.MockWrapper.Setup(w => w.GetApplicationState(app)).Returns(RunResponse.NotRunning);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType(out noKind)).Returns(InfoResponse.NoServer);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out noVersion)).Returns(InfoResponse.NoServer);
+        this.MockWrapper.Setup(w => w.GetVoicemeeterType()).Returns((InfoResponse.NoServer, noKind));
+        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((InfoResponse.NoServer, noVersion));
 
         var result = this.Remote.GetAppState(app);
 

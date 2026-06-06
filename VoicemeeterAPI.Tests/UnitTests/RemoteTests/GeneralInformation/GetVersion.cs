@@ -14,15 +14,15 @@ public class GetVersion : MockRemote
 
         this.MockLogin();
 
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType(out kind)).Returns(InfoResponse.Ok);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out version)).Returns(InfoResponse.Ok);
+        this.MockWrapper.Setup(w => w.GetVoicemeeterType()).Returns((InfoResponse.Ok, kind));
+        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((InfoResponse.Ok, version));
 
         var result = this.Remote.GetVersion();
 
         Assert.Multiple(
             () => Assert.Equal((VmVersion)version, result),
             () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out version), Times.Exactly(3))
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Exactly(3))
         );
     }
 
@@ -37,15 +37,15 @@ public class GetVersion : MockRemote
 
         this.MockLogin(kind, version);
 
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType(out noKind)).Returns(InfoResponse.NoServer);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out noVersion)).Returns(InfoResponse.NoServer);
+        this.MockWrapper.Setup(w => w.GetVoicemeeterType()).Returns((InfoResponse.NoServer, noKind));
+        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((InfoResponse.NoServer, noVersion));
 
         var result = this.Remote.GetVersion();
 
         Assert.Multiple(
             () => Assert.Equal(default, result),
             () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Exactly(3))
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Exactly(3))
         );
     }
 
@@ -58,14 +58,14 @@ public class GetVersion : MockRemote
         this.MockLogin(kind, version);
 
         var noVersion = 0;
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion(out noVersion)).Returns(InfoResponse.NoClient);
+        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((InfoResponse.NoClient, noVersion));
 
         var ex = Assert.Throws<GetInfoException>(() => this.Remote.GetVersion());
 
         Assert.Multiple(
             () => Assert.Equal(InfoResponse.NoClient, ex.Response),
             () => Assert.Equal(noVersion, ex.ReturnedValue),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Exactly(2))
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Exactly(2))
         );
     }
 
@@ -76,7 +76,7 @@ public class GetVersion : MockRemote
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.LoggedOut, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Never)
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Never)
         );
     }
 
@@ -87,7 +87,7 @@ public class GetVersion : MockRemote
 
         Assert.Multiple(
             () => Assert.Throws<ObjectDisposedException>(() => this.Remote.GetVersion()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(out It.Ref<int>.IsAny), Times.Never)
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Never)
         );
     }
 }

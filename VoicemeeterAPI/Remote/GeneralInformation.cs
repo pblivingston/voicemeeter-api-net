@@ -20,7 +20,7 @@ public partial class Remote
 
         this.On_GetInfo_Start(typeof(Kind), info);
 
-        var result = this.wrapper.GetVoicemeeterType(out var k);
+        (var result, var k) = this.wrapper.GetVoicemeeterType();
 
         var kind = (Kind)k;
         if (result == InfoResponse.Ok && kind.IsValid())
@@ -67,7 +67,7 @@ public partial class Remote
 
         this.On_GetInfo_Start(typeof(VmVersion), info);
 
-        var result = this.wrapper.GetVoicemeeterVersion(out var v);
+        (var result, var v) = this.wrapper.GetVoicemeeterVersion();
 
         VmVersion version = default;
         if (result == InfoResponse.Ok && VmVersion.IsValid(v))
