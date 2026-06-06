@@ -52,6 +52,14 @@ internal static partial class RemoteLog
     public static partial void GetInfo_Error(ILogger logger, string methodName, InfoResponse response, int value);
 
     [LoggerMessage(
+        EventId = (int)Event.GetInfo_Error_AppState,
+        EventName = nameof(Event.GetInfo_Error_AppState),
+        Level = LogLevel.Error,
+        Message = "GetAppState failed. App: {App}; Response: {Response}"
+    )]
+    public static partial void GetInfo_Error_AppState(ILogger logger, RunResponse response, App app);
+
+    [LoggerMessage(
         EventId = (int)Event.GetInfo_NotResponding,
         EventName = nameof(Event.GetInfo_NotResponding),
         Message = "GetAppState successful but {App} is not responding."

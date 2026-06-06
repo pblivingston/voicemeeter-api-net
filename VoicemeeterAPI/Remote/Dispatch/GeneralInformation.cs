@@ -33,6 +33,13 @@ public partial class Remote
         return new GetInfoException(response, value);
     }
 
+    private RunException On_GetInfo_Error(RunResponse response, App app)
+    {
+        RemoteLog.GetInfo_Error_AppState(this.logger, response, app);
+
+        return new RunException(response, app);
+    }
+
     private void On_GetInfo_NotResponding(App app, LogLevel level = LogLevel.Trace)
         => RemoteLog.GetInfo_NotResponding(this.logger, level, app);
 }

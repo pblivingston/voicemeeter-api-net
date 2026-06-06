@@ -61,6 +61,7 @@ internal enum Event
     GetInfo_Success_Version, // trace/info
     GetInfo_Success_AppState, // trace/info
     GetInfo_Error, // error + throw
+    GetInfo_Error_AppState, // error + throw
     GetInfo_NotResponding, // trace/warning
 
 

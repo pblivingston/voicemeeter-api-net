@@ -118,7 +118,7 @@ public partial class Remote
 
         if (result < RunResponse.Ok)
         {
-            throw this.On_Method_Error(result);
+            throw this.On_GetInfo_Error(result, app);
         }
 
         if (result is RunResponse.NotResponding)
@@ -132,21 +132,16 @@ public partial class Remote
 
         if (app.IsVoicemeeter())
         {
-            if (app == this.LastConnectionState.RunningKind.ToApp(this.vmrApi.Is64Bit))
+            var running = this.LastConnectionState.RunningKind.ToApp(this.vmrApi.Is64Bit);
+            if (app == running || running is App.None)
             {
                 this.loginStatus = result < RunResponse.NotRunning
                     ? LoginResponse.Ok
                     : LoginResponse.VoicemeeterNotRunning;
 
                 this.On_ConnectionState_StateMismatch(this.loginStatus, warning);
-
-                if (this.loginStatus is LoginResponse.VoicemeeterNotRunning)
-                {
-                    this.On_ConnectionState_StateMismatch(Kind.None, warning);
-                }
             }
-
-            if (result < RunResponse.NotRunning)
+            else if (result < RunResponse.NotRunning)
             {
                 this.On_ConnectionState_StateMismatch(app.ToKind(), warning);
             }
