@@ -5,7 +5,7 @@ using PBLivingston.VoicemeeterAPI.Types;
 public class Logout : MockRemote
 {
     [Fact]
-    public void UpdatesLoginStatusLoggedOutWhenSuccessful()
+    public void UpdatesLastLoginStatusLoggedOutWhenSuccessful()
     {
         var loginStatus = LoginResponse.LoggedOut;
         var kind = (int)Kind.Standard;
@@ -37,7 +37,7 @@ public class Logout : MockRemote
     }
 
     [Fact]
-    public void UpdatesLoginStatusUnknownWhenLogoutFails()
+    public void UpdatesLastLoginStatusUnknownWhenLogoutFails()
     {
         var loginStatus = LoginResponse.Unknown;
         var kind = (int)Kind.Standard;

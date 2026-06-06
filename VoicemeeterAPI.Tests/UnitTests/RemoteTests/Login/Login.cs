@@ -32,7 +32,7 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void UpdatesLoginStatusVoicemeeterNotRunningWhenVoicemeeterNotRunning()
+    public void UpdatesLastLoginStatusVoicemeeterNotRunningWhenVoicemeeterNotRunning()
     {
         var loginStatus = LoginResponse.VoicemeeterNotRunning;
         var buttonsState = RunResponse.Ok;
@@ -61,7 +61,7 @@ public class Login : MockRemote
     [InlineData(RunResponse.Hidden)]
     [InlineData(RunResponse.NotRunning)]
     [InlineData(RunResponse.NotResponding)]
-    public void UpdatesButtonsStateWhenButtonsIsState(RunResponse buttonsState)
+    public void UpdatesLastButtonsStateWhenButtonsIsState(RunResponse buttonsState)
     {
         var loginStatus = LoginResponse.Ok;
         var kind = (int)Kind.Standard;

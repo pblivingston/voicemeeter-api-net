@@ -6,7 +6,7 @@ using PBLivingston.VoicemeeterAPI.Types;
 public class GetKind : MockRemote
 {
     [Fact]
-    public void UpdatesLoginStatusOkWhenVoicemeeterRunning()
+    public void UpdatesPrivateLoginStatusOkWhenVoicemeeterLaunched()
     {
         var kind = (int)Kind.Banana;
         var version = 0x0201_0202;
@@ -27,7 +27,7 @@ public class GetKind : MockRemote
     }
 
     [Fact]
-    public void UpdatesLoginStatusVoicemeeterNotRunningWhenVoicemeeterNotRunning()
+    public void UpdatesPrivateLoginStatusVoicemeeterNotRunningWhenVoicemeeterClosed()
     {
         var kind = (int)Kind.Banana;
         var version = 0x0201_0202;
@@ -45,7 +45,7 @@ public class GetKind : MockRemote
         Assert.Multiple(
             () => Assert.Equal(Kind.None, result),
             () => Assert.Equal(expectedState, this.Remote.GetConnectionState()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(4))
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(3))
         );
     }
 
@@ -65,7 +65,7 @@ public class GetKind : MockRemote
         Assert.Multiple(
             () => Assert.Equal(InfoResponse.NoClient, ex.Response),
             () => Assert.Equal(noKind, ex.ReturnedValue),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(3))
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(out It.Ref<int>.IsAny), Times.Exactly(2))
         );
     }
 
