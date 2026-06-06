@@ -20,7 +20,7 @@ public partial class Remote
 
         this.On_Query_Start(level);
 
-        var result = this.vmrApi.IsParametersDirty();
+        var result = this.wrapper.IsParametersDirty();
 
         switch (result)
         {
@@ -56,7 +56,7 @@ public partial class Remote
 
         this.On_GetParam_Start(param);
 
-        var result = this.vmrApi.GetParameter(param, out value);
+        var result = this.wrapper.GetParameter(param, out value);
 
         if (result != Response.Ok)
         {
@@ -121,7 +121,7 @@ public partial class Remote
 
         this.On_GetParam_Start(param);
 
-        var result = this.vmrApi.GetParameter(param, out value);
+        var result = this.wrapper.GetParameter(param, out value);
 
         if (result != Response.Ok)
         {

@@ -20,7 +20,7 @@ public partial class Remote
 
         this.On_GetInfo_Start(typeof(Kind), info);
 
-        var result = this.vmrApi.GetVoicemeeterType(out var k);
+        var result = this.wrapper.GetVoicemeeterType(out var k);
 
         var kind = (Kind)k;
         if (result == InfoResponse.Ok && kind.IsValid())
@@ -67,7 +67,7 @@ public partial class Remote
 
         this.On_GetInfo_Start(typeof(VmVersion), info);
 
-        var result = this.vmrApi.GetVoicemeeterVersion(out var v);
+        var result = this.wrapper.GetVoicemeeterVersion(out var v);
 
         VmVersion version = default;
         if (result == InfoResponse.Ok && VmVersion.IsValid(v))
@@ -114,7 +114,7 @@ public partial class Remote
 
         this.On_GetInfo_Start(app, info);
 
-        var result = this.vmrApi.GetApplicationState(app);
+        var result = this.wrapper.GetApplicationState(app);
 
         if (result < RunResponse.Ok)
         {
@@ -132,7 +132,7 @@ public partial class Remote
 
         if (app.IsVoicemeeter())
         {
-            var running = this.LastConnectionState.RunningKind.ToApp(this.vmrApi.Is64Bit);
+            var running = this.LastConnectionState.RunningKind.ToApp(this.wrapper.Is64Bit);
             if (app == running || running is App.None)
             {
                 this.loginStatus = result < RunResponse.NotRunning

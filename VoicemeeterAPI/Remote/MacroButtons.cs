@@ -19,7 +19,7 @@ public partial class Remote
 
         this.On_Query_Start(level);
 
-        var result = this.vmrApi.MacroButtonIsDirty();
+        var result = this.wrapper.MacroButtonIsDirty();
 
         switch (result)
         {

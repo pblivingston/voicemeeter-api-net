@@ -30,7 +30,7 @@ using PBLivingston.VoicemeeterAPI.Utilities;
 /// </example>
 public sealed partial class Remote : IRemote
 {
-    private readonly IWrapper vmrApi;
+    private readonly IWrapper wrapper;
     private readonly ILogger<Remote> logger;
     private readonly Guid instanceId;
 
@@ -58,7 +58,7 @@ public sealed partial class Remote : IRemote
     /// <exception cref="ArgumentNullException"></exception>
     internal Remote(IWrapper wrapper, ILogger<Remote>? logger = null, Guid? identifier = null)
     {
-        this.vmrApi = wrapper ?? throw new ArgumentNullException(nameof(wrapper));
+        this.wrapper = wrapper ?? throw new ArgumentNullException(nameof(wrapper));
         this.logger = logger ?? NullLogger<Remote>.Instance;
         this.instanceId = identifier ?? new();
     }
@@ -177,7 +177,7 @@ public sealed partial class Remote : IRemote
 
         this.On_Dispose_Start();
 
-        this.vmrApi.Dispose();
+        this.wrapper.Dispose();
 
         this.On_Dispose_Success();
         this.isDisposed = true;

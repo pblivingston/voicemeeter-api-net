@@ -22,7 +22,7 @@ public partial class Remote
 
         this.On_Login_Start();
 
-        var result = this.vmrApi.Login();
+        var result = this.wrapper.Login();
 
         if (result < LoginResponse.Ok)
         {
@@ -113,7 +113,7 @@ public partial class Remote
             return this.loginStatus;
         }
 
-        var result = this.vmrApi.Logout();
+        var result = this.wrapper.Logout();
 
         if (result == LoginResponse.Ok)
         {
@@ -161,7 +161,7 @@ public partial class Remote
             throw this.On_Run_Error(RunResponse.UnknownApp, app);
         }
 
-        var appAdjusted = app.BitAdjust(this.vmrApi.Is64Bit);
+        var appAdjusted = app.BitAdjust(this.wrapper.Is64Bit);
 
         GeneralDispatch.On_BitAdjust(this.logger, app, appAdjusted);
 
@@ -186,7 +186,7 @@ public partial class Remote
             }
         }
 
-        var result = this.vmrApi.RunVoicemeeter((int)appAdjusted);
+        var result = this.wrapper.RunVoicemeeter((int)appAdjusted);
 
         if (result != RunResponse.Ok)
         {
@@ -224,7 +224,7 @@ public partial class Remote
 
     /// <inheritdoc cref="IRemote.Run{T}(T)"/>
     public void Run(Kind kind)
-        => this.Run(kind.ToApp(this.vmrApi.Is64Bit));
+        => this.Run(kind.ToApp(this.wrapper.Is64Bit));
 
     /// <inheritdoc cref="IRemote.Run{T}(T)"/>
     public void Run(string app)
@@ -297,7 +297,7 @@ public partial class Remote
 
     /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
     public async Task<RunResponse> RunAsync(Kind kind, CancellationToken cancellationToken = default)
-        => await this.RunAsync(kind.ToApp(this.vmrApi.Is64Bit), cancellationToken);
+        => await this.RunAsync(kind.ToApp(this.wrapper.Is64Bit), cancellationToken);
 
     /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
     public async Task<RunResponse> RunAsync(string app, CancellationToken cancellationToken = default)
@@ -414,7 +414,7 @@ public partial class Remote
                 }
             }
             while (!(state is RunResponse.Ok or RunResponse.Hidden
-                        && this.vmrApi.IsApplicationInputIdle(app) is Response.Ok));
+                        && this.wrapper.IsApplicationInputIdle(app) is Response.Ok));
 
             this.On_WaitForRunning_Detected(app, state);
 
