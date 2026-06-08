@@ -46,25 +46,6 @@ public class Run : MockRemote
     }
 
     [Fact]
-    public void DoesNothingWhenAppStateIsOk()
-    {
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-        var app = App.AUXControlPanel;
-
-        this.MockWrapper.Setup(w => w.GetApplicationState(app)).Returns(RunResponse.Ok);
-
-        this.MockLogin(kind, version);
-
-        this.Remote.Run(app);
-
-        Assert.Multiple(
-            () => this.MockWrapper.Verify(w => w.GetApplicationState(app), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Never())
-        );
-    }
-
-    [Fact]
     public void ThrowsExceptionRunWhenUnknownApp()
     {
         var kind = (int)Kind.Standard;
@@ -181,7 +162,10 @@ public class Run : MockRemote
 
         ((IRemote)this.Remote).Run(app);
 
-        this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once());
+        Assert.Multiple(
+            () => this.MockWrapper.Verify(w => w.GetApplicationState(app), Times.Once()),
+            () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once())
+        );
     }
 
     [Fact]
@@ -189,16 +173,19 @@ public class Run : MockRemote
     {
         var kind = (int)Kind.Standard;
         var version = 0x0101_0202;
-        var app = (int)App.VBAN2MIDI;
+        var app = App.VBAN2MIDI;
 
-        this.MockWrapper.Setup(w => w.GetApplicationState((App)app)).Returns(RunResponse.NotRunning);
-        this.MockWrapper.Setup(w => w.RunVoicemeeter(app)).Returns(RunResponse.Ok);
+        this.MockWrapper.Setup(w => w.GetApplicationState(app)).Returns(RunResponse.NotRunning);
+        this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
 
         this.MockLogin(kind, version);
 
-        ((IRemote)this.Remote).Run(app);
+        ((IRemote)this.Remote).Run((int)app);
 
-        this.MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once());
+        Assert.Multiple(
+            () => this.MockWrapper.Verify(w => w.GetApplicationState(app), Times.Once()),
+            () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once())
+        );
     }
 
     [Fact]
@@ -207,14 +194,17 @@ public class Run : MockRemote
         var kind = Kind.Standard;
         var app = App.Standardx64;
 
-        this.MockLogin();
-
         this.MockWrapper.Setup(w => w.Is64Bit).Returns(true);
         this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
 
+        this.MockLogin();
+
         ((IRemote)this.Remote).Run(kind);
 
-        this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once());
+        Assert.Multiple(
+            () => this.MockWrapper.Verify(w => w.Is64Bit, Times.Exactly(2)),
+            () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once())
+        );
     }
 
     [Fact]
@@ -231,7 +221,10 @@ public class Run : MockRemote
 
         ((IRemote)this.Remote).Run(app.ToString());
 
-        this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once());
+        Assert.Multiple(
+            () => this.MockWrapper.Verify(w => w.GetApplicationState(app), Times.Once()),
+            () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once())
+        );
     }
 
     [Fact]

@@ -112,7 +112,7 @@ public class LoginAsync : MockRemote
     }
 
     [Fact]
-    public async Task ThrowsExceptionRemoteWhenLoginTimesOut()
+    public async Task ThrowsExceptionRemoteWhenWaitForVoicemeeterTimesOut()
     {
         using var cts = new CancellationTokenSource();
         cts.Cancel();
