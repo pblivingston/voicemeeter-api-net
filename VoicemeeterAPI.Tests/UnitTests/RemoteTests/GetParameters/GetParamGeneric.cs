@@ -18,7 +18,7 @@ public class GetParamGeneric : MockRemote
 
         this.MockLogin(kind, version);
 
-        ((IRemote)this.Remote).GetParam(param, out float result);
+        var result = ((IRemote)this.Remote).GetParam<float>(param);
 
         Assert.Multiple(
             () => Assert.Equal(value, result),
@@ -39,7 +39,7 @@ public class GetParamGeneric : MockRemote
 
         this.MockLogin(kind, version);
 
-        ((IRemote)this.Remote).GetParam(param, out int result);
+        var result = ((IRemote)this.Remote).GetParam<int>(param);
 
         Assert.Multiple(
             () => Assert.Equal(expected, result),
@@ -60,7 +60,7 @@ public class GetParamGeneric : MockRemote
 
         this.MockLogin(kind, version);
 
-        ((IRemote)this.Remote).GetParam(param, out bool result);
+        var result = ((IRemote)this.Remote).GetParam<bool>(param);
 
         Assert.Multiple(
             () => Assert.Equal(expected, result),
@@ -80,7 +80,7 @@ public class GetParamGeneric : MockRemote
 
         this.MockLogin(kind, version);
 
-        ((IRemote)this.Remote).GetParam(param, out string result);
+        var result = ((IRemote)this.Remote).GetParam<string>(param);
 
         Assert.Multiple(
             () => Assert.Equal(value, result),
@@ -97,10 +97,10 @@ public class GetParamGeneric : MockRemote
 
         this.MockLogin(kind, version);
 
-        var ex = Assert.Throws<TypeNotSupportedException>(() => ((IRemote)this.Remote).GetParam(param, out DateTime _));
+        var ex = Assert.Throws<TypeNotSupportedException>(() => ((IRemote)this.Remote).GetParam<DateTime>(param));
 
         Assert.Multiple(
-            () => Assert.Equal($"value", ex.ParamName),
+            () => Assert.Equal("T", ex.ParamName),
             () => Assert.Equal(typeof(DateTime), ex.Type),
             () => Assert.Equal(SupportedTypes.ParamTypes, ex.SupportedTypes),
             () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Never()),

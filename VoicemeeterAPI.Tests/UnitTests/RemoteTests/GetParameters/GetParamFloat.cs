@@ -17,7 +17,7 @@ public class GetParamFloat : MockRemote
 
         this.MockLogin(kind, version);
 
-        this.Remote.GetParam(param, out float result);
+        var result = this.Remote.GetParamFloat(param);
 
         Assert.Multiple(
             () => Assert.Equal(value, result),
@@ -40,7 +40,7 @@ public class GetParamFloat : MockRemote
 
         this.MockLogin(kind, version);
 
-        var ex = Assert.Throws<GetParamException<float>>(() => this.Remote.GetParam(param, out float _));
+        var ex = Assert.Throws<GetParamException<float>>(() => this.Remote.GetParamFloat(param));
 
         Assert.Multiple(
             () => Assert.Equal(response, ex.Response),
@@ -58,7 +58,7 @@ public class GetParamFloat : MockRemote
 
         this.MockLogin();
 
-        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.GetParam(param, out float _));
+        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.GetParamFloat(param));
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
@@ -74,7 +74,7 @@ public class GetParamFloat : MockRemote
         this.Remote.Dispose();
 
         Assert.Multiple(
-            () => Assert.Throws<ObjectDisposedException>(() => this.Remote.GetParam(param, out float _)),
+            () => Assert.Throws<ObjectDisposedException>(() => this.Remote.GetParamFloat(param)),
             () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Never())
         );
     }
@@ -93,7 +93,7 @@ public class GetParamFloat : MockRemote
 
         this.MockLogin(kind, version);
 
-        this.Remote.GetParam(param, out int result);
+        var result = this.Remote.GetParamInt(param);
 
         Assert.Multiple(
             () => Assert.Equal(expected, result),
@@ -114,7 +114,7 @@ public class GetParamFloat : MockRemote
 
         this.MockLogin(kind, version);
 
-        var ex = Assert.Throws<GetParamException<float>>(() => this.Remote.GetParam(param, out int _));
+        var ex = Assert.Throws<GetParamException<float>>(() => this.Remote.GetParamInt(param));
 
         Assert.Multiple(
             () => Assert.Equal(Response.TypeMismatch, ex.Response),
@@ -138,7 +138,7 @@ public class GetParamFloat : MockRemote
 
         this.MockLogin(kind, version);
 
-        this.Remote.GetParam(param, out bool result);
+        var result = this.Remote.GetParamBool(param);
 
         Assert.Multiple(
             () => Assert.Equal(expected, result),
@@ -160,7 +160,7 @@ public class GetParamFloat : MockRemote
 
         this.MockLogin(kind, version);
 
-        var ex = Assert.Throws<GetParamException<float>>(() => this.Remote.GetParam(param, out bool _));
+        var ex = Assert.Throws<GetParamException<float>>(() => this.Remote.GetParamBool(param));
 
         Assert.Multiple(
             () => Assert.Equal(Response.TypeMismatch, ex.Response),

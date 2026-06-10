@@ -245,7 +245,7 @@ public interface IRemote : IDisposable
     /// </summary>
     /// <typeparam name="T">float, int, bool, or string</typeparam>
     /// <param name="param"></param>
-    /// <param name="value"></param>
+    /// <returns></returns>
     /// <exception cref="TypeNotSupportedException">
     ///   Throws if the given value type is not supported.
     /// </exception>
@@ -273,7 +273,7 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    public void GetParam<T>(string param, out T value) where T : notnull;
+    public T GetParam<T>(string param) where T : notnull;
 
     #endregion
 

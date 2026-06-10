@@ -17,7 +17,7 @@ public class GetParamString : MockRemote
 
         this.MockLogin(kind, version);
 
-        this.Remote.GetParam(param, out string result);
+        var result = this.Remote.GetParamString(param);
 
         Assert.Multiple(
             () => Assert.Equal(value, result),
@@ -40,7 +40,7 @@ public class GetParamString : MockRemote
 
         this.MockLogin(kind, version);
 
-        var ex = Assert.Throws<GetParamException<string>>(() => this.Remote.GetParam(param, out string _));
+        var ex = Assert.Throws<GetParamException<string>>(() => this.Remote.GetParamString(param));
 
         Assert.Multiple(
             () => Assert.Equal(response, ex.Response),
@@ -58,7 +58,7 @@ public class GetParamString : MockRemote
 
         this.MockLogin();
 
-        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.GetParam(param, out string _));
+        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.GetParamString(param));
 
         Assert.Multiple(
             () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
@@ -74,7 +74,7 @@ public class GetParamString : MockRemote
         this.Remote.Dispose();
 
         Assert.Multiple(
-            () => Assert.Throws<ObjectDisposedException>(() => this.Remote.GetParam(param, out string _)),
+            () => Assert.Throws<ObjectDisposedException>(() => this.Remote.GetParamString(param)),
             () => this.MockWrapper.Verify(w => w.GetParameter_String(param), Times.Never())
         );
     }

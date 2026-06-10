@@ -50,38 +50,42 @@ public partial class Remote
     #region Get Parameter Float
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
-    internal void GetParam_Float(string param, out float value)
+    internal float GetParam_iFloat(string param)
     {
         this.LoginGuard();
 
         this.On_GetParam_Start(param);
 
-        (var result, value) = this.wrapper.GetParameter_Float(param);
+        (var result, var value) = this.wrapper.GetParameter_Float(param);
 
         if (result != Response.Ok)
         {
             throw this.On_GetParam_Error(result, param, value, typeof(float));
         }
+
+        return value;
     }
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
-    public void GetParam(string param, out float value)
+    public float GetParamFloat(string param)
     {
         using var scope = this.BeginInstanceScope();
 
-        this.GetParam_Float(param, out value);
+        var value = this.GetParam_iFloat(param);
 
         this.On_GetParam_Success(param, value);
+
+        return value;
     }
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
-    public void GetParam(string param, out int value)
+    public int GetParamInt(string param)
     {
         using var scope = this.BeginInstanceScope();
 
-        this.GetParam_Float(param, out var val);
+        var val = this.GetParam_iFloat(param);
 
-        value = Convert.ToInt32(val);
+        var value = Convert.ToInt32(val);
 
         if (Math.Abs(val - value) > 0.0001f || value < 0)
         {
@@ -89,14 +93,16 @@ public partial class Remote
         }
 
         this.On_GetParam_Success(param, value);
+
+        return value;
     }
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
-    public void GetParam(string param, out bool value)
+    public bool GetParamBool(string param)
     {
         using var scope = this.BeginInstanceScope();
 
-        this.GetParam_Float(param, out var val);
+        var val = this.GetParam_iFloat(param);
 
         var v = Convert.ToInt32(val);
 
@@ -105,9 +111,11 @@ public partial class Remote
             throw this.On_GetParam_Error(Response.TypeMismatch, param, val, typeof(bool));
         }
 
-        value = v == 1;
+        var value = v == 1;
 
         this.On_GetParam_Success(param, value);
+
+        return value;
     }
 
     #endregion
@@ -115,13 +123,13 @@ public partial class Remote
     #region Get Parameter String
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
-    internal void GetParam_String(string param, out string value)
+    internal string GetParam_iString(string param)
     {
         this.LoginGuard();
 
         this.On_GetParam_Start(param);
 
-        (var result, value) = this.wrapper.GetParameter_String(param);
+        (var result, var value) = this.wrapper.GetParameter_String(param);
 
         if (result != Response.Ok)
         {
@@ -129,49 +137,43 @@ public partial class Remote
         }
 
         this.On_GetParam_Success(param, value);
+
+        return value;
     }
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
-    public void GetParam(string param, out string value)
+    public string GetParamString(string param)
     {
         using var scope = this.BeginInstanceScope();
 
-        this.GetParam_String(param, out value);
+        return this.GetParam_iString(param);
     }
 
     #endregion
 
     /// <inheritdoc/>
-    void IRemote.GetParam<T>(string param, out T value)
+    T IRemote.GetParam<T>(string param)
     {
         if (typeof(T) == typeof(float))
         {
-            this.GetParam(param, out float val);
-            value = (T)(object)val;
-            return;
+            return (T)(object)this.GetParamFloat(param);
         }
 
         if (typeof(T) == typeof(int))
         {
-            this.GetParam(param, out int val);
-            value = (T)(object)val;
-            return;
+            return (T)(object)this.GetParamInt(param);
         }
 
         if (typeof(T) == typeof(bool))
         {
-            this.GetParam(param, out bool val);
-            value = (T)(object)val;
-            return;
+            return (T)(object)this.GetParamBool(param);
         }
 
         if (typeof(T) == typeof(string))
         {
-            this.GetParam(param, out string val);
-            value = (T)(object)val;
-            return;
+            return (T)(object)this.GetParamString(param);
         }
 
-        throw GeneralDispatch.On_TypeNotSupported(this.logger, typeof(T), nameof(value), SupportedTypes.ParamTypes);
+        throw GeneralDispatch.On_TypeNotSupported(this.logger, typeof(T), nameof(T), SupportedTypes.ParamTypes);
     }
 }
