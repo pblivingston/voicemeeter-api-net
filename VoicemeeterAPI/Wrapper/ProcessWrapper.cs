@@ -47,11 +47,10 @@ internal partial class Wrapper
 
         public void Dispose()
         {
-            lock (this.cacheLock)
-            {
-                this.Process?.Dispose();
-                this.Process = null;
-            }
+            using var lk = this.cacheLock.EnterScope();
+
+            this.Process?.Dispose();
+            this.Process = null;
         }
 
         /// <summary>
@@ -187,46 +186,45 @@ internal partial class Wrapper
 
         private Process? GetProcess()
         {
-            lock (this.cacheLock)
+            using var lk = this.cacheLock.EnterScope();
+
+            try
             {
-                try
+                this.Process?.Refresh();
+                if (this.Process?.HasExited ?? true)
                 {
-                    this.Process?.Refresh();
-                    if (this.Process?.HasExited ?? true)
-                    {
-                        this.Process?.Dispose();
-                        this.Process = null;
-                    }
+                    this.Process?.Dispose();
+                    this.Process = null;
                 }
-                catch { }
-
-                if (this.Process is null && this.ExecutableExists())
-                {
-                    var processes = Process.GetProcessesByName(this.ProcessName);
-
-                    foreach (var p in processes)
-                    {
-                        if (this.Process is null)
-                        {
-                            try
-                            {
-                                var f = p.MainModule?.FileName;
-                                if ((this.App is App.MacroButtons && p.MainModule is null)
-                                    || (f is not null && f.StartsWith(this.InstallDir, StringComparison.OrdinalIgnoreCase)))
-                                {
-                                    this.Process = p;
-                                    continue;
-                                }
-                            }
-                            catch { }
-                        }
-
-                        p.Dispose();
-                    }
-                }
-
-                return this.Process;
             }
+            catch { }
+
+            if (this.Process is null && this.ExecutableExists())
+            {
+                var processes = Process.GetProcessesByName(this.ProcessName);
+
+                foreach (var p in processes)
+                {
+                    if (this.Process is null)
+                    {
+                        try
+                        {
+                            var f = p.MainModule?.FileName;
+                            if ((this.App is App.MacroButtons && p.MainModule is null)
+                                || (f is not null && f.StartsWith(this.InstallDir, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                this.Process = p;
+                                continue;
+                            }
+                        }
+                        catch { }
+                    }
+
+                    p.Dispose();
+                }
+            }
+
+            return this.Process;
         }
 
         private static RunResponse GetState(Process? process)
