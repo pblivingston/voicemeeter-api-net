@@ -85,12 +85,9 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse bu
     /// </remarks>
     public bool ButtonsRunning => this.ButtonsState < RunResponse.NotRunning;
 
-    public override string ToString() => $"""
-        LoginStatus: {this.LoginStatus}
-        ButtonsState: {this.ButtonsState}
-        RunningKind: {this.RunningKind}
-        RunningVersion: {this.RunningVersion}
-        """;
+    public ConnectionState()
+        : this(LoginResponse.LoggedOut, RunResponse.NotRunning, Kind.None, default)
+    { }
 
     public void Deconstruct(out LoginResponse login, out RunResponse buttons, out Kind kind, out VmVersion version)
     {
@@ -99,6 +96,13 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse bu
         kind = this.RunningKind;
         version = this.RunningVersion;
     }
+
+    public override string ToString() => $"""
+        LoginStatus: {this.LoginStatus}
+        ButtonsState: {this.ButtonsState}
+        RunningKind: {this.RunningKind}
+        RunningVersion: {this.RunningVersion}
+        """;
 
     public static explicit operator ConnectionState((LoginResponse login, RunResponse buttons, Kind kind, VmVersion version) t)
         => new(t.login, t.buttons, t.kind, t.version);

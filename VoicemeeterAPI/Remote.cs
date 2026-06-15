@@ -39,7 +39,7 @@ public partial class Remote : IRemote
 
     private int isDisposed;
     private LoginResponse loginStatus = LoginResponse.LoggedOut;
-    private ConnectionState lastConnectionState = new(LoginResponse.LoggedOut, RunResponse.NotRunning, Kind.None, default);
+    private ConnectionState lastConnectionState = new();
 
     /// <inheritdoc/>
     public event EventHandler<ConnectionStateEventArgs>? ConnectionStateChanged;
