@@ -14,6 +14,8 @@ public partial class Remote
     /// <inheritdoc cref="IRemote.IsParamsDirty()"/>
     internal bool ParamsDirty_i()
     {
+        using var lk = this.pDirtyLock.EnterScope();
+
         var level = LogLevel.Trace;
 
         this.On_Query_Start(level);

@@ -34,6 +34,8 @@ public partial class Remote : IRemote
     private readonly ILogger<Remote> logger;
     private readonly Guid instanceId;
     private readonly SemaphoreSlim stateLock = new(1, 1);
+    private readonly LockObject pDirtyLock = new();
+    private readonly LockObject bDirtyLock = new();
 
     private int isDisposed;
     private LoginResponse loginStatus = LoginResponse.LoggedOut;
