@@ -11,10 +11,8 @@ public partial class Remote
     #region MacroButtons Is Dirty
 
     /// <inheritdoc cref="IRemote.IsButtonsDirty()"/>
-    internal bool Query_ButtonsDirty()
+    internal bool ButtonsDirty_i()
     {
-        this.LoginGuard();
-
         var level = LogLevel.Trace;
 
         this.On_Query_Start(level);
@@ -41,7 +39,7 @@ public partial class Remote
     {
         using var scope = this.BeginInstanceScope();
 
-        return this.Query_ButtonsDirty();
+        return this.ButtonsDirty_i();
     }
 
     #endregion

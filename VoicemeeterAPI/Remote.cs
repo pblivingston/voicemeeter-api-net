@@ -3,11 +3,11 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-using System.Runtime.CompilerServices;
 using AtgDev.Utils.Native;
 using AtgDev.Voicemeeter;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using PBLivingston.VoicemeeterAPI.Logging;
 using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Utilities;
 
@@ -28,14 +28,16 @@ using PBLivingston.VoicemeeterAPI.Utilities;
 ///     }
 ///   </code>
 /// </example>
-public sealed partial class Remote : IRemote
+public partial class Remote : IRemote
 {
     private readonly IWrapper wrapper;
     private readonly ILogger<Remote> logger;
     private readonly Guid instanceId;
+    private readonly SemaphoreSlim stateLock = new(1, 1);
 
-    private bool isDisposed;
+    private int isDisposed;
     private LoginResponse loginStatus = LoginResponse.LoggedOut;
+    private ConnectionState lastConnectionState = new(LoginResponse.LoggedOut, RunResponse.NotRunning, Kind.None, default);
 
     /// <inheritdoc/>
     public event EventHandler<ConnectionStateEventArgs>? ConnectionStateChanged;
@@ -45,7 +47,27 @@ public sealed partial class Remote : IRemote
     public event EventHandler? ButtonsDirty;
 
     /// <inheritdoc/>
-    public ConnectionState LastConnectionState { get; private set; } = new(LoginResponse.LoggedOut, RunResponse.NotRunning, Kind.None, default);
+    public LoginResponse LoginStatus
+    {
+        get
+        {
+            using var lk = this.stateLock.EnterScope();
+            return this.loginStatus;
+        }
+    }
+    /// <inheritdoc/>
+    public bool LoggedIn => this.LoginStatus < LoginResponse.LoggedOut;
+    /// <inheritdoc/>
+    public bool Connected => this.LoginStatus == LoginResponse.Ok;
+    /// <inheritdoc/>
+    public ConnectionState LastConnectionState
+    {
+        get
+        {
+            using var lk = this.stateLock.EnterScope();
+            return this.lastConnectionState;
+        }
+    }
 
     #region Construction
 
@@ -99,107 +121,55 @@ public sealed partial class Remote : IRemote
 
     #endregion
 
-    #region Connection State
-
-    /// <inheritdoc cref="IRemote.GetConnectionState()"/>
-    internal ConnectionState GetConnectionState_i()
-    {
-        this.LoginGuard(requiredStatus: LoginResponse.Unknown);
-
-        this.On_GetConnectionState_Start();
-
-        if (this.loginStatus >= LoginResponse.LoggedOut)
-        {
-            return this.LastConnectionState;
-        }
-
-        Kind kind;
-        VmVersion version;
-        RunResponse mbState;
-        using (this.BeginMethodScope())
-        {
-            kind = this.GetInfo_Kind(true);
-            version = this.GetInfo_Version(true);
-            mbState = this.GetInfo_AppState(App.MacroButtons, true);
-        }
-
-        if (kind != version.K)
-        {
-            throw this.On_GetConnectionState_KindMismatch(kind, version);
-        }
-
-        this.On_Method_Success();
-
-        ConnectionState state = new(this.loginStatus, mbState, kind, version);
-
-        this.On_ConnectionState_Changed(state);
-
-        return state;
-    }
-
-    /// <inheritdoc/>
-    public ConnectionState GetConnectionState()
-    {
-        using var scope = this.BeginInstanceScope();
-
-        return this.GetConnectionState_i();
-    }
-
-    #endregion
-
     #region Disposal
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (Interlocked.Exchange(ref this.isDisposed, 1) != 0)
+        {
+            return;
+        }
+
+        using var scope = LogScope.Instance(this.logger, this.instanceId);
+
+        this.On_Dispose_Start();
+
+        if (disposing)
+        {
+            try
+            {
+                using var lk = this.stateLock.EnterScope();
+
+                if (this.loginStatus < LoginResponse.LoggedOut)
+                {
+                    this.On_Dispose_LoggedIn(this.loginStatus);
+
+                    using var methodScope = this.BeginMethodScope();
+
+                    this.Logout_i();
+                }
+
+                this.wrapper.Dispose();
+            }
+            finally
+            {
+                this.stateLock.Dispose();
+            }
+        }
+
+        this.On_Dispose_Success();
+    }
 
     /// <summary>
     ///   Calls <see cref="DllWrapperBase.Dispose()"/>.
     /// </summary>
     /// <remarks>
-    ///   Calls <see cref="Logout(int, int)"/> if still logged in.
+    ///   Calls <see cref="Logout()"/> if still logged in.
     /// </remarks>
     public void Dispose()
     {
-        using var scope = this.BeginInstanceScope();
-
-        if (this.isDisposed)
-        {
-            this.On_Dispose_AlreadyDisposed();
-            return;
-        }
-
-        if (this.LastConnectionState.LoggedIn)
-        {
-            this.On_Dispose_LoggedIn(this.loginStatus);
-
-            using (this.BeginMethodScope())
-            {
-                this.Logout_i(true);
-            }
-        }
-
-        this.On_Dispose_Start();
-
-        this.wrapper.Dispose();
-
-        this.On_Dispose_Success();
-        this.isDisposed = true;
-    }
-
-    #endregion
-
-    #region Login Guard
-
-    private void LoginGuard(LoginResponse requiredStatus = LoginResponse.Ok, [CallerMemberName] string methodName = "")
-    {
-        using var scope = this.BeginMethodScope(methodName);
-
-        if (this.isDisposed)
-        {
-            throw this.On_Guard_ObjectDisposed();
-        }
-
-        if (this.loginStatus > requiredStatus)
-        {
-            throw this.On_Guard_AccessDenied(this.loginStatus);
-        }
+        this.Dispose(true);
+        GC.SuppressFinalize(this);
     }
 
     #endregion

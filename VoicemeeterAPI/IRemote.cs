@@ -13,11 +13,6 @@ using PBLivingston.VoicemeeterAPI.Exceptions;
 public interface IRemote : IDisposable
 {
     /// <summary>
-    ///   Reflects the most recently cached connection state.
-    /// </summary>
-    public ConnectionState LastConnectionState { get; }
-
-    /// <summary>
     ///   Raised when <see cref="LastConnectionState"/> has changed.
     /// </summary>
     public event EventHandler<ConnectionStateEventArgs> ConnectionStateChanged;
@@ -33,11 +28,33 @@ public interface IRemote : IDisposable
     public event EventHandler ButtonsDirty;
 
     /// <summary>
-    ///   Updates <see cref="LastConnectionState"/> and returns the current connection state.
+    ///   The login status of the <see cref="IRemote"/> instance.
     /// </summary>
-    /// <returns></returns>
-    /// <exception cref="ObjectDisposedException"></exception>
-    public ConnectionState GetConnectionState();
+    /// <remarks>
+    ///   Ok, VoicemeeterNotRunning, LoggedOut, Unknown
+    /// </remarks>
+    public LoginResponse LoginStatus { get; }
+
+    /// <summary>
+    ///   Simplifies <see cref="LoginStatus"/> checks.
+    /// </summary>
+    /// <remarks>
+    ///   `true` if logged in to VoicemeeterRemote.
+    /// </remarks>
+    public bool LoggedIn { get; }
+
+    /// <summary>
+    ///   Simplifies <see cref="LoginStatus"/> checks.
+    /// </summary>
+    /// <remarks>
+    ///   `true` if logged in to VoicemeeterRemote and Voicemeeter is running.
+    /// </remarks>
+    public bool Connected { get; }
+
+    /// <summary>
+    ///   Reflects the most recently cached connection state.
+    /// </summary>
+    public ConnectionState LastConnectionState { get; }
 
     #region Login
 
@@ -211,6 +228,13 @@ public interface IRemote : IDisposable
     /// <exception cref="ObjectDisposedException"></exception>
     /// <exception cref="RemoteException{RunResponse}"></exception>
     public RunResponse GetAppState(App app);
+
+    /// <summary>
+    ///   Updates <see cref="LastConnectionState"/> and returns the current connection state.
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="ObjectDisposedException"></exception>
+    public ConnectionState GetConnectionState();
 
     #endregion
 

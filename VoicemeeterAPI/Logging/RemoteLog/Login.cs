@@ -66,6 +66,14 @@ internal static partial class RemoteLog
     )]
     public static partial void Run_Error(ILogger logger, RunResponse response, App app);
 
+    [LoggerMessage(
+        EventId = (int)Event.Run_LoggedOut,
+        EventName = nameof(Event.Run_LoggedOut),
+        Level = LogLevel.Warning,
+        Message = "Cannot wait for Voicemeeter when logged out."
+    )]
+    public static partial void Run_LoggedOut(ILogger logger);
+
     #endregion
 
     #region WaitForRunning

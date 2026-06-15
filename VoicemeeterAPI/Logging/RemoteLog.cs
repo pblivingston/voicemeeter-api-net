@@ -148,40 +148,12 @@ internal static partial class RemoteLog
     public static partial void Dispose_LoggedIn(ILogger logger, LoginResponse loginStatus);
 
     [LoggerMessage(
-        EventId = (int)Event.Dispose_AlreadyDisposed,
-        EventName = nameof(Event.Dispose_AlreadyDisposed),
-        Level = LogLevel.Error,
-        Message = "Remote object already disposed."
-    )]
-    public static partial void Dispose_AlreadyDisposed(ILogger logger);
-
-    [LoggerMessage(
         EventId = (int)Event.Dispose_Success,
         EventName = nameof(Event.Dispose_Success),
         Level = LogLevel.Debug,
         Message = "Remote object disposed."
     )]
     public static partial void Dispose_Success(ILogger logger);
-
-    #endregion
-
-    #region Guard
-
-    [LoggerMessage(
-        EventId = (int)Event.Guard_ObjectDisposed,
-        EventName = nameof(Event.Guard_ObjectDisposed),
-        Level = LogLevel.Critical,
-        Message = "No access. Remote object disposed."
-    )]
-    public static partial void Guard_ObjectDisposed(ILogger logger);
-
-    [LoggerMessage(
-        EventId = (int)Event.Guard_AccessDenied,
-        EventName = nameof(Event.Guard_AccessDenied),
-        Level = LogLevel.Error,
-        Message = "Access denied. LoginStatus: {LoginStatus}"
-    )]
-    public static partial void Guard_AccessDenied(ILogger logger, LoginResponse loginStatus);
 
     #endregion
 }

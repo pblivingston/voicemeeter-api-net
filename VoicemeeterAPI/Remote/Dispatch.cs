@@ -14,7 +14,18 @@ public partial class Remote
     #region Scope
 
     private IDisposable? BeginInstanceScope()
-        => LogScope.Instance(this.logger, this.instanceId);
+    {
+#if NET7_0_OR_GREATER
+        ObjectDisposedException.ThrowIf(this.isDisposed != 0, this);
+#else
+        if (this.isDisposed != 0)
+        {
+            throw new ObjectDisposedException(nameof(Remote));
+        }
+#endif
+
+        return LogScope.Instance(this.logger, this.instanceId);
+    }
 
     private IDisposable? BeginMethodScope([CallerMemberName] string methodName = "")
         => LogScope.Method(this.logger, methodName);
@@ -66,16 +77,16 @@ public partial class Remote
 
     private void On_ConnectionState_Changed(ConnectionState currentState, [CallerMemberName] string methodName = "")
     {
-        if (this.LastConnectionState == currentState)
+        if (this.lastConnectionState == currentState)
         {
             return;
         }
 
-        RemoteLog.ConnectionState_Changed(this.logger, methodName, this.LastConnectionState, currentState);
+        RemoteLog.ConnectionState_Changed(this.logger, methodName, this.lastConnectionState, currentState);
 
-        ConnectionStateChanged?.Invoke(this, new(this.LastConnectionState, currentState));
+        ConnectionStateChanged?.Invoke(this, new(this.lastConnectionState, currentState));
 
-        this.LastConnectionState = currentState;
+        this.lastConnectionState = currentState;
     }
 
     private void On_ConnectionState_StateMismatch(LoginResponse currentLoginStatus, LogLevel level = LogLevel.Warning)
@@ -142,29 +153,8 @@ public partial class Remote
     private void On_Dispose_LoggedIn(LoginResponse loginStatus)
         => RemoteLog.Dispose_LoggedIn(this.logger, loginStatus);
 
-    private void On_Dispose_AlreadyDisposed()
-        => RemoteLog.Dispose_AlreadyDisposed(this.logger);
-
     private void On_Dispose_Success()
         => RemoteLog.Dispose_Success(this.logger);
-
-    #endregion
-
-    #region Guard
-
-    private ObjectDisposedException On_Guard_ObjectDisposed()
-    {
-        RemoteLog.Guard_ObjectDisposed(this.logger);
-
-        return new ObjectDisposedException(nameof(Remote));
-    }
-
-    private AccessDeniedException On_Guard_AccessDenied(LoginResponse loginStatus)
-    {
-        RemoteLog.Guard_AccessDenied(this.logger, loginStatus);
-
-        return new AccessDeniedException(loginStatus);
-    }
 
     #endregion
 }

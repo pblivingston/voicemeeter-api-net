@@ -43,6 +43,7 @@ internal enum Event
 
     Run_Start = 1120, // info
     Run_Error, // error + throw
+    Run_LoggedOut, // warning
 
     WaitForVoicemeeter_Start = 1180, // info
     WaitForVoicemeeter_Detected, // info

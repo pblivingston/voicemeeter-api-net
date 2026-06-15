@@ -41,6 +41,13 @@ public partial class Remote
         return new RunException(response, app);
     }
 
+    private RunResponse On_Run_LoggedOut()
+    {
+        RemoteLog.Run_LoggedOut(this.logger);
+
+        return RunResponse.Ok;
+    }
+
     #endregion
 
     #region WaitForRunning

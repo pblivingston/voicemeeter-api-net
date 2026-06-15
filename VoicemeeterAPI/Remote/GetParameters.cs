@@ -11,11 +11,9 @@ public partial class Remote
 {
     #region Is Parameters Dirty
 
-    /// <inheritdoc/>
-    internal bool Query_ParamsDirty()
+    /// <inheritdoc cref="IRemote.IsParamsDirty()"/>
+    internal bool ParamsDirty_i()
     {
-        this.LoginGuard();
-
         var level = LogLevel.Trace;
 
         this.On_Query_Start(level);
@@ -42,18 +40,16 @@ public partial class Remote
     {
         using var scope = this.BeginInstanceScope();
 
-        return this.Query_ParamsDirty();
+        return this.ParamsDirty_i();
     }
 
     #endregion
 
     #region Get Parameter Float
 
-    /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
+    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
     internal float GetParam_iFloat(string param)
     {
-        this.LoginGuard();
-
         this.On_GetParam_Start(param);
 
         (var result, var value) = this.wrapper.GetParameter_Float(param);
@@ -66,7 +62,7 @@ public partial class Remote
         return value;
     }
 
-    /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
+    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
     public float GetParamFloat(string param)
     {
         using var scope = this.BeginInstanceScope();
@@ -78,7 +74,7 @@ public partial class Remote
         return value;
     }
 
-    /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
+    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
     public int GetParamInt(string param)
     {
         using var scope = this.BeginInstanceScope();
@@ -97,7 +93,7 @@ public partial class Remote
         return value;
     }
 
-    /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
+    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
     public bool GetParamBool(string param)
     {
         using var scope = this.BeginInstanceScope();
@@ -122,11 +118,9 @@ public partial class Remote
 
     #region Get Parameter String
 
-    /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
+    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
     internal string GetParam_iString(string param)
     {
-        this.LoginGuard();
-
         this.On_GetParam_Start(param);
 
         (var result, var value) = this.wrapper.GetParameter_String(param);
@@ -141,7 +135,7 @@ public partial class Remote
         return value;
     }
 
-    /// <inheritdoc cref="IRemote.GetParam{T}(string, out T)"/>
+    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
     public string GetParamString(string param)
     {
         using var scope = this.BeginInstanceScope();
