@@ -61,12 +61,12 @@ public abstract record SerializableRecord : IXunitSerializable
 
 public abstract class MockRemote : IDisposable
 {
-    internal Mock<IWrapper> MockWrapper { get; }
+    internal Mock<Remote.IWrapper> MockWrapper { get; }
     protected Remote Remote { get; }
 
     protected MockRemote()
     {
-        this.MockWrapper = new Mock<IWrapper>();
+        this.MockWrapper = new Mock<Remote.IWrapper>();
         this.Remote = new Remote(this.MockWrapper.Object);
     }
 
