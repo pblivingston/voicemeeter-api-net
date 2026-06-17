@@ -10,29 +10,67 @@ public partial class Remote
 {
     private partial class Wrapper
     {
-        /// <inheritdoc cref="ProcessWrapper.GetState()"/>
+        /// <summary>
+        ///   Gets the current state of the application.
+        /// </summary>
         /// <param name="app"></param>
+        /// <returns>
+        ///   Ok<br/>
+        ///   Hidden<br/>
+        ///   NotRunning<br/>
+        ///   NotResponding<br/>
+        ///   NotInstalled<br/>
+        ///   UnknownApp<br/>
+        /// </returns>
         public RunResponse GetApplicationState(App app)
             => app.IsValid()
                 ? this.apps[app].GetState()
                 : RunResponse.UnknownApp;
 
-        /// <inheritdoc cref="ProcessWrapper.Close(bool)"/>
+        /// <summary>
+        ///   Attempts to close the process.
+        /// </summary>
         /// <param name="app"></param>
+        /// <param name="force"></param>
+        /// <returns>
+        ///   Error<br/>
+        ///   UnknownApp<br/>
+        ///   Last App State<br/>
+        /// </returns>
+        /// <remarks>
+        ///   If app has tray mode enabled, force will be required to shut it down.
+        /// </remarks>
         public RunResponse CloseApplication(App app, bool force = false)
             => app.IsValid()
                 ? this.apps[app].Close(force)
                 : RunResponse.UnknownApp;
 
-        /// <inheritdoc cref="ProcessWrapper.IsInputIdle()"/>
+        /// <summary>
+        ///   Checks if application has entered an idle state.
+        /// </summary>
         /// <param name="app"></param>
+        /// <returns>
+        ///   Ok<br/>
+        ///   Dirty<br/>
+        ///   NoServer<br/>
+        ///   Error<br/>
+        ///   UnknownApp<br/>
+        /// </returns>
         public Response IsApplicationInputIdle(App app)
             => app.IsValid()
                 ? this.apps[app].IsInputIdle()
                 : Response.UnknownApp;
 
-        /// <inheritdoc cref="ProcessWrapper.WaitForExit(CancellationToken)"/>
+        /// <summary>
+        ///   Waits for the application to exit.
+        /// </summary>
         /// <param name="app"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>
+        ///   Error<br/>
+        ///   UnknownApp<br/>
+        ///   Last App State<br/>
+        /// </returns>
         public async Task<RunResponse> WaitForApplicationExit(App app, CancellationToken cancellationToken = default)
             => app.IsValid()
                 ? await this.apps[app].WaitForExit(cancellationToken)
@@ -45,26 +83,16 @@ public partial class Remote
             public App App { get; } = app;
             public string InstallDir { get; } = installDir;
             public string ProcessName { get; } = processName;
-            public Process? Process { get; set; }
+            private Process? process;
 
             public void Dispose()
             {
                 using var lk = this.cacheLock.EnterScope();
 
-                this.Process?.Dispose();
-                this.Process = null;
+                this.process?.Dispose();
+                this.process = null;
             }
 
-            /// <summary>
-            ///   Gets the current state of the application.
-            /// </summary>
-            /// <returns>
-            ///   Ok<br/>
-            ///   Hidden<br/>
-            ///   NotRunning<br/>
-            ///   NotResponding<br/>
-            ///   NotInstalled<br/>
-            /// </returns>
             public RunResponse GetState()
             {
                 if (!this.ExecutableExists())
@@ -75,29 +103,9 @@ public partial class Remote
                 return GetState(this.GetProcess());
             }
 
-            /// <summary>
-            ///   Checks if application has entered an idle state.
-            /// </summary>
-            /// <returns>
-            ///   Ok<br/>
-            ///   Dirty<br/>
-            ///   NoServer<br/>
-            ///   Error<br/>
-            /// </returns>
             public Response IsInputIdle()
                 => IsInputIdle(this.GetProcess());
 
-            /// <summary>
-            ///   Attempts to close the process and releases the process.
-            /// </summary>
-            /// <param name="force"></param>
-            /// <returns>
-            ///   Error<br/>
-            ///   Last App State<br/>
-            /// </returns>
-            /// <remarks>
-            ///   If app has tray mode enabled, force will be required to shut it down.
-            /// </remarks>
             public RunResponse Close(bool force = false)
             {
                 var process = this.GetProcess();
@@ -129,14 +137,6 @@ public partial class Remote
                 }
             }
 
-            /// <summary>
-            ///   Waits for the application to exit.
-            /// </summary>
-            /// <param name="cancellationToken"></param>
-            /// <returns>
-            ///   Error<br/>
-            ///   Last App State<br/>
-            /// </returns>
             public async Task<RunResponse> WaitForExit(CancellationToken cancellationToken = default)
             {
                 var process = this.GetProcess();
@@ -192,22 +192,22 @@ public partial class Remote
 
                 try
                 {
-                    this.Process?.Refresh();
-                    if (this.Process?.HasExited ?? true)
+                    this.process?.Refresh();
+                    if (this.process?.HasExited ?? true)
                     {
-                        this.Process?.Dispose();
-                        this.Process = null;
+                        this.process?.Dispose();
+                        this.process = null;
                     }
                 }
                 catch { }
 
-                if (this.Process is null && this.ExecutableExists())
+                if (this.process is null && this.ExecutableExists())
                 {
                     var processes = Process.GetProcessesByName(this.ProcessName);
 
                     foreach (var p in processes)
                     {
-                        if (this.Process is null)
+                        if (this.process is null)
                         {
                             try
                             {
@@ -215,7 +215,7 @@ public partial class Remote
                                 if ((this.App is App.MacroButtons && p.MainModule is null)
                                     || (f is not null && f.StartsWith(this.InstallDir, StringComparison.OrdinalIgnoreCase)))
                                 {
-                                    this.Process = p;
+                                    this.process = p;
                                     continue;
                                 }
                             }
@@ -226,7 +226,7 @@ public partial class Remote
                     }
                 }
 
-                return this.Process;
+                return this.process;
             }
 
             private static RunResponse GetState(Process? process)
