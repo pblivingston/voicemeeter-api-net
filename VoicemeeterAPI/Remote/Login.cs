@@ -201,11 +201,15 @@ public partial class Remote
 
         if (a.IsVoicemeeter() && this.LoggedIn)
         {
+            using var lk = this.stateLock.EnterScope();
+
             this.On_ConnectionState_StateMismatch(LoginResponse.Ok);
         }
 
         if (a is App.MacroButtons && this.LoggedIn)
         {
+            using var lk = this.stateLock.EnterScope();
+
             this.On_ConnectionState_StateMismatch(RunResponse.Ok);
         }
     }
