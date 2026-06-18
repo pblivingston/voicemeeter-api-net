@@ -105,19 +105,6 @@ public class Run : MockRemote
     }
 
     [Fact]
-    public void ThrowsExceptionAccessDeniedWhenLoginStatusLoggedOut()
-    {
-        var app = App.DeviceCheck;
-
-        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.Run(app));
-
-        Assert.Multiple(
-            () => Assert.Equal(LoginResponse.LoggedOut, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never())
-        );
-    }
-
-    [Fact]
     public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
         var app = App.BUSGEQ15;

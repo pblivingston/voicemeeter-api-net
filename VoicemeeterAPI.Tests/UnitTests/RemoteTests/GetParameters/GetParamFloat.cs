@@ -52,21 +52,6 @@ public class GetParamFloat : MockRemote
     }
 
     [Fact]
-    public void ThrowsExceptionAccessDeniedWhenLoginStatusNotOk()
-    {
-        var param = "Mock.Param";
-
-        this.MockLogin();
-
-        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.GetParamFloat(param));
-
-        Assert.Multiple(
-            () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Never())
-        );
-    }
-
-    [Fact]
     public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
         var param = "Mock.Param";

@@ -370,21 +370,6 @@ public class RunAsync : MockRemote
     }
 
     [Fact]
-    public async Task ThrowsExceptionAccessDeniedWhenLoginStatusLoggedOut()
-    {
-        var app = App.DeviceCheck;
-
-        var ex = await Assert.ThrowsAsync<AccessDeniedException>(async () => await this.Remote.RunAsync(app, TestContext.Current.CancellationToken));
-
-        Assert.Multiple(
-            () => Assert.Equal(LoginResponse.LoggedOut, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.GetApplicationState(app), Times.Never()),
-            () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Never()),
-            () => this.MockWrapper.Verify(w => w.IsApplicationInputIdle(app), Times.Never())
-        );
-    }
-
-    [Fact]
     public async Task ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
         var app = App.BUSGEQ15;

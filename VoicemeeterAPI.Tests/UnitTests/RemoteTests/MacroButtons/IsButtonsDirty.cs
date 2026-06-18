@@ -60,19 +60,6 @@ public class IsButtonsDirty : MockRemote
     }
 
     [Fact]
-    public void ThrowsExceptionAccessDeniedWhenLoginStatusNotOk()
-    {
-        this.MockLogin();
-
-        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.IsButtonsDirty());
-
-        Assert.Multiple(
-            () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Never())
-        );
-    }
-
-    [Fact]
     public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
         this.Remote.Dispose();

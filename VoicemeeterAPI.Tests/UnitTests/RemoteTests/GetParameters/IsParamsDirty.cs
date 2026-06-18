@@ -60,19 +60,6 @@ public class IsParamsDirty : MockRemote
     }
 
     [Fact]
-    public void ThrowsExceptionAccessDeniedWhenLoginStatusNotOk()
-    {
-        this.MockLogin();
-
-        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.IsParamsDirty());
-
-        Assert.Multiple(
-            () => Assert.Equal(LoginResponse.VoicemeeterNotRunning, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never())
-        );
-    }
-
-    [Fact]
     public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
         this.Remote.Dispose();

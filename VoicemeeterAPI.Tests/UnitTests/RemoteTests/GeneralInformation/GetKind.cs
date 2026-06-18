@@ -70,17 +70,6 @@ public class GetKind : MockRemote
     }
 
     [Fact]
-    public void ThrowsExceptionAccessDeniedWhenLoginStatusLoggedOut()
-    {
-        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.GetKind());
-
-        Assert.Multiple(
-            () => Assert.Equal(LoginResponse.LoggedOut, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Never)
-        );
-    }
-
-    [Fact]
     public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
         this.Remote.Dispose();

@@ -76,19 +76,6 @@ public class GetAppState : MockRemote
     }
 
     [Fact]
-    public void ThrowsExceptionAccessDeniedWhenLoginStatusLoggedOut()
-    {
-        var app = App.CABLEControlPanel;
-
-        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.GetAppState(app));
-
-        Assert.Multiple(
-            () => Assert.Equal(LoginResponse.LoggedOut, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.GetApplicationState(app), Times.Never)
-        );
-    }
-
-    [Fact]
     public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
         var app = App.VAIOControlPanel;

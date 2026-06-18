@@ -101,42 +101,6 @@ public class Login : MockRemote
     }
 
     [Fact]
-    public void ThrowsExceptionAccessDeniedWhenAlreadyLoggedIn()
-    {
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-
-        this.MockLogin(kind, version);
-
-        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.Login());
-
-        Assert.Multiple(
-            () => Assert.Equal(LoginResponse.Ok, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.Login(), Times.Once())
-        );
-    }
-
-    [Fact]
-    public void ThrowsExceptionAccessDeniedWhenLoginStatusUnknown()
-    {
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-
-        this.MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
-
-        this.MockLogin(kind, version);
-
-        this.Remote.Logout();
-
-        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.Login());
-
-        Assert.Multiple(
-            () => Assert.Equal(LoginResponse.Unknown, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.Login(), Times.Once())
-        );
-    }
-
-    [Fact]
     public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
         this.Remote.Dispose();

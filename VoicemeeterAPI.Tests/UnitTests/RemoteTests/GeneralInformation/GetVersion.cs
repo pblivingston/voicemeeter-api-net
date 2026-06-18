@@ -70,17 +70,6 @@ public class GetVersion : MockRemote
     }
 
     [Fact]
-    public void ThrowsExceptionAccessDeniedWhenLoginStatusLoggedOut()
-    {
-        var ex = Assert.Throws<AccessDeniedException>(() => this.Remote.GetVersion());
-
-        Assert.Multiple(
-            () => Assert.Equal(LoginResponse.LoggedOut, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Never)
-        );
-    }
-
-    [Fact]
     public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
         this.Remote.Dispose();

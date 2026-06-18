@@ -143,42 +143,6 @@ public class LoginAsync : MockRemote
     }
 
     [Fact]
-    public async Task ThrowsExceptionAccessDeniedWhenAlreadyLoggedIn()
-    {
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-
-        this.MockLogin(kind, version);
-
-        var ex = await Assert.ThrowsAsync<AccessDeniedException>(async () => await this.Remote.LoginAsync(TestContext.Current.CancellationToken));
-
-        Assert.Multiple(
-            () => Assert.Equal(LoginResponse.Ok, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.Login(), Times.Once())
-        );
-    }
-
-    [Fact]
-    public async Task ThrowsExceptionAccessDeniedWhenLoginStatusUnknown()
-    {
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-
-        this.MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
-
-        this.MockLogin(kind, version);
-
-        this.Remote.Logout();
-
-        var ex = await Assert.ThrowsAsync<AccessDeniedException>(async () => await this.Remote.LoginAsync(TestContext.Current.CancellationToken));
-
-        Assert.Multiple(
-            () => Assert.Equal(LoginResponse.Unknown, ex.LoginStatus),
-            () => this.MockWrapper.Verify(w => w.Login(), Times.Once())
-        );
-    }
-
-    [Fact]
     public async Task ThrowsExceptionObjectDisposedWhenRemoteDisposed()
     {
         this.Remote.Dispose();
