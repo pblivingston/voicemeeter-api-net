@@ -1,4 +1,4 @@
-namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests;
+namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GeneralInformation;
 
 using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Types;
@@ -54,11 +54,10 @@ public class GetConnectionState : MockRemote
         this.MockWrapper.Setup(w => w.GetVoicemeeterType()).Returns((InfoResponse.Ok, kind));
         this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((InfoResponse.Ok, version));
 
-        var ex = Assert.Throws<KindMismatchException>(() => this.Remote.GetConnectionState());
+        var ex = Assert.Throws<RemoteException<Response>>(() => this.Remote.GetConnectionState());
 
         Assert.Multiple(
-            () => Assert.Equal((Kind)kind, ex.ReturnedKind),
-            () => Assert.Equal((VmVersion)version, ex.ReturnedVersion),
+            () => Assert.Equal(Response.Error, ex.Response),
             () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Exactly(2)),
             () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Exactly(2)),
             () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Exactly(2))
