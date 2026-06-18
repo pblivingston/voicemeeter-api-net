@@ -77,18 +77,56 @@ public abstract class MockRemote : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    ///   Sets up and performs a mock login sequence where:<br/>
+    ///   Voicemeeter is not running<br/>
+    ///   MacroButtons is running<br/>
+    /// </summary>
+    /// <inheritdoc cref="MockLogin_p"/>
     protected void MockLogin()
         => this.MockLogin(RunResponse.Ok);
 
+    /// <summary>
+    ///   Sets up and performs a mock login sequence where:<br/>
+    ///   The given Voicemeeter kind/version is running<br/>
+    ///   MacroButtons is running<br/>
+    /// </summary>
+    /// <inheritdoc cref="MockLogin_p"/>
     protected void MockLogin(int kind, int version)
         => this.MockLogin(RunResponse.Ok, kind, version);
 
+    /// <summary>
+    ///   Sets up and performs a mock login sequence where:<br/>
+    ///   Voicemeeter is not running<br/>
+    ///   MacroButtons is the given state<br/>
+    /// </summary>
+    /// <inheritdoc cref="MockLogin_p"/>
     protected void MockLogin(RunResponse buttonsState)
         => this.MockLogin_p(LoginResponse.VoicemeeterNotRunning, buttonsState, (int)Kind.None, 0x0000_0000);
 
+    /// <summary>
+    ///   Sets up and performs a mock login sequence where:<br/>
+    ///   The given Voicemeeter kind/version is running<br/>
+    ///   MacroButtons is the given state<br/>
+    /// </summary>
+    /// <inheritdoc cref="MockLogin_p"/>
     protected void MockLogin(RunResponse buttonsState, int kind, int version)
         => this.MockLogin_p(LoginResponse.Ok, buttonsState, kind, version);
 
+    /// <summary>
+    ///   Sets up and performs a mock login sequence
+    /// </summary>
+    /// <param name="loginStatus"></param>
+    /// <param name="buttonsState"></param>
+    /// <param name="kind"></param>
+    /// <param name="version"></param>
+    /// <remarks>
+    ///   Calls:<br/>
+    ///   <see cref="Remote.IWrapper.Login()"/> once<br/>
+    ///   <see cref="Remote.IWrapper.GetVoicemeeterType()"/> once<br/>
+    ///   <see cref="Remote.IWrapper.GetVoicemeeterVersion()"/> once<br/>
+    ///   <see cref="Remote.IWrapper.GetApplicationState(App)"/> once with <see cref="App.MacroButtons"/><br/>
+    /// </remarks>
     private void MockLogin_p(LoginResponse loginStatus, RunResponse buttonsState, int kind, int version)
     {
         VmVersion runningVersion = default;
