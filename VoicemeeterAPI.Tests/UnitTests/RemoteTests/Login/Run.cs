@@ -52,6 +52,8 @@ public class Run : MockRemote
         var version = 0x0101_0202;
         var app = App.Unknown;
 
+        this.MockWrapper.Setup(w => w.GetApplicationState(app)).Returns(RunResponse.UnknownApp);
+
         this.MockLogin(kind, version);
 
         var ex = Assert.Throws<RunException>(() => this.Remote.Run(app));
@@ -59,7 +61,8 @@ public class Run : MockRemote
         Assert.Multiple(
             () => Assert.Equal(app, ex.App),
             () => Assert.Equal(RunResponse.UnknownApp, ex.Response),
-            () => this.MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<int>()), Times.Never())
+            () => this.MockWrapper.Verify(w => w.GetApplicationState(app), Times.Once()),
+            () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Never())
         );
     }
 

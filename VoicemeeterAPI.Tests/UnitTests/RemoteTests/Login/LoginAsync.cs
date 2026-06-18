@@ -115,7 +115,7 @@ public class LoginAsync : MockRemote
     public async Task ThrowsExceptionRemoteWhenWaitForVoicemeeterTimesOut()
     {
         using var cts = new CancellationTokenSource();
-        cts.Cancel();
+        cts.CancelAfter(10);
 
         this.MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.Ok);
 
@@ -125,6 +125,19 @@ public class LoginAsync : MockRemote
             () => Assert.Equal(LoginResponse.Timeout, ex.Response),
             () => this.MockWrapper.Verify(w => w.Login(), Times.Once())
         );
+    }
+
+    [Fact]
+    public async Task ThrowsExceptionTaskCanceledWhenTokenCanceled()
+    {
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        this.MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.Ok);
+
+        var ex = await Assert.ThrowsAsync<TaskCanceledException>(async () => await this.Remote.LoginAsync(cts.Token));
+
+        this.MockWrapper.Verify(w => w.Login(), Times.Never());
     }
 
     [Theory]

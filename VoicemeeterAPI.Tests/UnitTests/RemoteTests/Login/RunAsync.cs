@@ -80,7 +80,7 @@ public class RunAsync : MockRemote
         Assert.Multiple(
             () => Assert.Equal(RunResponse.Ok, result),
             () => Assert.Equal(expectedState, this.Remote.LastConnectionState),
-            () => this.MockWrapper.Verify(w => w.Is64Bit, Times.Exactly(3)),
+            () => this.MockWrapper.Verify(w => w.Is64Bit, Times.Exactly(2)),
             () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)launched), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetApplicationState(launched), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Exactly(5)),
@@ -141,7 +141,7 @@ public class RunAsync : MockRemote
         var app = App.MacroButtons;
 
         using var cts = new CancellationTokenSource();
-        cts.Cancel();
+        cts.CancelAfter(10);
 
         this.MockWrapper.Setup(w => w.GetApplicationState(app)).Returns(RunResponse.NotRunning);
         this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
@@ -168,7 +168,7 @@ public class RunAsync : MockRemote
         var app = App.Standardx64;
 
         using var cts = new CancellationTokenSource();
-        cts.Cancel();
+        cts.CancelAfter(10);
 
         this.MockWrapper.Setup(w => w.Is64Bit).Returns(true);
         this.MockWrapper.Setup(w => w.RunVoicemeeter((int)app)).Returns(RunResponse.Ok);
@@ -254,7 +254,7 @@ public class RunAsync : MockRemote
         Assert.Multiple(
             () => Assert.Equal(app, ex.App),
             () => Assert.Equal(RunResponse.Error, ex.Response),
-            () => this.MockWrapper.Verify(w => w.Is64Bit, Times.Exactly(3)),
+            () => this.MockWrapper.Verify(w => w.Is64Bit, Times.Exactly(2)),
             () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetApplicationState(app), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Exactly(5)),
@@ -311,6 +311,8 @@ public class RunAsync : MockRemote
         var version = 0x0101_0202;
         var app = App.Unknown;
 
+        this.MockWrapper.Setup(w => w.GetApplicationState(app)).Returns(RunResponse.UnknownApp);
+
         this.MockLogin(kind, version);
 
         var ex = await Assert.ThrowsAsync<RunException>(async () => await this.Remote.RunAsync(app, TestContext.Current.CancellationToken));
@@ -318,7 +320,7 @@ public class RunAsync : MockRemote
         Assert.Multiple(
             () => Assert.Equal(app, ex.App),
             () => Assert.Equal(RunResponse.UnknownApp, ex.Response),
-            () => this.MockWrapper.Verify(w => w.GetApplicationState(app), Times.Never()),
+            () => this.MockWrapper.Verify(w => w.GetApplicationState(app), Times.Once()),
             () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Never()),
             () => this.MockWrapper.Verify(w => w.IsApplicationInputIdle(app), Times.Never())
         );
@@ -508,7 +510,7 @@ public class RunAsync : MockRemote
         Assert.Multiple(
             () => Assert.Equal(RunResponse.Ok, result),
             () => Assert.Equal(expectedState, this.Remote.LastConnectionState),
-            () => this.MockWrapper.Verify(w => w.Is64Bit, Times.Exactly(4)),
+            () => this.MockWrapper.Verify(w => w.Is64Bit, Times.Exactly(3)),
             () => this.MockWrapper.Verify(w => w.RunVoicemeeter((int)app), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetApplicationState(app), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Exactly(5)),
