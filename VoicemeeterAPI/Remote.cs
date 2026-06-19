@@ -28,7 +28,7 @@ using PBLivingston.VoicemeeterAPI.Utilities;
 ///     }
 ///   </code>
 /// </example>
-public partial class Remote : IRemote
+public sealed partial class Remote : IRemote
 {
     private readonly IWrapper wrapper;
     private readonly ILogger<Remote> logger;
@@ -40,6 +40,8 @@ public partial class Remote : IRemote
     private int isDisposed;
     private LoginResponse loginStatus = LoginResponse.LoggedOut;
     private ConnectionState lastConnectionState = new();
+
+    private bool IsDisposed => Volatile.Read(ref this.isDisposed) != 0;
 
     /// <inheritdoc/>
     public event EventHandler<ConnectionStateEventArgs>? ConnectionStateChanged;
@@ -125,7 +127,7 @@ public partial class Remote : IRemote
 
     #region Disposal
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (Interlocked.Exchange(ref this.isDisposed, 1) != 0)
         {
