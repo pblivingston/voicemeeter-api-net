@@ -71,6 +71,11 @@ public sealed partial class Remote : IRemote
             using var lk = this.stateLock.EnterScope();
             return this.lastConnectionState;
         }
+        private set
+        {
+            using var lk = this.stateLock.EnterScope();
+            this.lastConnectionState = value;
+        }
     }
 
     #region Construction

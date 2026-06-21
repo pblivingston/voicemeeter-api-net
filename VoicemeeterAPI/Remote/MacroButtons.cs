@@ -13,13 +13,15 @@ public partial class Remote
     /// <inheritdoc cref="IRemote.IsButtonsDirty()"/>
     internal bool ButtonsDirty_i()
     {
-        using var lk = this.bDirtyLock.EnterScope();
-
         var level = LogLevel.Trace;
 
         this.On_Query_Start(level);
 
-        var result = this.wrapper.MacroButtonIsDirty();
+        Response result;
+        using (this.bDirtyLock.EnterScope())
+        {
+            result = this.wrapper.MacroButtonIsDirty();
+        }
 
         switch (result)
         {

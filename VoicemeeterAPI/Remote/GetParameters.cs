@@ -14,13 +14,15 @@ public partial class Remote
     /// <inheritdoc cref="IRemote.IsParamsDirty()"/>
     internal bool ParamsDirty_i()
     {
-        using var lk = this.pDirtyLock.EnterScope();
-
         var level = LogLevel.Trace;
 
         this.On_Query_Start(level);
 
-        var result = this.wrapper.IsParametersDirty();
+        Response result;
+        using (this.pDirtyLock.EnterScope())
+        {
+            result = this.wrapper.IsParametersDirty();
+        }
 
         switch (result)
         {

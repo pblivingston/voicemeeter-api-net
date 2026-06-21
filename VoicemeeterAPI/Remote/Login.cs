@@ -29,70 +29,77 @@ public partial class Remote
     public LoginResponse Login()
     {
         using var scope = this.BeginInstanceScope();
-        using var lk = this.stateLock.EnterScope();
 
-        var result = this.Login_p();
-
-        if (result is LoginResponse.VoicemeeterNotRunning)
-        {
-            this.On_Login_VmNotRunning();
-        }
-        else
-        {
-            this.On_Method_Success();
-        }
-
+        LoginResponse status;
         ConnectionState state;
-        using (this.BeginMethodScope())
+        using (this.stateLock.EnterScope())
         {
-            (this.loginStatus, state) = this.GetConnectionState_i();
+            var result = this.Login_p();
+
+            if (result is LoginResponse.VoicemeeterNotRunning)
+            {
+                this.On_Login_VmNotRunning();
+            }
+            else
+            {
+                this.On_Method_Success();
+            }
+
+            using (this.BeginMethodScope())
+            {
+                (status, state) = this.GetConnectionState_i();
+                this.loginStatus = status;
+            }
+
+            if (!state.ButtonsRunning)
+            {
+                this.On_Login_MbNotRunning();
+            }
         }
 
         this.On_ConnectionState_Changed(state);
 
-        if (!state.ButtonsRunning)
-        {
-            this.On_Login_MbNotRunning();
-        }
-
-        return this.loginStatus;
+        return status;
     }
 
     /// <inheritdoc/>
     public async Task<LoginResponse> LoginAsync(CancellationToken cancellationToken = default)
     {
         using var scope = this.BeginInstanceScope();
-        using var lk = await this.stateLock.EnterScopeAsync(cancellationToken);
 
-        var result = this.Login_p();
-
-        if (result is LoginResponse.VoicemeeterNotRunning)
-        {
-            this.On_Login_VmNotRunning();
-        }
-        else if (await this.WaitForVoicemeeter(cancellationToken) is RunResponse.Timeout)
-        {
-            throw this.On_Method_Error(LoginResponse.Timeout);
-        }
-        else
-        {
-            this.On_Method_Success();
-        }
-
+        LoginResponse status;
         ConnectionState state;
-        using (this.BeginMethodScope())
+        using (await this.stateLock.EnterScopeAsync(cancellationToken))
         {
-            (this.loginStatus, state) = this.GetConnectionState_i();
+            var result = this.Login_p();
+
+            if (result is LoginResponse.VoicemeeterNotRunning)
+            {
+                this.On_Login_VmNotRunning();
+            }
+            else if (await this.WaitForVoicemeeter(cancellationToken) is RunResponse.Timeout)
+            {
+                throw this.On_Method_Error(LoginResponse.Timeout);
+            }
+            else
+            {
+                this.On_Method_Success();
+            }
+            using (this.BeginMethodScope())
+            {
+                (status, state) = this.GetConnectionState_i();
+                this.loginStatus = status;
+            }
+
+            if (!state.ButtonsRunning)
+            {
+                this.On_Login_MbNotRunning();
+            }
         }
 
         this.On_ConnectionState_Changed(state);
 
-        if (!state.ButtonsRunning)
-        {
-            this.On_Login_MbNotRunning();
-        }
-
-        return this.loginStatus;
+        return status;
     }
 
     #endregion
@@ -125,26 +132,33 @@ public partial class Remote
     public LoginResponse Logout()
     {
         using var scope = this.BeginInstanceScope();
-        using var lk = this.stateLock.EnterScope();
 
-        if (this.loginStatus == LoginResponse.LoggedOut)
+        LoginResponse status;
+        ConnectionState state;
+        using (this.stateLock.EnterScope())
         {
-            this.On_Method_Error(LoginResponse.AlreadyLoggedOut);
-        }
-        else
-        {
-            this.loginStatus = this.Logout_i();
+            if (this.loginStatus == LoginResponse.LoggedOut)
+            {
+                this.On_Method_Error(LoginResponse.AlreadyLoggedOut);
+                return this.loginStatus;
+            }
+            else
+            {
+                status = this.Logout_i();
+                this.loginStatus = status;
 
-            ConnectionState state = new(
-                this.loginStatus,
-                this.lastConnectionState.ButtonsState,
-                this.lastConnectionState.RunningKind,
-                this.lastConnectionState.RunningVersion
-            );
-            this.On_ConnectionState_Changed(state);
+                state = new(
+                    this.loginStatus,
+                    this.lastConnectionState.ButtonsState,
+                    this.lastConnectionState.RunningKind,
+                    this.lastConnectionState.RunningVersion
+                );
+            }
         }
 
-        return this.loginStatus;
+        this.On_ConnectionState_Changed(state);
+
+        return status;
     }
 
     #endregion
@@ -275,39 +289,44 @@ public partial class Remote
         RunResponse result;
         if (app is App.MacroButtons || app.IsVoicemeeter())
         {
-            using var lk = await this.stateLock.EnterScopeAsync(cancellationToken);
-
-            var loggedIn = this.loginStatus < LoginResponse.LoggedOut;
-
-            a = this.Run_p(app);
-
-            result = a is App.MacroButtons
-                ? await this.WaitForRunning(a, cancellationToken)
-                : loggedIn
-                    ? await this.WaitForVoicemeeter(cancellationToken)
-                    : this.On_Run_LoggedOut();
-
-            if (result < RunResponse.Ok)
+            ConnectionState state;
+            using (await this.stateLock.EnterScopeAsync(cancellationToken))
             {
-                throw this.On_Run_Error(result, a);
-            }
+                var loggedIn = this.loginStatus < LoginResponse.LoggedOut;
 
-            if (loggedIn)
-            {
-                ConnectionState state;
-                using (this.BeginMethodScope())
+                a = this.Run_p(app);
+
+                result = a is App.MacroButtons
+                    ? await this.WaitForRunning(a, cancellationToken)
+                    : loggedIn
+                        ? await this.WaitForVoicemeeter(cancellationToken)
+                        : this.On_Run_LoggedOut();
+
+                if (result < RunResponse.Ok)
                 {
-                    (this.loginStatus, state) = this.GetConnectionState_i();
+                    throw this.On_Run_Error(result, a);
                 }
 
-                if ((a is App.MacroButtons && !state.ButtonsRunning)
-                    || (a.IsVoicemeeter() && !state.Connected))
+                if (loggedIn)
                 {
-                    throw this.On_Run_Error(RunResponse.Error, a);
-                }
+                    using (this.BeginMethodScope())
+                    {
+                        (this.loginStatus, state) = this.GetConnectionState_i();
+                    }
 
-                this.On_ConnectionState_Changed(state);
+                    if ((a is App.MacroButtons && !state.ButtonsRunning)
+                        || (a.IsVoicemeeter() && !state.Connected))
+                    {
+                        throw this.On_Run_Error(RunResponse.Error, a);
+                    }
+                }
+                else
+                {
+                    state = this.lastConnectionState;
+                }
             }
+
+            this.On_ConnectionState_Changed(state);
         }
         else
         {

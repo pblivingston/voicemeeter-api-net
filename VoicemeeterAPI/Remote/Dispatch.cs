@@ -77,16 +77,18 @@ public partial class Remote
 
     private void On_ConnectionState_Changed(ConnectionState currentState, [CallerMemberName] string methodName = "")
     {
-        if (this.lastConnectionState == currentState)
+        var previousState = this.LastConnectionState;
+
+        if (previousState == currentState)
         {
             return;
         }
 
-        RemoteLog.ConnectionState_Changed(this.logger, methodName, this.lastConnectionState, currentState);
+        this.LastConnectionState = currentState;
 
-        ConnectionStateChanged?.Invoke(this, new(this.lastConnectionState, currentState));
+        RemoteLog.ConnectionState_Changed(this.logger, methodName, previousState, currentState);
 
-        this.lastConnectionState = currentState;
+        ConnectionStateChanged?.Invoke(this, new(previousState, currentState));
     }
 
     private void On_ConnectionState_StateMismatch(LoginResponse currentLoginStatus, LogLevel level = LogLevel.Warning)

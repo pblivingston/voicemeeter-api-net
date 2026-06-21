@@ -211,25 +211,27 @@ public partial class Remote
     public ConnectionState GetConnectionState()
     {
         using var scope = this.BeginInstanceScope();
-        using var lk = this.stateLock.EnterScope();
 
         ConnectionState state;
-        if (this.loginStatus >= LoginResponse.LoggedOut)
+        using (this.stateLock.EnterScope())
         {
-            this.On_GetConnectionState_Start();
+            if (this.loginStatus >= LoginResponse.LoggedOut)
+            {
+                this.On_GetConnectionState_Start();
 
-            state = new(
-                this.loginStatus,
-                this.lastConnectionState.ButtonsState,
-                this.lastConnectionState.RunningKind,
-                this.lastConnectionState.RunningVersion
-            );
+                state = new(
+                    this.loginStatus,
+                    this.lastConnectionState.ButtonsState,
+                    this.lastConnectionState.RunningKind,
+                    this.lastConnectionState.RunningVersion
+                );
 
-            this.On_Method_Success();
-        }
-        else
-        {
-            (this.loginStatus, state) = this.GetConnectionState_i();
+                this.On_Method_Success();
+            }
+            else
+            {
+                (this.loginStatus, state) = this.GetConnectionState_i();
+            }
         }
 
         this.On_ConnectionState_Changed(state);
