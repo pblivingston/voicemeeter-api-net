@@ -1,13 +1,43 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-#if NET9_0_OR_GREATER
-global using LockObject = System.Threading.Lock;
-#else
-global using LockObject = System.Object;
+namespace PBLivingston.VoicemeeterAPI;
+
+#if NET6_0_OR_GREATER
+using System.Globalization;
 #endif
 
-namespace PBLivingston.VoicemeeterAPI;
+using System.Text;
+
+internal static class StringBuilderExt
+{
+    public static StringBuilder AddArg<T>(this StringBuilder builder, string label, T value) where T : struct
+    {
+#if NET6_0_OR_GREATER
+        builder.Append(CultureInfo.InvariantCulture, $"{label}: {value}; ");
+#else
+        builder.Append($"{label}: {value}; ");
+#endif
+        return builder;
+    }
+
+    public static StringBuilder AddNullableArg<T>(this StringBuilder builder, string label, T? value)
+    {
+#if NET6_0_OR_GREATER
+        if (value is not null)
+        {
+            builder.Append(CultureInfo.InvariantCulture, $"{label}: {value}; ");
+        }
+#else
+        if (!EqualityComparer<T?>.Default.Equals(value, default))
+        {
+            builder.Append($"{label}: {value}; ");
+        }
+#endif
+
+        return builder;
+    }
+}
 
 internal static class SemaphoreExt
 {

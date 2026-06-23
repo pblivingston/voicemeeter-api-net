@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using PBLivingston.VoicemeeterAPI.Logging;
 using PBLivingston.VoicemeeterAPI.Types;
-using PBLivingston.VoicemeeterAPI.Utilities;
 
 /// <summary>
 ///   Implements the <see cref="IRemote"/> interface to provide methods for interacting with the VoicemeeterRemote API.
@@ -32,7 +31,7 @@ public sealed partial class Remote : IRemote
 {
     private readonly IWrapper wrapper;
     private readonly ILogger<Remote> logger;
-    private readonly Guid instanceId;
+    private readonly Guid instanceId = Guid.NewGuid();
     private readonly SemaphoreSlim stateLock = new(1, 1);
     private readonly LockObject pDirtyLock = new();
     private readonly LockObject bDirtyLock = new();
@@ -85,25 +84,22 @@ public sealed partial class Remote : IRemote
     /// </summary>
     /// <param name="wrapper"><see cref="IWrapper"/></param>
     /// <param name="logger"></param>
-    /// <param name="identifier"></param>
     /// <exception cref="ArgumentNullException"></exception>
-    internal Remote(IWrapper wrapper, ILogger<Remote>? logger = null, Guid? identifier = null)
+    internal Remote(IWrapper wrapper, ILogger<Remote>? logger = null)
     {
         this.wrapper = wrapper ?? throw new ArgumentNullException(nameof(wrapper));
         this.logger = logger ?? NullLogger<Remote>.Instance;
-        this.instanceId = identifier ?? new();
     }
 
     /// <summary>
     ///   Initializes a new instance of <see cref="Remote"/> class with a new <see cref="RemoteApiWrapper"/> using the default DLL path.
     /// </summary>
     /// <param name="logger"></param>
-    /// <param name="identifier"></param>
     /// <remarks>
     ///   Uses <see cref="PathHelperExt.GetInstallDirectory()"/> to determine the default path.
     /// </remarks>
-    public Remote(ILogger<Remote>? logger = null, Guid? identifier = null)
-        : this(new Wrapper(), logger, identifier)
+    public Remote(ILogger<Remote>? logger = null)
+        : this(new Wrapper(), logger)
     { }
 
     #endregion
@@ -115,18 +111,16 @@ public sealed partial class Remote : IRemote
     /// </summary>
     /// <param name="apiWrapper"></param>
     /// <param name="logger"></param>
-    /// <param name="identifier"></param>
-    public static Remote FromAtgRemoteApiWrapper(RemoteApiWrapper apiWrapper, ILogger<Remote>? logger = null, Guid? identifier = null)
-        => new(new Wrapper(apiWrapper), logger, identifier);
+    public static Remote FromAtgRemoteApiWrapper(RemoteApiWrapper apiWrapper, ILogger<Remote>? logger = null)
+        => new(new Wrapper(apiWrapper), logger);
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="Remote"/> class with a new <see cref="RemoteApiWrapper"/> using the specified installation directory.
     /// </summary>
     /// <param name="installDir"></param>
     /// <param name="logger"></param>
-    /// <param name="identifier"></param>
-    public static Remote FromInstallationDirectory(string installDir, ILogger<Remote>? logger = null, Guid? identifier = null)
-        => new(new Wrapper(installDir), logger, identifier);
+    public static Remote FromInstallationDirectory(string installDir, ILogger<Remote>? logger = null)
+        => new(new Wrapper(installDir), logger);
 
     #endregion
 

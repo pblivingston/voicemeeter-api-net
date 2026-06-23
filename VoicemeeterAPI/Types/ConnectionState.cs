@@ -97,12 +97,19 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse bu
         version = this.RunningVersion;
     }
 
-    public override string ToString() => $"""
-        LoginStatus: {this.LoginStatus}
-        ButtonsState: {this.ButtonsState}
-        RunningKind: {this.RunningKind}
-        RunningVersion: {this.RunningVersion}
-        """;
+    public override string ToString()
+    {
+        var builder = new System.Text.StringBuilder();
+
+        return builder
+            .Append("{ ")
+            .AddArg(nameof(this.LoginStatus), this.LoginStatus)
+            .AddArg(nameof(this.ButtonsState), this.ButtonsState)
+            .AddArg(nameof(this.RunningKind), this.RunningKind)
+            .AddArg(nameof(this.RunningVersion), this.RunningVersion)
+            .Append("}")
+            .ToString();
+    }
 
     public static explicit operator ConnectionState((LoginResponse login, RunResponse buttons, Kind kind, VmVersion version) t)
         => new(t.login, t.buttons, t.kind, t.version);
