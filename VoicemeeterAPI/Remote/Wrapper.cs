@@ -3,9 +3,10 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
+using System.Runtime.InteropServices;
 using AtgDev.Voicemeeter;
+using AtgDev.Voicemeeter.Utils;
 using PBLivingston.VoicemeeterAPI.Types;
-using PBLivingston.VoicemeeterAPI.Utilities;
 
 public partial class Remote
 {
@@ -24,7 +25,7 @@ public partial class Remote
         private readonly Dictionary<App, ProcessWrapper> apps = [];
 
         public bool Is64Bit { get; } = Environment.Is64BitProcess;
-        public string InstallDir { get; } = PathHelperExt.GetInstallDirectory();
+        public string InstallDir { get; } = GetInstallDirectory();
 
         private string DllName => VmrName + (this.Is64Bit ? "64.dll" : ".dll");
 
@@ -84,6 +85,16 @@ public partial class Remote
             {
                 a.Value.Dispose();
             }
+        }
+
+        private static string GetInstallDirectory()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                throw new PlatformNotSupportedException("Cannot get Voicemeeter installation path on current OS");
+            }
+
+            return PathHelper.GetProgramFolder();
         }
     }
 }

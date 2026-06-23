@@ -5,6 +5,7 @@ namespace PBLivingston.VoicemeeterAPI;
 
 using AtgDev.Utils.Native;
 using AtgDev.Voicemeeter;
+using AtgDev.Voicemeeter.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using PBLivingston.VoicemeeterAPI.Logging;
@@ -96,7 +97,7 @@ public sealed partial class Remote : IRemote
     /// </summary>
     /// <param name="logger"></param>
     /// <remarks>
-    ///   Uses <see cref="PathHelperExt.GetInstallDirectory()"/> to determine the default path.
+    ///   Uses <see cref="PathHelper.GetProgramFolder()"/> to determine the default path.
     /// </remarks>
     public Remote(ILogger<Remote>? logger = null)
         : this(new Wrapper(), logger)
