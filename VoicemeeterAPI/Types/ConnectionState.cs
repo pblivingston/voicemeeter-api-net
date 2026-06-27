@@ -107,7 +107,7 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse bu
             .AddArg(nameof(this.ButtonsState), this.ButtonsState)
             .AddArg(nameof(this.RunningKind), this.RunningKind)
             .AddArg(nameof(this.RunningVersion), this.RunningVersion)
-            .Append("}")
+            .Append('}')
             .ToString();
     }
 

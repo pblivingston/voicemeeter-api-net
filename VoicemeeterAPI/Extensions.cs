@@ -23,17 +23,14 @@ internal static class StringBuilderExt
 
     public static StringBuilder AddNullableArg<T>(this StringBuilder builder, string label, T? value)
     {
-#if NET6_0_OR_GREATER
         if (value is not null)
         {
+#if NET6_0_OR_GREATER
             builder.Append(CultureInfo.InvariantCulture, $"{label}: {value}; ");
-        }
 #else
-        if (!EqualityComparer<T?>.Default.Equals(value, default))
-        {
             builder.Append($"{label}: {value}; ");
-        }
 #endif
+        }
 
         return builder;
     }
