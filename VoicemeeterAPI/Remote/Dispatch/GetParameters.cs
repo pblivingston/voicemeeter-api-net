@@ -4,7 +4,6 @@
 namespace PBLivingston.VoicemeeterAPI;
 
 using Microsoft.Extensions.Logging;
-using PBLivingston.VoicemeeterAPI.Exceptions;
 using PBLivingston.VoicemeeterAPI.Logging;
 using PBLivingston.VoicemeeterAPI.Types;
 

@@ -5,7 +5,6 @@ namespace PBLivingston.VoicemeeterAPI;
 
 using AtgDev.Voicemeeter;
 using PBLivingston.VoicemeeterAPI.Types;
-using PBLivingston.VoicemeeterAPI.Exceptions;
 
 /// <summary>
 ///   Interface for interacting with the VoicemeeterRemote API via <see cref="RemoteApiWrapper"/>.

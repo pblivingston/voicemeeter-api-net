@@ -1,7 +1,7 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-namespace PBLivingston.VoicemeeterAPI.Exceptions;
+namespace PBLivingston.VoicemeeterAPI;
 
 public class CannotParseAsTypeException(string actualValue, Type type, string paramName)
     : TypeException(type, "Cannot parse string as requested type.", paramName)

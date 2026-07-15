@@ -3,8 +3,6 @@
 
 namespace PBLivingston.VoicemeeterAPI.Types;
 
-using PBLivingston.VoicemeeterAPI.Exceptions;
-
 public static class VersionUtils
 {
     private static bool InByte(int value)

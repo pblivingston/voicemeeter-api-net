@@ -3,8 +3,6 @@
 
 namespace PBLivingston.VoicemeeterAPI.Types;
 
-using PBLivingston.VoicemeeterAPI.Exceptions;
-
 /// <summary>
 ///   Applications that can be run with <see cref="Remote.Run(App, int , int)"/>.
 /// </summary>
