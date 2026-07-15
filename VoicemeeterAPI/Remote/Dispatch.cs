@@ -16,9 +16,9 @@ public partial class Remote
     private IDisposable? BeginInstanceScope()
     {
 #if NET7_0_OR_GREATER
-        ObjectDisposedException.ThrowIf(this.isDisposed != 0, this);
+        ObjectDisposedException.ThrowIf(this.IsDisposed, this);
 #else
-        if (this.isDisposed != 0)
+        if (this.IsDisposed)
         {
             throw new ObjectDisposedException(nameof(Remote));
         }
@@ -137,13 +137,6 @@ public partial class Remote
 
     private void On_GetConnectionState_Start()
         => RemoteLog.GetConnectionState_Start(this.logger);
-
-    private KindMismatchException On_GetConnectionState_KindMismatch(Kind returnedKind, VmVersion returnedVersion)
-    {
-        RemoteLog.GetConnectionState_KindMismatch(this.logger, returnedKind, returnedVersion);
-
-        return new KindMismatchException(returnedKind, returnedVersion);
-    }
 
     #endregion
 

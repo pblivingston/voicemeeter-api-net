@@ -35,10 +35,10 @@ internal static class GeneralDispatch
         return new CannotParseAsTypeException(value, type, paramName);
     }
 
-    public static VmApiArgumentOutOfRangeException On_ArgumentOutOfRange<T>(ILogger logger, T value, string paramName, string message, [CallerMemberName] string methodName = "")
+    public static VmArgumentOutOfRangeException On_ArgumentOutOfRange<T>(ILogger logger, T value, string paramName, string message, [CallerMemberName] string methodName = "")
     {
         GeneralLog.ArgumentOutOfRange(logger, value?.ToString() ?? "null", methodName, paramName);
 
-        return new VmApiArgumentOutOfRangeException(paramName, value, message);
+        return new VmArgumentOutOfRangeException(message, paramName, value);
     }
 }
