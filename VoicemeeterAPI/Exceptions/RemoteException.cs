@@ -3,8 +3,6 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-using PBLivingston.VoicemeeterAPI.Types;
-
 public class RemoteException : VmApiException
 {
     public ConnectionState? LastConnectionState { get; }

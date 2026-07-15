@@ -3,8 +3,6 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-using PBLivingston.VoicemeeterAPI.Types;
-
 public class PartsOutOfRangeException(
     int major,
     int minor,
@@ -60,7 +58,7 @@ public class PartsOutOfRangeException<T> : VmArgumentException
         string patchName = "pat"
     )
         : base($"""
-        Kind must be '{Types.Kind.Standard}'/'{(int)Types.Kind.Standard}', '{Types.Kind.Banana}'/'{(int)Types.Kind.Banana}', '{Types.Kind.Potato}'/'{(int)Types.Kind.Potato}'
+        Kind must be '{VoicemeeterAPI.Kind.Standard}'/'{(int)VoicemeeterAPI.Kind.Standard}', '{VoicemeeterAPI.Kind.Banana}'/'{(int)VoicemeeterAPI.Kind.Banana}', '{VoicemeeterAPI.Kind.Potato}'/'{(int)VoicemeeterAPI.Kind.Potato}'
         Semantic parts must be <= 0xFF and resulting semantic version must be > '0.0.0'
         Kind: {kind}; Parameter name: {kindName}
         Major: {major}; Parameter name: {majorName}
@@ -85,7 +83,7 @@ public class PartsOutOfRangeException<T> : VmArgumentException
         string semanticName = "sem"
     )
         : base($"""
-        Kind must be '{Types.Kind.Standard}'/'{(int)Types.Kind.Standard}', '{Types.Kind.Banana}'/'{(int)Types.Kind.Banana}', '{Types.Kind.Potato}'/'{(int)Types.Kind.Potato}'
+        Kind must be '{VoicemeeterAPI.Kind.Standard}'/'{(int)VoicemeeterAPI.Kind.Standard}', '{VoicemeeterAPI.Kind.Banana}'/'{(int)VoicemeeterAPI.Kind.Banana}', '{VoicemeeterAPI.Kind.Potato}'/'{(int)VoicemeeterAPI.Kind.Potato}'
         Semantic version must be > '0.0.0'
         Kind: {kind}; Parameter name: {kindName}
         Semantic: {semantic}; Parameter name: {semanticName}

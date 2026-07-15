@@ -6,7 +6,6 @@ namespace PBLivingston.VoicemeeterAPI.Utilities;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using PBLivingston.VoicemeeterAPI.Logging;
-using PBLivingston.VoicemeeterAPI.Types;
 
 internal static class GeneralDispatch
 {

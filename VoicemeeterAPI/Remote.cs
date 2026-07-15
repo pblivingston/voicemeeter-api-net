@@ -9,7 +9,6 @@ using AtgDev.Voicemeeter.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using PBLivingston.VoicemeeterAPI.Logging;
-using PBLivingston.VoicemeeterAPI.Types;
 
 /// <summary>
 ///   Implements the <see cref="IRemote"/> interface to provide methods for interacting with the VoicemeeterRemote API.

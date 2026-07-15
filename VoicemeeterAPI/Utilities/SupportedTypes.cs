@@ -3,8 +3,6 @@
 
 namespace PBLivingston.VoicemeeterAPI.Utilities;
 
-using PBLivingston.VoicemeeterAPI.Types;
-
 internal static class SupportedTypes
 {
     public static string ListString(Type[] types) => string.Join(", ", types.Select(t => t.Name));

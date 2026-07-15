@@ -4,7 +4,6 @@
 namespace PBLivingston.VoicemeeterAPI.Logging;
 
 using Microsoft.Extensions.Logging;
-using PBLivingston.VoicemeeterAPI.Types;
 
 internal static partial class GeneralLog
 {

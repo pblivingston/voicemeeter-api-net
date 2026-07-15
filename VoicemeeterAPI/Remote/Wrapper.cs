@@ -6,7 +6,6 @@ namespace PBLivingston.VoicemeeterAPI;
 using System.Runtime.InteropServices;
 using AtgDev.Voicemeeter;
 using AtgDev.Voicemeeter.Utils;
-using PBLivingston.VoicemeeterAPI.Types;
 
 public partial class Remote
 {

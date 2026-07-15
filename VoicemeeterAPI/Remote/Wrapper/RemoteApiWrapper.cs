@@ -3,8 +3,6 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-using PBLivingston.VoicemeeterAPI.Types;
-
 public partial class Remote
 {
     private partial class Wrapper
