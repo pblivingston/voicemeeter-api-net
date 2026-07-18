@@ -3,7 +3,7 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-public abstract class PackedOutOfRangeException(string paramName, int actualValue, string message)
+public class PackedOutOfRangeException(string paramName, int actualValue, string message)
     : VmArgumentOutOfRangeException(
         message + Environment.NewLine + "Remaining three bytes should be > 0x00_0000.",
         paramName,
