@@ -1,7 +1,5 @@
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;
 
-using PBLivingston.VoicemeeterAPI.Exceptions;
-using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Utilities;
 
 public class GetParamGeneric : MockRemote

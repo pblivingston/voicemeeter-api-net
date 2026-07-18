@@ -1,7 +1,5 @@
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.Login;
 
-using PBLivingston.VoicemeeterAPI.Types;
-
 public class Logout : MockRemote
 {
     [Fact]

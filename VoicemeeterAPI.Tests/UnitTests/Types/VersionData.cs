@@ -1,7 +1,6 @@
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types;
 
 using System.Text.Json.Serialization;
-using PBLivingston.VoicemeeterAPI.Types;
 
 public class VersionData : TheoryData<VersionData.CaseName, VersionData.CaseRecord>
 {

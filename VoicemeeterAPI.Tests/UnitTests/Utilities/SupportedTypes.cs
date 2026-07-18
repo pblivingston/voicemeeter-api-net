@@ -1,6 +1,5 @@
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Utilities;
 
-using PBLivingston.VoicemeeterAPI.Types;
 using PBLivingston.VoicemeeterAPI.Utilities;
 
 public class SupportedTypesTests

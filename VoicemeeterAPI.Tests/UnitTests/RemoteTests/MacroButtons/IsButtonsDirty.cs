@@ -1,8 +1,5 @@
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.MacroButtons;
 
-using PBLivingston.VoicemeeterAPI.Exceptions;
-using PBLivingston.VoicemeeterAPI.Types;
-
 public class IsButtonsDirty : MockRemote
 {
     [Fact]

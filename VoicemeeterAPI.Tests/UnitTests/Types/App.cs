@@ -1,8 +1,6 @@
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types;
 
 using System.Text.Json.Serialization;
-using PBLivingston.VoicemeeterAPI.Exceptions;
-using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.AppData;
 
 public class AppTests

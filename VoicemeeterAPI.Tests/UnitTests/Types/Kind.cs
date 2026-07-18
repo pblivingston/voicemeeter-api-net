@@ -1,6 +1,5 @@
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types;
 
-using PBLivingston.VoicemeeterAPI.Types;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.KindData;
 
 public class KindTests

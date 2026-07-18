@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Xunit.Sdk;
-using PBLivingston.VoicemeeterAPI.Types;
 
 internal static class CaseTagExt
 {

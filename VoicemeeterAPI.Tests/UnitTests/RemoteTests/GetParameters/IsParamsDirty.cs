@@ -1,8 +1,5 @@
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;
 
-using PBLivingston.VoicemeeterAPI.Exceptions;
-using PBLivingston.VoicemeeterAPI.Types;
-
 public class IsParamsDirty : MockRemote
 {
     [Fact]
