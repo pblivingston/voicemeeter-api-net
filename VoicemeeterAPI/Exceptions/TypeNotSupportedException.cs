@@ -10,5 +10,5 @@ public class TypeNotSupportedException(Type type, string paramName, Type[] suppo
 
     public override string Message
         => base.Message + Environment.NewLine +
-            $"Supported types: {Utilities.SupportedTypes.ListString(this.SupportedTypes)}";
+            $"Supported types: {Internal.SupportedTypes.ListString(this.SupportedTypes)}";
 }

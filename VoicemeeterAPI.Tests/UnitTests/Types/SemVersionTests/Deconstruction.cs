@@ -1,6 +1,5 @@
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.SemVersionTests;
 
-using PBLivingston.VoicemeeterAPI.Utilities;
 using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.VersionData;
 
 public class Deconstruction

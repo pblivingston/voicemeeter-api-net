@@ -3,8 +3,6 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-using PBLivingston.VoicemeeterAPI.Utilities;
-
 public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 {
     /// <inheritdoc/>

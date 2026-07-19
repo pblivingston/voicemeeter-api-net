@@ -6,3 +6,5 @@ global using LockObject = System.Threading.Lock;
 #else
 global using LockObject = System.Object;
 #endif
+
+global using PBLivingston.VoicemeeterAPI.Internal;

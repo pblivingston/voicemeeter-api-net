@@ -4,7 +4,6 @@
 namespace PBLivingston.VoicemeeterAPI;
 
 using Microsoft.Extensions.Logging;
-using PBLivingston.VoicemeeterAPI.Utilities;
 
 public partial class Remote
 {
