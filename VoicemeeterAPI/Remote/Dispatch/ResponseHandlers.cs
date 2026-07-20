@@ -234,6 +234,13 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     )
     {
+        if (!(version == default || version.IsValid()))
+        {
+            var ex = new VersionNotSupportedException(version, this.lastConnectionState);
+            Log.RemoteContractViolation(this.logger, ex, methodName, "Voicemeeter version not supported.", new(version), executionPath);
+            throw ex;
+        }
+
         var state = new ConnectionState(login, mbState, version.K, version);
 
         Log.RemoteMethodSuccess(this.logger, LogLevel.Information, methodName, new(state), executionPath);
