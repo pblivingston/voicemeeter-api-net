@@ -18,13 +18,12 @@ public partial class Remote
             Level = LogLevel.Information,
             Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
                 "Starting... " +
-                "{Payload}[{ExecutionPath}]"
+                "{Payload}[{MethodName}]"
         )]
         public static partial void RemoteMethodStart(
             ILogger logger,
             string methodName,
-            LogArgs payload,
-            string executionPath
+            LogArgs payload
         );
 
         [LoggerMessage(

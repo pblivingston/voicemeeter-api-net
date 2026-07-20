@@ -84,7 +84,7 @@ public partial class Remote
     }
 
     /// <summary>
-    ///   Updates this.lastConnectionState
+    ///   Updates this.lastConnectionState - must be within this.stateLock scope!
     /// </summary>
     /// <param name="currentState"></param>
     /// <param name="executionPath"></param>
@@ -92,7 +92,7 @@ public partial class Remote
     /// <returns>
     ///   Previously cached state
     /// </returns>
-    private ConnectionState HandleStaleCache(
+    private void HandleStaleCache(
         ConnectionState currentState,
         string executionPath,
         [CallerMemberName] string methodName = ""
@@ -100,18 +100,18 @@ public partial class Remote
     {
         var previousState = this.lastConnectionState;
 
-        if (currentState != previousState)
+        if (currentState == previousState)
         {
-            this.lastConnectionState = currentState;
-
-            Log.ConnectionStateChanged(
-                this.logger,
-                methodName,
-                new(previousState, currentState),
-                executionPath
-            );
+            return;
         }
 
-        return previousState;
+        this.lastConnectionState = currentState;
+
+        Log.ConnectionStateChanged(
+            this.logger,
+            methodName,
+            new(previousState, currentState),
+            executionPath
+        );
     }
 }

@@ -25,10 +25,9 @@ public partial class Remote
     #region Entry
 
     private void MethodStart(
-        string executionPath,
         LogArgs payload = default,
         [CallerMemberName] string methodName = ""
-    ) => Log.RemoteMethodStart(this.logger, methodName, payload, executionPath);
+    ) => Log.RemoteMethodStart(this.logger, methodName, payload);
 
     private void WrapperCall(
         string wrapperMethodName,
@@ -38,8 +37,8 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     )
     {
-        var info = trace ? LogLevel.Trace : LogLevel.Information;
-        Log.RemoteWrapperCall(this.logger, info, methodName, wrapperMethodName, payload, executionPath);
+        var level = trace ? LogLevel.Trace : LogLevel.Debug;
+        Log.RemoteWrapperCall(this.logger, level, methodName, wrapperMethodName, payload, executionPath);
     }
 
     private void WaitForRunningStart(

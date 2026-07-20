@@ -65,36 +65,33 @@ public partial class Remote
     /// <summary>
     ///   Accesses this.lastConnectionState - must be within this.stateLock scope!
     /// </summary>
+    /// <param name="app"></param>
     /// <param name="response"></param>
-    /// <param name="payload"></param>
     /// <param name="executionPath"></param>
-    /// <param name="trace"></param>
     /// <param name="paramName"></param>
     /// <param name="methodName"></param>
     /// <returns></returns>
     private RunResponse HandleResponse(
+        App app,
         RunResponse response,
-        LogArgs payload,
         string executionPath,
-        bool trace = false,
         string paramName = "app",
         [CallerMemberName] string methodName = ""
     )
     {
-        var info = trace ? LogLevel.Trace : LogLevel.Information;
-        var warning = trace ? LogLevel.Trace : LogLevel.Warning;
         var aState = methodName is nameof(this.GetAppState_i);
+        LogArgs payload = new(app);
 
         switch (response)
         {
             case RunResponse.NotResponding when aState:
-                Log.RemoteMethodSuccess(this.logger, warning, methodName, payload, executionPath);
+                Log.RemoteMethodSuccess(this.logger, LogLevel.Warning, methodName, payload, executionPath);
                 break;
 
             case RunResponse.NotRunning when aState:
             case RunResponse.Hidden when aState:
             case RunResponse.Ok when aState:
-                Log.RemoteMethodSuccess(this.logger, info, methodName, payload, executionPath);
+                Log.RemoteMethodSuccess(this.logger, LogLevel.Debug, methodName, new(app, response), executionPath);
                 break;
 
             case RunResponse.Ok:
@@ -102,12 +99,12 @@ public partial class Remote
                 break;
 
             case RunResponse.NotInstalled:
-                var ex1 = new AppNotInstalledException(payload.App ?? default);
+                var ex1 = new AppNotInstalledException(app);
                 Log.AppCriticalState(this.logger, ex1, methodName, payload, executionPath);
                 throw ex1;
 
             case RunResponse.UnknownApp:
-                var ex2 = new VmArgumentException($"'{payload.App ?? default}' is not a valid VB-Audio application.", paramName);
+                var ex2 = new VmArgumentException($"'{app}' is not a valid VB-Audio application.", paramName);
                 Log.RemoteInvalidArgument(this.logger, ex2, methodName, payload, executionPath);
                 throw ex2;
 
@@ -145,10 +142,12 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     )
     {
-        var info = trace ? LogLevel.Trace : LogLevel.Information;
+        var debug = trace ? LogLevel.Trace : LogLevel.Debug;
         var warning = trace ? LogLevel.Trace : LogLevel.Warning;
         var pDirty = methodName is nameof(this.ParamsDirty_i);
         var bDirty = methodName is nameof(this.ButtonsDirty_i);
+        var getInfo = methodName is (nameof(this.GetKind_i)) or (nameof(this.GetVersion_i));
+        var getParam = methodName is (nameof(this.GetParamFloat_i)) or (nameof(this.GetParamString_i));
 
         switch (response)
         {
@@ -164,7 +163,7 @@ public partial class Remote
                 return false;
 
             case Response.Ok:
-                Log.RemoteMethodSuccess(this.logger, info, methodName, payload, executionPath);
+                Log.RemoteMethodSuccess(this.logger, debug, methodName, payload, executionPath);
                 return true;
 
             case Response.Error when !this.LoggedIn:
@@ -185,7 +184,7 @@ public partial class Remote
                 Log.RemoteMethodError(this.logger, ex1b, methodName, payload, executionPath);
                 throw ex1b;
 
-            case Response.NoServer when methodName is (nameof(this.GetKind_i)) or (nameof(this.GetVersion_i)):
+            case Response.NoServer when getInfo:
                 Log.RemoteMethodSuccess(this.logger, warning, methodName, payload, executionPath);
                 return false;
 
@@ -199,12 +198,13 @@ public partial class Remote
                 Log.RemoteLostConnection(this.logger, ex2b, methodName, "Voicemeeter", payload, executionPath);
                 throw ex2b;
 
-            case Response.UnknownParameter:
+            case Response.UnknownParameter when getParam:
                 var ex3 = new VmArgumentException($"'{payload.Param}' is not a valid Voicemeeter parameter.", paramName);
                 Log.RemoteInvalidArgument(this.logger, ex3, methodName, payload, executionPath);
                 throw ex3;
 
             case Response.Dirty:
+            case Response.UnknownParameter:
             case Response.UnknownApp:
             case Response.TypeMismatch:
             default:
@@ -215,7 +215,7 @@ public partial class Remote
     }
 
     /// <summary>
-    ///   this.HandleStaleCache accesses this.lastConnectionState - must be within this.stateLock scope!
+    ///   Logs warnings when Voicemeeter or MacroButtons are not running
     /// </summary>
     /// <param name="login"></param>
     /// <param name="version"></param>
@@ -223,12 +223,13 @@ public partial class Remote
     /// <param name="executionPath"></param>
     /// <param name="methodName"></param>
     /// <returns>
-    ///   Previously cached state
+    ///   Current state
     /// </returns>
     private ConnectionState HandleResponse(
         LoginResponse login,
         VmVersion version,
         RunResponse mbState,
+        bool loggedOut,
         string executionPath,
         [CallerMemberName] string methodName = ""
     )
@@ -236,6 +237,11 @@ public partial class Remote
         var state = new ConnectionState(login, mbState, version.K, version);
 
         Log.RemoteMethodSuccess(this.logger, LogLevel.Information, methodName, new(state), executionPath);
+
+        if (loggedOut)
+        {
+            return state;
+        }
 
         if (!state.Connected)
         {
@@ -247,6 +253,6 @@ public partial class Remote
             Log.RemoteNotConnected(this.logger, methodName, "MacroButtons", executionPath);
         }
 
-        return this.HandleStaleCache(state, executionPath, methodName);
+        return state;
     }
 }
