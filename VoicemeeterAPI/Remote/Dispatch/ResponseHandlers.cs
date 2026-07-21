@@ -53,7 +53,7 @@ public partial class Remote
             default:
                 if (login)
                 {
-                    var ex = new RemoteException("Unhandled response!", response, this.lastConnectionState);
+                    var ex = new UnhandledResponseException(response, this.lastConnectionState);
                     Log.UnhandledResponse(this.logger, ex, methodName, payload, executionPath);
                     throw ex;
                 } // never throw during Logout; just log
@@ -115,7 +115,7 @@ public partial class Remote
             case RunResponse.Timeout:
             case RunResponse.Error:
             default:
-                var ex = new RemoteException("Unhandled response!", response, this.lastConnectionState);
+                var ex = new UnhandledResponseException(response, this.lastConnectionState);
                 Log.UnhandledResponse(this.logger, ex, methodName, payload, executionPath);
                 throw ex;
         }
@@ -208,7 +208,7 @@ public partial class Remote
             case Response.UnknownApp:
             case Response.TypeMismatch:
             default:
-                var ex = new RemoteException("Unhandled response!", response, this.LastConnectionState);
+                var ex = new UnhandledResponseException(response, this.LastConnectionState);
                 Log.UnhandledResponse(this.logger, ex, methodName, payload, executionPath);
                 throw ex;
         }

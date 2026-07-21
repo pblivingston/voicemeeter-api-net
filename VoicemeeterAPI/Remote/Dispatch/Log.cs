@@ -317,7 +317,7 @@ public partial class Remote
         )]
         public static partial void UnhandledResponse(
             ILogger logger,
-            RemoteException ex,
+            UnhandledResponseException ex,
             string methodName,
             LogArgs payload,
             string executionPath
