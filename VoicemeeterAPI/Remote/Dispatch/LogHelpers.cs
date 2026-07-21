@@ -75,16 +75,17 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     ) => Log.AppUnexpectedState(this.logger, methodName, payload, executionPath);
 
-    private void WaitForVoicemeeterLoggedOut(
+    private void CannotWaitForVoicemeeter(
         string executionPath,
         [CallerMemberName] string methodName = ""
-    ) => Log.WaitForVoicemeeterLoggedOut(this.logger, methodName, executionPath);
+    ) => Log.CannotWaitForVoicemeeter(this.logger, methodName, executionPath);
 
     private void OperationCanceled(
+        OperationCanceledException ex,
         string executionPath,
         LogArgs payload = default,
         [CallerMemberName] string methodName = ""
-    ) => Log.RemoteOperationCanceled(this.logger, methodName, payload, executionPath);
+    ) => Log.RemoteOperationCanceled(this.logger, ex, methodName, payload, executionPath);
 
     #endregion
 

@@ -26,7 +26,7 @@ internal enum Event
 
     AppUnexpectedState = 1310,
 
-    WaitForVoicemeeterLoggedOut = 1320,
+    CannotWaitForVoicemeeter = 1320,
 
     StaleConnectionState = 1330,
 

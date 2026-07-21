@@ -25,6 +25,11 @@ public partial class Remote
             this.Param = param;
             this.args = true;
         }
+        public LogArgs(object value)
+        {
+            this.Value = value;
+            this.args = true;
+        }
         public LogArgs(string param, object value)
         {
             this.Param = param;
@@ -42,10 +47,10 @@ public partial class Remote
             this.Version = version;
             this.args = true;
         }
-        public LogArgs(Kind kind, VmVersion version)
+        public LogArgs(VmVersion version, RunResponse state)
         {
-            this.Kind = kind;
             this.Version = version;
+            this.State = state;
             this.args = true;
         }
 

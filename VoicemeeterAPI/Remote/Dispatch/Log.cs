@@ -150,13 +150,13 @@ public partial class Remote
         );
 
         [LoggerMessage(
-            EventId = (int)Event.WaitForVoicemeeterLoggedOut,
+            EventId = (int)Event.CannotWaitForVoicemeeter,
             Level = LogLevel.Warning,
             Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
                 "Cannot wait for Voicemeeter while not logged in. " +
                 "[{ExecutionPath}]"
         )]
-        public static partial void WaitForVoicemeeterLoggedOut(
+        public static partial void CannotWaitForVoicemeeter(
             ILogger logger,
             string methodName,
             string executionPath
@@ -186,6 +186,7 @@ public partial class Remote
         )]
         public static partial void RemoteOperationCanceled(
             ILogger logger,
+            OperationCanceledException ex,
             string methodName,
             LogArgs payload,
             string executionPath
