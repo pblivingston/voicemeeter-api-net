@@ -85,16 +85,6 @@ public interface IRemote : IDisposable
     public LoginResponse Login();
 
     /// <summary>
-    ///   Opens communication pipe with VoicemeeterRemote. If Voicemeeter is running, confirms it is reachable. Waits up to 15 seconds.
-    /// </summary>
-    /// <param name="cancellationToken"></param>
-    /// <exception cref="RemoteException{LoginResponse}">
-    ///   Throws if already logged in, the API call returns an error, or waiting for Voicemeeter is cancelled or times out.
-    /// </exception>
-    /// <inheritdoc cref="Login()"/>
-    public Task<LoginResponse> LoginAsync(CancellationToken cancellationToken = default);
-
-    /// <summary>
     ///   Closes communication pipe with VoicemeeterRemote.
     /// </summary>
     /// <returns>
@@ -145,7 +135,8 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    public void Run<T>(T app) where T : notnull;
+    public RunResponse Run<T>(T app)
+        where T : struct, Enum;
 
     /// <summary>
     ///   Runs the specified <see cref="App"/> and waits for it to start. If the <see cref="App"/> is Voicemeeter, confirms it is reachable. Waits up to 15 seconds.
@@ -159,7 +150,8 @@ public interface IRemote : IDisposable
     ///   Throws if the <see cref="App"/> is already running but not responding, the API call returns an error, or waiting for <see cref="App"/> is cancelled or times out.
     /// </exception>
     /// <inheritdoc cref="Run{T}(T)"/>
-    public Task<RunResponse> RunAsync<T>(T app, CancellationToken cancellationToken = default) where T : notnull;
+    public Task<RunResponse> RunAsync<T>(T app, CancellationToken cancellationToken = default)
+        where T : struct, Enum;
 
     #endregion
 
@@ -295,7 +287,8 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    public T GetParam<T>(string param) where T : notnull;
+    public T GetParam<T>(string param)
+        where T : notnull;
 
     #endregion
 

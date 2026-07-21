@@ -8,7 +8,6 @@ using AtgDev.Voicemeeter;
 using AtgDev.Voicemeeter.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using PBLivingston.VoicemeeterAPI.Logging;
 
 /// <summary>
 ///   Implements the <see cref="IRemote"/> interface to provide methods for interacting with the VoicemeeterRemote API.
@@ -133,9 +132,7 @@ public sealed partial class Remote : IRemote
             return;
         }
 
-        using var scope = LogScope.Instance(this.logger, this.instanceId);
-
-        this.On_Dispose_Start();
+        using var scope = this.BeginCallScope();
 
         if (disposing)
         {
@@ -145,11 +142,7 @@ public sealed partial class Remote : IRemote
 
                 if (this.loginStatus < LoginResponse.LoggedOut)
                 {
-                    this.On_Dispose_LoggedIn(this.loginStatus);
-
-                    using var methodScope = this.BeginMethodScope();
-
-                    this.Logout_i();
+                    this.Logout_i(nameof(this.Dispose));
                 }
 
                 this.wrapper.Dispose();
@@ -159,8 +152,6 @@ public sealed partial class Remote : IRemote
                 this.stateLock.Dispose();
             }
         }
-
-        this.On_Dispose_Success();
     }
 
     /// <summary>

@@ -3,101 +3,42 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-using System.Runtime.CompilerServices;
-
 public partial class Remote
 {
     #region Login
 
-    private LoginResponse Login_p()
+    private LoginResponse Login_p(string executionPath)
     {
-        this.On_Login_Start();
+        var e = Utilities.BuildPath(executionPath);
+
+        this.WrapperCall(nameof(this.wrapper.Login), e);
 
         var result = this.wrapper.Login();
 
-        if (result < LoginResponse.Ok)
-        {
-            throw this.On_Method_Error(result);
-        }
-
-        return result;
+        return this.HandleResponse(result, e);
     }
 
     /// <inheritdoc/>
     public LoginResponse Login()
     {
-        using var scope = this.BeginInstanceScope();
+        var e = nameof(this.Login);
 
-        LoginResponse status;
-        ConnectionState state;
+        using var scope = this.BeginCallScope();
+
+        this.MethodStart();
+
+        LoginResponse result;
+        ConnectionState previousState;
+        ConnectionState currentState;
         using (this.stateLock.EnterScope())
         {
-            var result = this.Login_p();
-
-            if (result is LoginResponse.VoicemeeterNotRunning)
-            {
-                this.On_Login_VmNotRunning();
-            }
-            else
-            {
-                this.On_Method_Success();
-            }
-
-            using (this.BeginMethodScope())
-            {
-                (status, state) = this.GetConnectionState_i();
-                this.loginStatus = status;
-            }
-
-            if (!state.ButtonsRunning)
-            {
-                this.On_Login_MbNotRunning();
-            }
+            result = this.Login_p(e);
+            (previousState, currentState) = this.GetConnectionState_i(e);
         }
 
-        this.On_ConnectionState_Changed(state);
+        this.OnConnectionStateChanged(previousState, currentState);
 
-        return status;
-    }
-
-    /// <inheritdoc/>
-    public async Task<LoginResponse> LoginAsync(CancellationToken cancellationToken = default)
-    {
-        using var scope = this.BeginInstanceScope();
-
-        LoginResponse status;
-        ConnectionState state;
-        using (await this.stateLock.EnterScopeAsync(cancellationToken))
-        {
-            var result = this.Login_p();
-
-            if (result is LoginResponse.VoicemeeterNotRunning)
-            {
-                this.On_Login_VmNotRunning();
-            }
-            else if (await this.WaitForVoicemeeter(cancellationToken) is RunResponse.Timeout)
-            {
-                throw this.On_Method_Error(LoginResponse.Timeout);
-            }
-            else
-            {
-                this.On_Method_Success();
-            }
-            using (this.BeginMethodScope())
-            {
-                (status, state) = this.GetConnectionState_i();
-                this.loginStatus = status;
-            }
-
-            if (!state.ButtonsRunning)
-            {
-                this.On_Login_MbNotRunning();
-            }
-        }
-
-        this.On_ConnectionState_Changed(state);
-
-        return status;
+        return result;
     }
 
     #endregion
@@ -105,173 +46,124 @@ public partial class Remote
     #region Logout
 
     /// <inheritdoc cref="IRemote.Logout()"/>
-    private LoginResponse Logout_i()
+    private LoginResponse Logout_i(string executionPath)
     {
-        this.On_Logout_Start();
+        var e = Utilities.BuildPath(executionPath);
+
+        this.WrapperCall(nameof(this.wrapper.Logout), e);
 
         var result = this.wrapper.Logout();
 
-        LoginResponse login;
-        if (result == LoginResponse.Ok)
-        {
-            login = LoginResponse.LoggedOut;
-            this.On_Method_Success();
-        }
-        else
-        {
-            login = LoginResponse.Unknown;
-            this.On_Method_Error(result);
-        }
-
-        return login;
+        return this.HandleResponse(result, e);
     }
 
     /// <inheritdoc/>
     public LoginResponse Logout()
     {
-        using var scope = this.BeginInstanceScope();
+        var e = nameof(this.Logout);
 
-        LoginResponse status;
-        ConnectionState state;
+        using var scope = this.BeginCallScope();
+
+        this.MethodStart();
+
+        ConnectionState previousState;
+        ConnectionState currentState;
         using (this.stateLock.EnterScope())
         {
-            if (this.loginStatus == LoginResponse.LoggedOut)
-            {
-                this.On_Method_Error(LoginResponse.AlreadyLoggedOut);
-                return this.loginStatus;
-            }
-            else
-            {
-                status = this.Logout_i();
-                this.loginStatus = status;
-
-                state = new(
-                    this.loginStatus,
-                    this.lastConnectionState.ButtonsState,
-                    this.lastConnectionState.RunningKind,
-                    this.lastConnectionState.RunningVersion
-                );
-            }
+            this.loginStatus = this.Logout_i(e);
+            (previousState, currentState) = this.GetConnectionState_i(e, true);
         }
 
-        this.On_ConnectionState_Changed(state);
+        this.OnConnectionStateChanged(previousState, currentState);
 
-        return status;
+        return this.loginStatus;
     }
 
     #endregion
 
     #region Run Voicemeeter
 
-    private App Run_p(App app)
+    private RunResponse Run_p(App app, string executionPath)
     {
-        App a;
-        if (app.IsVoicemeeter())
+        var e = Utilities.BuildPath(executionPath);
+
+        var state = this.GetAppState_i(app, e);
+
+        if (state is RunResponse.NotResponding)
         {
-            a = app.BitAdjust(this.wrapper.Is64Bit);
-
-            GeneralDispatch.On_BitAdjust(this.logger, app, a);
-        }
-        else
-        {
-            RunResponse state;
-            using (this.BeginMethodScope())
-            {
-                state = this.GetAppState_i(app, false);
-            }
-
-            if (state is RunResponse.NotResponding)
-            {
-                throw this.On_Run_Error(state, app);
-            }
-
-            a = app;
+            this.AppUnexpectedState(e, new(app, state));
+            return state;
         }
 
-        this.On_Run_Start(a);
+        this.WrapperCall(nameof(this.wrapper.RunVoicemeeter), e, new(app));
 
-        var result = this.wrapper.RunVoicemeeter((int)a);
+        var result = this.wrapper.RunVoicemeeter(app);
 
-        if (result != RunResponse.Ok)
-        {
-            throw this.On_Run_Error(result, a);
-        }
-
-        return a;
+        return this.HandleResponse(app, result, e);
     }
 
     #region Run
 
     /// <inheritdoc cref="IRemote.Run{T}(T)"/>
-    public void Run(App app)
+    internal RunResponse Run_i(App app, string executionPath)
     {
-        using var scope = this.BeginInstanceScope();
+        var e = Utilities.BuildPath(executionPath);
 
-        var a = this.Run_p(app);
+        using var lk = this.stateLock.EnterScope();
 
-        this.On_Method_Success();
+        var result = this.Run_p(app, e);
 
-        if (a.IsVoicemeeter() && this.LoggedIn)
+        if (result is RunResponse.NotResponding)
         {
-            using var lk = this.stateLock.EnterScope();
-
-            this.On_ConnectionState_StateMismatch(LoginResponse.Ok);
+            return result;
         }
 
-        if (a is App.MacroButtons && this.LoggedIn)
+        if (app.IsVoicemeeter() && this.LoggedIn)
         {
-            using var lk = this.stateLock.EnterScope();
-
-            this.On_ConnectionState_StateMismatch(RunResponse.Ok);
+            this.HandleStaleCache(LoginResponse.Ok, e);
         }
+
+        if (app is App.MacroButtons && this.LoggedIn)
+        {
+            this.HandleStaleCache(RunResponse.Ok, e);
+        }
+
+        return result;
     }
 
     /// <inheritdoc cref="IRemote.Run{T}(T)"/>
-    public void Run(int app)
-        => this.Run((App)app);
+    internal RunResponse Run_i(Kind kind, string executionPath)
+        => this.Run_i(kind.ToApp(this.wrapper.Is64Bit), executionPath);
 
     /// <inheritdoc cref="IRemote.Run{T}(T)"/>
-    public void Run(Kind kind)
+    public RunResponse Run(App app)
+    {
+        using var scope = this.BeginCallScope();
+
+        this.MethodStart();
+
+        return this.Run_i(app, nameof(this.Run));
+    }
+
+    /// <inheritdoc cref="IRemote.Run{T}(T)"/>
+    public RunResponse Run(Kind kind)
         => this.Run(kind.ToApp(this.wrapper.Is64Bit));
 
-    /// <inheritdoc cref="IRemote.Run{T}(T)"/>
-    public void Run(string app)
-    {
-        if (!Enum.TryParse(app, true, out App a))
-        {
-            throw GeneralDispatch.On_CannotParseAsType(this.logger, app, typeof(App), nameof(app));
-        }
-
-        this.Run(a);
-    }
-
     /// <inheritdoc/>
-    void IRemote.Run<T>(T app)
+    RunResponse IRemote.Run<T>(T app)
     {
-        switch (app)
+        var e = nameof(IRemote.Run);
+
+        using var scope = this.BeginCallScope();
+
+        this.MethodStart();
+
+        return app switch
         {
-            case App a:
-                this.Run(a);
-                break;
-
-            case int i:
-                this.Run(i);
-                break;
-
-            case Kind k:
-                this.Run(k);
-                break;
-
-            case string s:
-                this.Run(s);
-                break;
-
-            default:
-                using (this.BeginInstanceScope())
-                {
-                    throw GeneralDispatch.On_TypeNotSupported(this.logger, typeof(T), nameof(app), SupportedTypes.RunTypes);
-                }
-        }
+            App a => this.Run_i(a, e),
+            Kind k => this.Run_i(k, e),
+            _ => throw this.TypeNotSupported<T>(SupportedTypes.RunTypes, e, new(app))
+        };
     }
 
     #endregion
@@ -279,112 +171,78 @@ public partial class Remote
     #region RunAsync
 
     /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
-    public async Task<RunResponse> RunAsync(App app, CancellationToken cancellationToken = default)
+    internal async Task<RunResponse> RunAsync_i(App app, string executionPath, CancellationToken cancellationToken)
     {
-        using var scope = this.BeginInstanceScope();
+        var e = Utilities.BuildPath(executionPath);
 
-        App a;
         RunResponse result;
-        if (app is App.MacroButtons || app.IsVoicemeeter())
+        ConnectionState previousState;
+        ConnectionState currentState;
+        using (await this.stateLock.EnterScopeAsync(cancellationToken))
         {
-            ConnectionState state;
-            using (await this.stateLock.EnterScopeAsync(cancellationToken))
+            var r = this.Run_p(app, e);
+
+            if (r is RunResponse.NotResponding)
             {
-                var loggedIn = this.loginStatus < LoginResponse.LoggedOut;
-
-                a = this.Run_p(app);
-
-                result = a is App.MacroButtons
-                    ? await this.WaitForRunning(a, cancellationToken)
-                    : loggedIn
-                        ? await this.WaitForVoicemeeter(cancellationToken)
-                        : this.On_Run_LoggedOut();
-
-                if (result < RunResponse.Ok)
-                {
-                    throw this.On_Run_Error(result, a);
-                }
-
-                if (loggedIn)
-                {
-                    using (this.BeginMethodScope())
-                    {
-                        (this.loginStatus, state) = this.GetConnectionState_i();
-                    }
-
-                    if ((a is App.MacroButtons && !state.ButtonsRunning)
-                        || (a.IsVoicemeeter() && !state.Connected))
-                    {
-                        throw this.On_Run_Error(RunResponse.Error, a);
-                    }
-                }
-                else
-                {
-                    state = this.lastConnectionState;
-                }
+                return r;
             }
 
-            this.On_ConnectionState_Changed(state);
-        }
-        else
-        {
-            a = this.Run_p(app);
+            var vm = app.IsVoicemeeter();
+            var loggedOut = this.loginStatus >= LoginResponse.LoggedOut;
 
-            result = await this.WaitForRunning(a, cancellationToken);
-
-            if (result < RunResponse.Ok)
+            if (vm && loggedOut)
             {
-                throw this.On_Run_Error(result, a);
+                this.CannotWaitForVoicemeeter(e);
+                result = r;
             }
+            else
+            {
+                result = vm
+                    ? await this.WaitForVoicemeeter(e, cancellationToken)
+                    : await this.WaitForRunning(app, e, cancellationToken);
+            }
+
+            (previousState, currentState) = this.GetConnectionState_i(e, loggedOut);
         }
 
-        this.On_Method_Success();
+        this.OnConnectionStateChanged(previousState, currentState);
 
         return result;
     }
 
     /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
-    public async Task<RunResponse> RunAsync(int app, CancellationToken cancellationToken = default)
-        => await this.RunAsync((App)app, cancellationToken);
+    internal async Task<RunResponse> RunAsync_i(Kind kind, string executionPath, CancellationToken cancellationToken)
+        => await this.RunAsync_i(kind.ToApp(this.wrapper.Is64Bit), executionPath, cancellationToken);
+
+    /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
+    public async Task<RunResponse> RunAsync(App app, CancellationToken cancellationToken = default)
+    {
+        using var scope = this.BeginCallScope();
+
+        this.MethodStart();
+
+        return await this.RunAsync_i(app, nameof(this.RunAsync), cancellationToken);
+    }
 
     /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
     public async Task<RunResponse> RunAsync(Kind kind, CancellationToken cancellationToken = default)
         => await this.RunAsync(kind.ToApp(this.wrapper.Is64Bit), cancellationToken);
 
-    /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
-    public async Task<RunResponse> RunAsync(string app, CancellationToken cancellationToken = default)
-    {
-        if (!Enum.TryParse(app, true, out App a))
-        {
-            throw GeneralDispatch.On_CannotParseAsType(this.logger, app, typeof(App), nameof(app));
-        }
-
-        return await this.RunAsync(a, cancellationToken);
-    }
-
     /// <inheritdoc/>
     async Task<RunResponse> IRemote.RunAsync<T>(T app, CancellationToken cancellationToken)
     {
-        switch (app)
+        var e = nameof(IRemote.RunAsync);
+
+        using var scope = this.BeginCallScope();
+
+        this.MethodStart();
+
+        return app switch
         {
-            case App a:
-                return await this.RunAsync(a, cancellationToken);
-
-            case int i:
-                return await this.RunAsync(i, cancellationToken);
-
-            case Kind k:
-                return await this.RunAsync(k, cancellationToken);
-
-            case string s:
-                return await this.RunAsync(s, cancellationToken);
-
-            default:
-                using (this.BeginInstanceScope())
-                {
-                    throw GeneralDispatch.On_TypeNotSupported(this.logger, typeof(T), nameof(app), SupportedTypes.RunTypes);
-                }
-        }
+            App a => await this.RunAsync_i(a, e, cancellationToken),
+            Kind k => await this.RunAsync_i(k, e, cancellationToken),
+            _ => throw this.TypeNotSupported<T>(SupportedTypes.RunTypes, e, new(app))
+        };
     }
 
     #endregion
@@ -393,11 +251,12 @@ public partial class Remote
 
     #region Helpers
 
-    private async Task<RunResponse> WaitForVoicemeeter(CancellationToken cancellationToken = default, [CallerMemberName] string methodName = "")
+    private async Task<RunResponse> WaitForVoicemeeter(string executionPath, CancellationToken cancellationToken)
     {
-        using var scope = this.BeginMethodScope(methodName);
+        var e = Utilities.BuildPath(executionPath);
+        var target = "Voicemeeter";
 
-        this.On_WaitForVoicemeeter_Start();
+        this.WaitForRunningStart(target, e);
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         cts.CancelAfter(TimeSpan.FromSeconds(15));
@@ -405,53 +264,52 @@ public partial class Remote
         try
         {
             LoginResponse login;
-            LoginResponse l;
-            Kind k;
-            VmVersion v;
+            VmVersion version;
             do
             {
                 await Task.Delay(100, cts.Token);
 
-                using var s = this.BeginMethodScope();
-
-                (login, k) = this.GetKind_i(true);
-                (l, v) = this.GetVersion_i(true);
+                (login, version) = this.GetVersion_i(e);
             }
-            while (!(login is LoginResponse.Ok && login == l
-                && k.IsValid() && v.IsValid() && k == v.K));
+            while (!(login is LoginResponse.Ok && version.IsValid()));
 
-            this.On_WaitForVoicemeeter_Detected(k, v);
-
-            this.On_Method_YieldForSettle();
+            this.YieldForEngineSettle(target, e);
             bool pDirty;
             bool bDirty;
             do
             {
                 await Task.Delay(50, cts.Token);
 
-                using var s = this.BeginMethodScope();
-
-                pDirty = this.ParamsDirty_i();
-                bDirty = this.ButtonsDirty_i();
+                pDirty = this.ParamsDirty_i(e);
+                bDirty = this.ButtonsDirty_i(e);
             }
             while (pDirty || bDirty);
 
-            using var ms = this.BeginMethodScope();
+            var state = this.GetAppState_i(version.K.ToApp(this.wrapper.Is64Bit), e);
 
-            return this.GetAppState_i(k.ToApp(this.wrapper.Is64Bit), false);
+            if (this.wrapper.Is64Bit && state is RunResponse.NotRunning)
+            {
+                state = this.GetAppState_i(version.K.ToApp(false), e);
+            }
+
+            this.WaitForRunningDetected(target, e, new(version, state));
+
+            return state;
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException ex)
         {
-            this.On_WaitForVoicemeeter_Timeout();
+            this.OperationCanceled(ex, e);
             return RunResponse.Timeout;
         }
     }
 
-    private async Task<RunResponse> WaitForRunning(App app, CancellationToken cancellationToken = default, [CallerMemberName] string methodName = "")
+    private async Task<RunResponse> WaitForRunning(App app, string executionPath, CancellationToken cancellationToken)
     {
-        using var scope = this.BeginMethodScope(methodName);
+        var e = Utilities.BuildPath(executionPath);
+        var target = app.ToString();
+        LogArgs payload = new(app);
 
-        this.On_WaitForRunning_Start(app);
+        this.WaitForRunningStart(target, e, payload);
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         cts.CancelAfter(TimeSpan.FromSeconds(15));
@@ -464,43 +322,32 @@ public partial class Remote
                 await Task.Delay(100, cts.Token);
 
                 idle = this.wrapper.IsApplicationInputIdle(app);
-
-                if (idle is Response.Error)
-                {
-                    return RunResponse.Error;
-                }
             }
             while (idle is not Response.Ok);
 
             if (app is App.MacroButtons
                 && this.loginStatus < LoginResponse.LoggedOut)
             {
-                this.On_Method_YieldForSettle();
+                this.YieldForEngineSettle(target, e);
                 bool dirty;
                 do
                 {
                     await Task.Delay(50, cts.Token);
 
-                    using var s = this.BeginMethodScope();
-
-                    dirty = this.ButtonsDirty_i();
+                    dirty = this.ButtonsDirty_i(e);
                 }
                 while (dirty);
             }
 
-            RunResponse state;
-            using (this.BeginMethodScope())
-            {
-                state = this.GetAppState_i(app, false);
-            }
+            var state = this.GetAppState_i(app, e);
 
-            this.On_WaitForRunning_Detected(app, state);
+            this.WaitForRunningDetected(target, e, new(app, state));
 
             return state;
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException ex)
         {
-            this.On_WaitForRunning_Timeout(app);
+            this.OperationCanceled(ex, e, new(app));
             return RunResponse.Timeout;
         }
     }

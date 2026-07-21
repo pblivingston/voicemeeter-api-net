@@ -3,46 +3,28 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-using Microsoft.Extensions.Logging;
-
 public partial class Remote
 {
     #region Is Parameters Dirty
 
     /// <inheritdoc cref="IRemote.IsParamsDirty()"/>
-    internal bool ParamsDirty_i()
+    internal bool ParamsDirty_i(string executionPath)
     {
-        var level = LogLevel.Trace;
-
-        this.On_Query_Start(level);
-
         Response result;
         using (this.pDirtyLock.EnterScope())
         {
             result = this.wrapper.IsParametersDirty();
         }
 
-        switch (result)
-        {
-            case Response.Ok:
-                this.On_Query_Success(Response.Ok, level);
-                return false;
-
-            case Response.Dirty:
-                this.On_ParamsDirty(level);
-                return true;
-
-            default:
-                throw this.On_Method_Error(result);
-        }
+        return this.HandleResponse(result, Utilities.BuildPath(executionPath));
     }
 
     /// <inheritdoc/>
     public bool IsParamsDirty()
     {
-        using var scope = this.BeginInstanceScope();
+        using var scope = this.BeginCallScope();
 
-        return this.ParamsDirty_i();
+        return this.ParamsDirty_i(nameof(this.IsParamsDirty));
     }
 
     #endregion
@@ -50,16 +32,15 @@ public partial class Remote
     #region Get Parameter Float
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
-    internal float GetParam_iFloat(string param)
+    internal float GetParamFloat_i(string param, string executionPath)
     {
-        this.On_GetParam_Start(param);
+        var e = Utilities.BuildPath(executionPath);
+
+        this.WrapperCall(nameof(this.wrapper.GetParameter_Float), e, new(param), true);
 
         (var result, var value) = this.wrapper.GetParameter_Float(param);
 
-        if (result != Response.Ok)
-        {
-            throw this.On_GetParam_Error(result, param, value, typeof(float));
-        }
+        this.HandleResponse(result, e, new(param, value), true);
 
         return value;
     }
@@ -67,53 +48,57 @@ public partial class Remote
     /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
     public float GetParamFloat(string param)
     {
-        using var scope = this.BeginInstanceScope();
+        using var scope = this.BeginCallScope();
 
-        var value = this.GetParam_iFloat(param);
-
-        this.On_GetParam_Success(param, value);
-
-        return value;
+        return this.GetParamFloat_i(param, nameof(this.GetParamFloat));
     }
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
-    public int GetParamInt(string param)
+    internal int GetParamInt_i(string param, string executionPath)
     {
-        using var scope = this.BeginInstanceScope();
+        var e = Utilities.BuildPath(executionPath);
 
-        var val = this.GetParam_iFloat(param);
+        var val = this.GetParamFloat_i(param, e);
 
         var value = Convert.ToInt32(val);
 
         if (Math.Abs(val - value) > 0.0001f || value < 0)
         {
-            throw this.On_GetParam_Error(Response.TypeMismatch, param, val, typeof(int));
+            throw this.CannotConvertToType<int>(param, val, e);
         }
-
-        this.On_GetParam_Success(param, value);
 
         return value;
     }
 
-    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
-    public bool GetParamBool(string param)
+    public int GetParamInt(string param)
     {
-        using var scope = this.BeginInstanceScope();
+        using var scope = this.BeginCallScope();
 
-        var val = this.GetParam_iFloat(param);
+        return this.GetParamInt_i(param, nameof(this.GetParamInt));
+    }
+
+    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
+    internal bool GetParamBool_i(string param, string executionPath)
+    {
+        var e = Utilities.BuildPath(executionPath);
+
+        var val = this.GetParamFloat_i(param, e);
 
         var v = Convert.ToInt32(val);
 
         if (Math.Abs(val - v) > 0.0001f || v is not (0 or 1))
         {
-            throw this.On_GetParam_Error(Response.TypeMismatch, param, val, typeof(bool));
+            throw this.CannotConvertToType<bool>(param, val, e);
         }
 
-        var value = v == 1;
+        return v == 1;
+    }
 
-        this.On_GetParam_Success(param, value);
+    public bool GetParamBool(string param)
+    {
+        using var scope = this.BeginCallScope();
 
-        return value;
+        return this.GetParamBool_i(param, nameof(this.GetParamBool));
     }
 
     #endregion
@@ -121,18 +106,15 @@ public partial class Remote
     #region Get Parameter String
 
     /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
-    internal string GetParam_iString(string param)
+    internal string GetParamString_i(string param, string executionPath)
     {
-        this.On_GetParam_Start(param);
+        var e = Utilities.BuildPath(executionPath);
+
+        this.WrapperCall(nameof(this.wrapper.GetParameter_String), e, new(param), true);
 
         (var result, var value) = this.wrapper.GetParameter_String(param);
 
-        if (result != Response.Ok)
-        {
-            throw this.On_GetParam_Error(result, param, value, typeof(string));
-        }
-
-        this.On_GetParam_Success(param, value);
+        this.HandleResponse(result, e, new(param, value), true);
 
         return value;
     }
@@ -140,9 +122,9 @@ public partial class Remote
     /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
     public string GetParamString(string param)
     {
-        using var scope = this.BeginInstanceScope();
+        using var scope = this.BeginCallScope();
 
-        return this.GetParam_iString(param);
+        return this.GetParamString_i(param, nameof(this.GetParamString));
     }
 
     #endregion
@@ -150,26 +132,18 @@ public partial class Remote
     /// <inheritdoc/>
     T IRemote.GetParam<T>(string param)
     {
-        if (typeof(T) == typeof(float))
-        {
-            return (T)(object)this.GetParamFloat(param);
-        }
+        var e = nameof(IRemote.GetParam);
+        var t = typeof(T);
 
-        if (typeof(T) == typeof(int))
-        {
-            return (T)(object)this.GetParamInt(param);
-        }
+        using var scope = this.BeginCallScope();
 
-        if (typeof(T) == typeof(bool))
+        return t switch
         {
-            return (T)(object)this.GetParamBool(param);
-        }
-
-        if (typeof(T) == typeof(string))
-        {
-            return (T)(object)this.GetParamString(param);
-        }
-
-        throw GeneralDispatch.On_TypeNotSupported(this.logger, typeof(T), nameof(T), SupportedTypes.ParamTypes);
+            _ when t == typeof(float) => (T)(object)this.GetParamFloat_i(param, e),
+            _ when t == typeof(int) => (T)(object)this.GetParamInt_i(param, e),
+            _ when t == typeof(bool) => (T)(object)this.GetParamBool_i(param, e),
+            _ when t == typeof(string) => (T)(object)this.GetParamString_i(param, e),
+            _ => throw this.TypeNotSupported<T>(SupportedTypes.ParamTypes, e, new(param))
+        };
     }
 }

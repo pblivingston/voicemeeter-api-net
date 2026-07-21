@@ -20,12 +20,12 @@ public partial class Remote
         /// <inheritdoc cref="RemoteApiWrapper.Logout()" path="/summary"/>
         public LoginResponse Logout();
         /// <inheritdoc cref="RemoteApiWrapper.RunVoicemeeter(int)" path="/summary"/>
-        public RunResponse RunVoicemeeter(int app);
+        public RunResponse RunVoicemeeter(App app);
 
         /// <inheritdoc cref="RemoteApiWrapper.GetVoicemeeterType(out int)" path="/summary"/>
-        public (InfoResponse, int) GetVoicemeeterType();
+        public (Response, Kind) GetVoicemeeterKind();
         /// <inheritdoc cref="RemoteApiWrapper.GetVoicemeeterVersion(out int)" path="/summary"/>
-        public (InfoResponse, int) GetVoicemeeterVersion();
+        public (Response, VmVersion) GetVoicemeeterVersion();
 
         /// <inheritdoc cref="RemoteApiWrapper.IsParametersDirty()" path="/summary"/>
         public Response IsParametersDirty();

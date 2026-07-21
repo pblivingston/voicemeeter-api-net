@@ -19,7 +19,7 @@ internal static class SupportedTypes
         => t == typeof(SemVersion)
         || t == typeof(VmVersion);
 
-    public static readonly Type[] RunTypes = [typeof(int), typeof(App), typeof(Kind), typeof(string)];
+    public static readonly Type[] RunTypes = [typeof(App), typeof(Kind)];
     public static readonly string RunTypes_Str = ListString(RunTypes);
     public static bool IsRunType(Type t)
         => t == typeof(int)

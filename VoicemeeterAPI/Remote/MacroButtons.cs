@@ -3,46 +3,28 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-using Microsoft.Extensions.Logging;
-
 public partial class Remote
 {
     #region MacroButtons Is Dirty
 
     /// <inheritdoc cref="IRemote.IsButtonsDirty()"/>
-    internal bool ButtonsDirty_i()
+    internal bool ButtonsDirty_i(string executionPath)
     {
-        var level = LogLevel.Trace;
-
-        this.On_Query_Start(level);
-
         Response result;
         using (this.bDirtyLock.EnterScope())
         {
             result = this.wrapper.MacroButtonIsDirty();
         }
 
-        switch (result)
-        {
-            case Response.Ok:
-                this.On_Query_Success(Response.Ok, level);
-                return false;
-
-            case Response.Dirty:
-                this.On_ButtonsDirty(level);
-                return true;
-
-            default:
-                throw this.On_Method_Error(result);
-        }
+        return this.HandleResponse(result, Utilities.BuildPath(executionPath));
     }
 
     /// <inheritdoc/>
     public bool IsButtonsDirty()
     {
-        using var scope = this.BeginInstanceScope();
+        using var scope = this.BeginCallScope();
 
-        return this.ButtonsDirty_i();
+        return this.ButtonsDirty_i(nameof(this.IsButtonsDirty));
     }
 
     #endregion

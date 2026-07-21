@@ -14,37 +14,25 @@ public partial class Remote
         public LoginResponse Logout()
             => (LoginResponse)this.remoteApiWrapper.Logout();
         /// <inheritdoc/>
-        public RunResponse RunVoicemeeter(int app)
-            => (RunResponse)this.remoteApiWrapper.RunVoicemeeter(app);
+        public RunResponse RunVoicemeeter(App app)
+            => (RunResponse)this.remoteApiWrapper.RunVoicemeeter((int)app);
 
         /// <inheritdoc/>
-        public (InfoResponse, int) GetVoicemeeterType()
-        {
-            var response = (InfoResponse)this.remoteApiWrapper.GetVoicemeeterType(out var type);
-            return (response, type);
-        }
+        public (Response, Kind) GetVoicemeeterKind()
+            => ((Response)this.remoteApiWrapper.GetVoicemeeterType(out var type), (Kind)type);
         /// <inheritdoc/>
-        public (InfoResponse, int) GetVoicemeeterVersion()
-        {
-            var response = (InfoResponse)this.remoteApiWrapper.GetVoicemeeterVersion(out var version);
-            return (response, version);
-        }
+        public (Response, VmVersion) GetVoicemeeterVersion()
+            => ((Response)this.remoteApiWrapper.GetVoicemeeterVersion(out var version), (VmVersion)version);
 
         /// <inheritdoc/>
         public Response IsParametersDirty()
             => (Response)this.remoteApiWrapper.IsParametersDirty();
         /// <inheritdoc/>
         public (Response, float) GetParameter_Float(string param)
-        {
-            var response = (Response)this.remoteApiWrapper.GetParameter(param, out float value);
-            return (response, value);
-        }
+            => ((Response)this.remoteApiWrapper.GetParameter(param, out float value), value);
         /// <inheritdoc/>
         public (Response, string) GetParameter_String(string param)
-        {
-            var response = (Response)this.remoteApiWrapper.GetParameter(param, out string value);
-            return (response, value);
-        }
+            => ((Response)this.remoteApiWrapper.GetParameter(param, out string value), value);
 
         /// <inheritdoc/>
         public Response MacroButtonIsDirty()

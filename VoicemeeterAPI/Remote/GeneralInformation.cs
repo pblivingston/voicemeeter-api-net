@@ -3,38 +3,29 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-using Microsoft.Extensions.Logging;
-
 public partial class Remote
 {
     #region Get Voicemeeter Kind
 
     /// <inheritdoc cref="IRemote.GetKind()"/>
-    internal (LoginResponse, Kind) GetKind_i(bool trace)
+    internal (LoginResponse, Kind) GetKind_i(string executionPath)
     {
-        var info = trace ? LogLevel.Trace : LogLevel.Information;
+        var e = Utilities.BuildPath(executionPath);
 
-        this.On_GetInfo_Start(typeof(Kind), info);
+        this.WrapperCall(nameof(this.wrapper.GetVoicemeeterKind), e);
 
-        (var result, var k) = this.wrapper.GetVoicemeeterType();
+        (var result, var kind) = this.wrapper.GetVoicemeeterKind();
 
         LoginResponse login;
-        var kind = (Kind)k;
-        if (result == InfoResponse.Ok && kind.IsValid())
+        if (this.HandleResponse(result, e, new(kind)))
         {
             login = LoginResponse.Ok;
         }
-        else if (result == InfoResponse.NoServer)
+        else
         {
             login = LoginResponse.VoicemeeterNotRunning;
             kind = Kind.None;
         }
-        else
-        {
-            throw this.On_GetInfo_Error(result, k);
-        }
-
-        this.On_GetInfo_Success(kind, info);
 
         return (login, kind);
     }
@@ -42,13 +33,15 @@ public partial class Remote
     /// <inheritdoc/>
     public Kind GetKind()
     {
-        using var scope = this.BeginInstanceScope();
+        var e = nameof(this.GetKind);
+
+        using var scope = this.BeginCallScope();
         using var lk = this.stateLock.EnterScope();
 
-        (this.loginStatus, var kind) = this.GetKind_i(false);
+        (this.loginStatus, var kind) = this.GetKind_i(e);
 
-        this.On_ConnectionState_StateMismatch(kind);
-        this.On_ConnectionState_StateMismatch(this.loginStatus);
+        this.HandleStaleCache(kind, e);
+        this.HandleStaleCache(this.loginStatus, e);
 
         return kind;
     }
@@ -58,31 +51,24 @@ public partial class Remote
     #region Get Voicemeeter Version
 
     /// <inheritdoc cref="IRemote.GetVersion()"/>
-    internal (LoginResponse, VmVersion) GetVersion_i(bool trace)
+    internal (LoginResponse, VmVersion) GetVersion_i(string executionPath)
     {
-        var info = trace ? LogLevel.Trace : LogLevel.Information;
+        var e = Utilities.BuildPath(executionPath);
 
-        this.On_GetInfo_Start(typeof(VmVersion), info);
+        this.WrapperCall(nameof(this.wrapper.GetVoicemeeterVersion), e);
 
-        (var result, var v) = this.wrapper.GetVoicemeeterVersion();
+        (var result, var version) = this.wrapper.GetVoicemeeterVersion();
 
         LoginResponse login;
-        VmVersion version = default;
-        if (result == InfoResponse.Ok && VmVersion.IsValid(v))
+        if (this.HandleResponse(result, e, new(version)))
         {
             login = LoginResponse.Ok;
-            version = (VmVersion)v;
-        }
-        else if (result == InfoResponse.NoServer)
-        {
-            login = LoginResponse.VoicemeeterNotRunning;
         }
         else
         {
-            throw this.On_GetInfo_Error(result, v);
+            login = LoginResponse.VoicemeeterNotRunning;
+            version = default;
         }
-
-        this.On_GetInfo_Success(version, info);
 
         return (login, version);
     }
@@ -90,13 +76,15 @@ public partial class Remote
     /// <inheritdoc/>
     public VmVersion GetVersion()
     {
-        using var scope = this.BeginInstanceScope();
+        var e = nameof(this.GetVersion);
+
+        using var scope = this.BeginCallScope();
         using var lk = this.stateLock.EnterScope();
 
-        (this.loginStatus, var version) = this.GetVersion_i(false);
+        (this.loginStatus, var version) = this.GetVersion_i(e);
 
-        this.On_ConnectionState_StateMismatch(version);
-        this.On_ConnectionState_StateMismatch(this.loginStatus);
+        this.HandleStaleCache(version, e);
+        this.HandleStaleCache(this.loginStatus, e);
 
         return version;
     }
@@ -106,68 +94,53 @@ public partial class Remote
     #region Get Application State
 
     /// <inheritdoc cref="IRemote.GetAppState(App)"/>
-    internal RunResponse GetAppState_i(App app, bool trace)
+    internal RunResponse GetAppState_i(App app, string executionPath)
     {
-        var info = trace ? LogLevel.Trace : LogLevel.Information;
-        var warning = trace ? LogLevel.Trace : LogLevel.Warning;
+        var e = Utilities.BuildPath(executionPath);
 
-        this.On_GetInfo_Start(app, info);
+        this.WrapperCall(nameof(this.wrapper.GetApplicationState), e, new(app));
 
         var result = this.wrapper.GetApplicationState(app);
 
-        if (result < RunResponse.Ok)
-        {
-            throw this.On_GetInfo_Error(result, app);
-        }
-
-        if (result is RunResponse.NotResponding)
-        {
-            this.On_GetInfo_NotResponding(app, warning);
-        }
-        else
-        {
-            this.On_GetInfo_Success(app, result, info);
-        }
-
-        return result;
+        return this.HandleResponse(app, result, e);
     }
 
     /// <inheritdoc/>
     public RunResponse GetAppState(App app)
     {
-        using var scope = this.BeginInstanceScope();
+        var e = nameof(this.GetAppState);
+
+        using var scope = this.BeginCallScope();
         using var lk = this.stateLock.EnterScope();
 
-        var result = this.GetAppState_i(app, false);
+        var result = this.GetAppState_i(app, e);
 
         if (this.loginStatus >= LoginResponse.LoggedOut)
         {
             return result;
         }
 
+        if (app is App.MacroButtons)
+        {
+            this.HandleStaleCache(result, e);
+        }
+
         if (app.IsVoicemeeter())
         {
+            Kind kind;
             if (result < RunResponse.NotRunning)
             {
                 this.loginStatus = LoginResponse.Ok;
-                this.On_ConnectionState_StateMismatch(app.ToKind());
+                kind = app.ToKind();
             }
             else
             {
-                (this.loginStatus, var running) = this.GetKind_i(true);
-
-                if (app == running.ToApp(this.wrapper.Is64Bit))
-                {
-                    throw this.On_GetInfo_Error(RunResponse.Error, app);
-                }
+                this.loginStatus = LoginResponse.VoicemeeterNotRunning;
+                kind = Kind.None;
             }
 
-            this.On_ConnectionState_StateMismatch(this.loginStatus);
-        }
-
-        if (app is App.MacroButtons)
-        {
-            this.On_ConnectionState_StateMismatch(result);
+            this.HandleStaleCache(kind, e);
+            this.HandleStaleCache(this.loginStatus, e);
         }
 
         return result;
@@ -178,64 +151,51 @@ public partial class Remote
     #region Get Connection State
 
     /// <inheritdoc cref="IRemote.GetConnectionState()"/>
-    internal (LoginResponse, ConnectionState) GetConnectionState_i()
+    internal (ConnectionState previousState, ConnectionState currentState) GetConnectionState_i(string executionPath, bool loggedOut = false)
     {
-        this.On_GetConnectionState_Start();
+        var e = Utilities.BuildPath(executionPath);
 
-        LoginResponse login;
-        LoginResponse l;
-        Kind kind;
+        var previousState = this.lastConnectionState;
+
         VmVersion version;
         RunResponse mbState;
-        using (this.BeginMethodScope())
+        if (loggedOut)
         {
-            (login, kind) = this.GetKind_i(true);
-            (l, version) = this.GetVersion_i(true);
-            mbState = this.GetAppState_i(App.MacroButtons, true);
+            version = previousState.RunningVersion;
+            mbState = previousState.ButtonsState;
+        }
+        else
+        {
+            (this.loginStatus, version) = this.GetVersion_i(e);
+            mbState = this.GetAppState_i(App.MacroButtons, e);
         }
 
-        if (login != l || kind != version.K)
-        {
-            throw this.On_Method_Error(Response.Error);
-        }
+        var currentState = this.HandleResponse(this.loginStatus, version, mbState, loggedOut, e);
+        this.HandleStaleCache(currentState, e);
 
-        ConnectionState state = new(login, mbState, kind, version);
-
-        this.On_Method_Success();
-
-        return (login, state);
+        return (previousState, currentState);
     }
 
     /// <inheritdoc/>
     public ConnectionState GetConnectionState()
     {
-        using var scope = this.BeginInstanceScope();
+        using var scope = this.BeginCallScope();
 
-        ConnectionState state;
+        this.MethodStart();
+
+        ConnectionState previousState;
+        ConnectionState currentState;
         using (this.stateLock.EnterScope())
         {
-            if (this.loginStatus >= LoginResponse.LoggedOut)
-            {
-                this.On_GetConnectionState_Start();
-
-                state = new(
-                    this.loginStatus,
-                    this.lastConnectionState.ButtonsState,
-                    this.lastConnectionState.RunningKind,
-                    this.lastConnectionState.RunningVersion
-                );
-
-                this.On_Method_Success();
-            }
-            else
-            {
-                (this.loginStatus, state) = this.GetConnectionState_i();
-            }
+            (previousState, currentState) = this.GetConnectionState_i(
+                nameof(this.GetConnectionState),
+                this.loginStatus >= LoginResponse.LoggedOut
+            );
         }
 
-        this.On_ConnectionState_Changed(state);
+        this.OnConnectionStateChanged(previousState, currentState);
 
-        return state;
+        return currentState;
     }
 
     #endregion
