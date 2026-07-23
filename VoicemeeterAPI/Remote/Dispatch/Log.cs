@@ -42,6 +42,32 @@ public partial class Remote
         );
 
         [LoggerMessage(
+            EventId = (int)Event.RemoteInternalLogin,
+            Level = LogLevel.Information,
+            Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
+                "Logging in... " +
+                "[{ExecutionPath}]"
+        )]
+        public static partial void RemoteInternalLogin(
+            ILogger logger,
+            string methodName,
+            string executionPath
+        );
+
+        [LoggerMessage(
+            EventId = (int)Event.RemoteInternalLogout,
+            Level = LogLevel.Information,
+            Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
+                "Logging out... " +
+                "[{ExecutionPath}]"
+        )]
+        public static partial void RemoteInternalLogout(
+            ILogger logger,
+            string methodName,
+            string executionPath
+        );
+
+        [LoggerMessage(
             EventId = (int)Event.WaitForRunningStart,
             Level = LogLevel.Information,
             Message = "[VoicemeeterAPI.Remote.{MethodName}] " +

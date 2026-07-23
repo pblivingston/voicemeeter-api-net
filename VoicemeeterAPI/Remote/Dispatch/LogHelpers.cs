@@ -48,6 +48,16 @@ public partial class Remote
         Log.RemoteWrapperCall(this.logger, level, methodName, wrapperMethodName, payload, executionPath);
     }
 
+    private void InternalLogin(
+        string executionPath,
+        [CallerMemberName] string methodName = ""
+    ) => Log.RemoteInternalLogin(this.logger, methodName, executionPath);
+
+    private void InternalLogout(
+        string executionPath,
+        [CallerMemberName] string methodName = ""
+    ) => Log.RemoteInternalLogout(this.logger, methodName, executionPath);
+
     private void WaitForRunningStart(
         string targetDescription,
         string executionPath,

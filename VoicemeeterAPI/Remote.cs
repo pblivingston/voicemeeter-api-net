@@ -105,6 +105,24 @@ public sealed partial class Remote : IRemote
 
     #region Factory
 
+    public static (Remote, ConnectionState) NewSession(ILogger<Remote>? logger = null)
+    {
+        var e = nameof(NewSession);
+
+        var remote = new Remote(new Wrapper(), logger);
+
+        using var scope = remote.BeginCallScope();
+
+        remote.MethodStart();
+
+        remote.InternalLogin(e);
+
+        remote.Login_i(e);
+        (_, var state) = remote.GetConnectionState_i(e);
+
+        return (remote, state);
+    }
+
     /// <summary>
     ///   Initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="RemoteApiWrapper"/>.
     /// </summary>
@@ -132,6 +150,8 @@ public sealed partial class Remote : IRemote
             return;
         }
 
+        var e = nameof(this.Dispose);
+
         using var scope = this.BeginCallScope();
 
         if (disposing)
@@ -142,8 +162,12 @@ public sealed partial class Remote : IRemote
 
                 if (this.loginStatus < LoginResponse.LoggedOut)
                 {
-                    this.Logout_i(nameof(this.Dispose));
+                    this.InternalLogout(e);
+
+                    this.Logout_i(e);
                 }
+
+                this.WrapperCall(nameof(this.wrapper.Dispose), e);
 
                 this.wrapper.Dispose();
             }

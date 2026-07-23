@@ -15,7 +15,9 @@ public partial class Remote
 
         var result = this.wrapper.Login();
 
-        return this.HandleResponse(result, e);
+        this.loginStatus = this.HandleResponse(result, e);
+
+        return this.loginStatus;
     }
 
     /// <inheritdoc/>
@@ -54,7 +56,9 @@ public partial class Remote
 
         var result = this.wrapper.Logout();
 
-        return this.HandleLogoutResponse(result, e);
+        this.loginStatus = this.HandleLogoutResponse(result, e);
+
+        return this.loginStatus;
     }
 
     /// <inheritdoc/>
@@ -66,17 +70,18 @@ public partial class Remote
 
         this.MethodStart();
 
+        LoginResponse result;
         ConnectionState previousState;
         ConnectionState currentState;
         using (this.stateLock.EnterScope())
         {
-            this.loginStatus = this.Logout_i(e);
+            result = this.Logout_i(e);
             (previousState, currentState) = this.GetConnectionState_i(e, true);
         }
 
         this.OnConnectionStateChanged(previousState, currentState);
 
-        return this.loginStatus;
+        return result;
     }
 
     #endregion
