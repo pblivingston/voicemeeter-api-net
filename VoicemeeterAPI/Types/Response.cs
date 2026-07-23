@@ -3,48 +3,69 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
+public enum LoginResponse
+{
+    AlreadyLoggedIn = -2,
+    NoClient = -1,
+    Ok = 0,
+    VoicemeeterNotRunning = 1,
+
+    /// <summary>
+    ///   from VoicemeeterAPI
+    /// </summary>
+    LoggedOut = 2,
+    /// <summary>
+    ///   from VoicemeeterAPI
+    /// </summary>
+    Unknown = 3
+}
+
+public enum RunResponse
+{
+    /// <summary>
+    ///   from VoicemeeterAPI
+    /// </summary>
+    AlreadyShutDown = -103,
+    /// <summary>
+    ///   from VoicemeeterAPI
+    /// </summary>
+    Timeout = -102,
+    /// <summary>
+    ///   from VoicemeeterAPI
+    /// </summary>
+    Error = -101,
+
+    UnknownApp = -2,
+    NotInstalled = -1,
+    Ok = 0,
+
+    /// <summary>
+    ///   from VoicemeeterAPI
+    /// </summary>
+    Hidden = 1,
+    /// <summary>
+    ///   from VoicemeeterAPI
+    /// </summary>
+    NotRunning = 2,
+    /// <summary>
+    ///   from VoicemeeterAPI
+    /// </summary>
+    NotResponding = 3
+}
+
 public enum Response
 {
-    TypeMismatch = -6, //
+    /// <summary>
+    ///   from VoicemeeterAPI
+    /// </summary>
+    UnknownApp = -101,
+
     StructureMismatch = -5,
-    UnknownApp = -4, //
     UnknownParameter = -3,
     NoServer = -2,
     Error = -1,
     Ok = 0,
     Dirty = 1
-}
-
-public enum LoginResponse
-{
-    Timeout = -4, //
-    AlreadyLoggedOut = -3, //
-    AlreadyLoggedIn = -2,
-    NoClient = -1,
-    Ok = 0,
-    VoicemeeterNotRunning = 1,
-    LoggedOut = 2, //
-    Unknown = 3 //
-}
-
-public enum RunResponse
-{
-    Error = -5, //
-    Timeout = -4, //
-    AlreadyShutDown = -3, //
-    UnknownApp = -2,
-    NotInstalled = -1,
-    Ok = 0,
-    Hidden = 1, //
-    NotRunning = 2, //
-    NotResponding = 3 //
-}
-
-public enum InfoResponse
-{
-    NoServer = -2,
-    NoClient = -1,
-    Ok = 0
 }
 
 public enum ScriptResponse

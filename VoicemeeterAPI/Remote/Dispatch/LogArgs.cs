@@ -4,78 +4,65 @@
 namespace PBLivingston.VoicemeeterAPI;
 
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 public partial class Remote
 {
-    private readonly record struct LogArgs
+    private sealed class LogArgs(bool isSentinel)
     {
-        private readonly bool args = false;
+        public static LogArgs Empty { get; } = new(true);
 
-        public string? Param { get; }
-        public object? Value { get; }
-        public Kind? Kind { get; }
-        public VmVersion? Version { get; }
-        public App? App { get; }
-        public RunResponse? State { get; }
-        public LoginResponse? LoginResponse { get; }
-        public ConnectionState? ConnectionState { get; }
+        private readonly bool args = !isSentinel;
 
-        public LogArgs(string param)
-        {
-            this.Param = param;
-            this.args = true;
-        }
-        public LogArgs(object value)
-        {
-            this.Value = value;
-            this.args = true;
-        }
-        public LogArgs(string param, object value)
-        {
-            this.Param = param;
-            this.Value = value;
-            this.args = true;
-        }
+        public string? Param { init; get; }
+        public object? Value { init; get; }
+        public Kind? Kind { init; get; }
+        public VmVersion? Version { init; get; }
+        public App? App { init; get; }
+        public RunResponse? State { init; get; }
+        public LoginResponse? LoginResponse { init; get; }
+        public ConnectionState? ConnectionState { init; get; }
 
-        public LogArgs(Kind kind)
+        public static LogArgs New(
+            ILogger logger,
+            LogLevel level,
+            string? param = null,
+            object? value = null,
+            Kind? kind = null,
+            VmVersion? version = null,
+            App? app = null,
+            RunResponse? state = null,
+            LoginResponse? loginResponse = null,
+            ConnectionState? connectionState = null
+        )
         {
-            this.Kind = kind;
-            this.args = true;
-        }
-        public LogArgs(VmVersion version)
-        {
-            this.Version = version;
-            this.args = true;
-        }
-        public LogArgs(VmVersion version, RunResponse state)
-        {
-            this.Version = version;
-            this.State = state;
-            this.args = true;
-        }
+            if (!logger.IsEnabled(level)
+                || (
+                    param is null
+                    && value is null
+                    && kind is null
+                    && version is null
+                    && app is null
+                    && state is null
+                    && loginResponse is null
+                    && connectionState is null
+                )
+            )
+            {
+                return Empty;
+            }
 
-        public LogArgs(App app)
-        {
-            this.App = app;
-            this.args = true;
-        }
-        public LogArgs(App app, RunResponse state)
-        {
-            this.App = app;
-            this.State = state;
-            this.args = true;
-        }
-
-        public LogArgs(LoginResponse loginResponse)
-        {
-            this.LoginResponse = loginResponse;
-            this.args = true;
-        }
-
-        public LogArgs(ConnectionState connectionState)
-        {
-            this.ConnectionState = connectionState;
-            this.args = true;
+            return new(false)
+            {
+                Param = param,
+                Value = value,
+                Kind = kind,
+                Version = version,
+                App = app,
+                State = state,
+                LoginResponse = loginResponse,
+                ConnectionState = connectionState
+            };
         }
 
         public override string ToString()

@@ -25,28 +25,39 @@ public partial class Remote
     #region Entry
 
     private void MethodStart(
-        LogArgs payload = default,
+        App? app = null,
+        Kind? kind = null,
         [CallerMemberName] string methodName = ""
-    ) => Log.RemoteMethodStart(this.logger, methodName, payload);
+    )
+    {
+        var payload = LogArgs.New(this.logger, LogLevel.Information, app: app, kind: kind);
+        Log.RemoteMethodStart(this.logger, methodName, payload);
+    }
 
     private void WrapperCall(
         string wrapperMethodName,
         string executionPath,
-        LogArgs payload = default,
+        string? param = null,
+        App? app = null,
         bool trace = false,
         [CallerMemberName] string methodName = ""
     )
     {
         var level = trace ? LogLevel.Trace : LogLevel.Debug;
+        var payload = LogArgs.New(this.logger, level, param: param, app: app);
         Log.RemoteWrapperCall(this.logger, level, methodName, wrapperMethodName, payload, executionPath);
     }
 
     private void WaitForRunningStart(
         string targetDescription,
         string executionPath,
-        LogArgs payload = default,
+        App? app = null,
         [CallerMemberName] string methodName = ""
-    ) => Log.WaitForRunningStart(this.logger, methodName, targetDescription, payload, executionPath);
+    )
+    {
+        var payload = LogArgs.New(this.logger, LogLevel.Information, app: app);
+        Log.WaitForRunningStart(this.logger, methodName, targetDescription, payload, executionPath);
+    }
 
     private void YieldForEngineSettle(
         string targetDescription,
@@ -61,19 +72,30 @@ public partial class Remote
     private void WaitForRunningDetected(
         string targetDescription,
         string executionPath,
-        LogArgs payload = default,
+        RunResponse state,
+        VmVersion? version = null,
+        App? app = null,
         [CallerMemberName] string methodName = ""
-    ) => Log.WaitForRunningDetected(this.logger, methodName, targetDescription, payload, executionPath);
+    )
+    {
+        var payload = LogArgs.New(this.logger, LogLevel.Information, state: state, version: version, app: app);
+        Log.WaitForRunningDetected(this.logger, methodName, targetDescription, payload, executionPath);
+    }
 
     #endregion
 
     #region Warning
 
     private void AppUnexpectedState(
+        App app,
+        RunResponse state,
         string executionPath,
-        LogArgs payload = default,
         [CallerMemberName] string methodName = ""
-    ) => Log.AppUnexpectedState(this.logger, methodName, payload, executionPath);
+    )
+    {
+        var payload = LogArgs.New(this.logger, LogLevel.Warning, app: app, state: state);
+        Log.AppUnexpectedState(this.logger, methodName, payload, executionPath);
+    }
 
     private void CannotWaitForVoicemeeter(
         string executionPath,
@@ -83,9 +105,13 @@ public partial class Remote
     private void OperationCanceled(
         OperationCanceledException ex,
         string executionPath,
-        LogArgs payload = default,
+        App? app = null,
         [CallerMemberName] string methodName = ""
-    ) => Log.RemoteOperationCanceled(this.logger, ex, methodName, payload, executionPath);
+    )
+    {
+        var payload = LogArgs.New(this.logger, LogLevel.Warning, app: app);
+        Log.RemoteOperationCanceled(this.logger, ex, methodName, payload, executionPath);
+    }
 
     #endregion
 
@@ -99,21 +125,21 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     )
     {
+        var payload = LogArgs.New(this.logger, LogLevel.Error, param: voicemeeterParam, value: returnedValue);
         var ex = new CannotConvertToTypeException(typeof(T), voicemeeterParam, returnedValue, paramName);
-        Log.RemoteInvalidArgument(this.logger, ex, methodName, new(voicemeeterParam, returnedValue), executionPath);
+        Log.RemoteInvalidArgument(this.logger, ex, methodName, payload, executionPath);
         return ex;
     }
 
     private TypeNotSupportedException TypeNotSupported<T>(
         Type[] supportedTypes,
         string executionPath,
-        LogArgs payload = default,
         string paramName = "T",
         [CallerMemberName] string methodName = ""
     )
     {
         var ex = new TypeNotSupportedException(typeof(T), paramName, supportedTypes);
-        Log.RemoteInvalidArgument(this.logger, ex, methodName, payload, executionPath);
+        Log.RemoteInvalidArgument(this.logger, ex, methodName, LogArgs.Empty, executionPath);
         return ex;
     }
 

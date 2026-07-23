@@ -36,11 +36,11 @@ public partial class Remote
     {
         var e = Utilities.BuildPath(executionPath);
 
-        this.WrapperCall(nameof(this.wrapper.GetParameter_Float), e, new(param), true);
+        this.WrapperCall(nameof(this.wrapper.GetParameter_Float), e, param: param, trace: true);
 
         (var result, var value) = this.wrapper.GetParameter_Float(param);
 
-        this.HandleResponse(result, e, new(param, value), true);
+        this.HandleResponse(result, param, value, e);
 
         return value;
     }
@@ -110,11 +110,11 @@ public partial class Remote
     {
         var e = Utilities.BuildPath(executionPath);
 
-        this.WrapperCall(nameof(this.wrapper.GetParameter_String), e, new(param), true);
+        this.WrapperCall(nameof(this.wrapper.GetParameter_String), e, param: param, trace: true);
 
         (var result, var value) = this.wrapper.GetParameter_String(param);
 
-        this.HandleResponse(result, e, new(param, value), true);
+        this.HandleResponse(result, param, value, e);
 
         return value;
     }
@@ -132,18 +132,15 @@ public partial class Remote
     /// <inheritdoc/>
     T IRemote.GetParam<T>(string param)
     {
-        var e = nameof(IRemote.GetParam);
         var t = typeof(T);
-
-        using var scope = this.BeginCallScope();
 
         return t switch
         {
-            _ when t == typeof(float) => (T)(object)this.GetParamFloat_i(param, e),
-            _ when t == typeof(int) => (T)(object)this.GetParamInt_i(param, e),
-            _ when t == typeof(bool) => (T)(object)this.GetParamBool_i(param, e),
-            _ when t == typeof(string) => (T)(object)this.GetParamString_i(param, e),
-            _ => throw this.TypeNotSupported<T>(SupportedTypes.ParamTypes, e, new(param))
+            _ when t == typeof(float) => (T)(object)this.GetParamFloat(param),
+            _ when t == typeof(int) => (T)(object)this.GetParamInt(param),
+            _ when t == typeof(bool) => (T)(object)this.GetParamBool(param),
+            _ when t == typeof(string) => (T)(object)this.GetParamString(param),
+            _ => throw this.TypeNotSupported<T>(SupportedTypes.ParamTypes, nameof(IRemote.GetParam))
         };
     }
 }

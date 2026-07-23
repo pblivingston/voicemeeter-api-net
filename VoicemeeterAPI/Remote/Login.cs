@@ -7,7 +7,7 @@ public partial class Remote
 {
     #region Login
 
-    private LoginResponse Login_p(string executionPath)
+    internal LoginResponse Login_i(string executionPath)
     {
         var e = Utilities.BuildPath(executionPath);
 
@@ -32,7 +32,7 @@ public partial class Remote
         ConnectionState currentState;
         using (this.stateLock.EnterScope())
         {
-            result = this.Login_p(e);
+            result = this.Login_i(e);
             (previousState, currentState) = this.GetConnectionState_i(e);
         }
 
@@ -54,7 +54,7 @@ public partial class Remote
 
         var result = this.wrapper.Logout();
 
-        return this.HandleResponse(result, e);
+        return this.HandleLogoutResponse(result, e);
     }
 
     /// <inheritdoc/>
@@ -91,15 +91,15 @@ public partial class Remote
 
         if (state is RunResponse.NotResponding)
         {
-            this.AppUnexpectedState(e, new(app, state));
+            this.AppUnexpectedState(app, state, e);
             return state;
         }
 
-        this.WrapperCall(nameof(this.wrapper.RunVoicemeeter), e, new(app));
+        this.WrapperCall(nameof(this.wrapper.RunVoicemeeter), e, app: app);
 
         var result = this.wrapper.RunVoicemeeter(app);
 
-        return this.HandleResponse(app, result, e);
+        return this.HandleResponse(result, app, e);
     }
 
     #region Run
@@ -132,39 +132,33 @@ public partial class Remote
     }
 
     /// <inheritdoc cref="IRemote.Run{T}(T)"/>
-    internal RunResponse Run_i(Kind kind, string executionPath)
-        => this.Run_i(kind.ToApp(this.wrapper.Is64Bit), executionPath);
-
-    /// <inheritdoc cref="IRemote.Run{T}(T)"/>
     public RunResponse Run(App app)
     {
         using var scope = this.BeginCallScope();
 
-        this.MethodStart();
+        this.MethodStart(app: app);
 
         return this.Run_i(app, nameof(this.Run));
     }
 
     /// <inheritdoc cref="IRemote.Run{T}(T)"/>
     public RunResponse Run(Kind kind)
-        => this.Run(kind.ToApp(this.wrapper.Is64Bit));
+    {
+        using var scope = this.BeginCallScope();
+
+        this.MethodStart(kind: kind);
+
+        return this.Run_i(kind.ToApp(this.wrapper.Is64Bit), nameof(this.Run));
+    }
 
     /// <inheritdoc/>
     RunResponse IRemote.Run<T>(T app)
-    {
-        var e = nameof(IRemote.Run);
-
-        using var scope = this.BeginCallScope();
-
-        this.MethodStart();
-
-        return app switch
+        => app switch
         {
-            App a => this.Run_i(a, e),
-            Kind k => this.Run_i(k, e),
-            _ => throw this.TypeNotSupported<T>(SupportedTypes.RunTypes, e, new(app))
+            App a => this.Run(a),
+            Kind k => this.Run(k),
+            _ => throw this.TypeNotSupported<T>(SupportedTypes.RunTypes, nameof(IRemote.Run))
         };
-    }
 
     #endregion
 
@@ -211,39 +205,33 @@ public partial class Remote
     }
 
     /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
-    internal async Task<RunResponse> RunAsync_i(Kind kind, string executionPath, CancellationToken cancellationToken)
-        => await this.RunAsync_i(kind.ToApp(this.wrapper.Is64Bit), executionPath, cancellationToken);
-
-    /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
     public async Task<RunResponse> RunAsync(App app, CancellationToken cancellationToken = default)
     {
         using var scope = this.BeginCallScope();
 
-        this.MethodStart();
+        this.MethodStart(app: app);
 
         return await this.RunAsync_i(app, nameof(this.RunAsync), cancellationToken);
     }
 
     /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
     public async Task<RunResponse> RunAsync(Kind kind, CancellationToken cancellationToken = default)
-        => await this.RunAsync(kind.ToApp(this.wrapper.Is64Bit), cancellationToken);
+    {
+        using var scope = this.BeginCallScope();
+
+        this.MethodStart(kind: kind);
+
+        return await this.RunAsync_i(kind.ToApp(this.wrapper.Is64Bit), nameof(this.RunAsync), cancellationToken);
+    }
 
     /// <inheritdoc/>
     async Task<RunResponse> IRemote.RunAsync<T>(T app, CancellationToken cancellationToken)
-    {
-        var e = nameof(IRemote.RunAsync);
-
-        using var scope = this.BeginCallScope();
-
-        this.MethodStart();
-
-        return app switch
+        => app switch
         {
-            App a => await this.RunAsync_i(a, e, cancellationToken),
-            Kind k => await this.RunAsync_i(k, e, cancellationToken),
-            _ => throw this.TypeNotSupported<T>(SupportedTypes.RunTypes, e, new(app))
+            App a => await this.RunAsync(a, cancellationToken),
+            Kind k => await this.RunAsync(k, cancellationToken),
+            _ => throw this.TypeNotSupported<T>(SupportedTypes.RunTypes, nameof(IRemote.RunAsync))
         };
-    }
 
     #endregion
 
@@ -292,7 +280,7 @@ public partial class Remote
                 state = this.GetAppState_i(version.K.ToApp(false), e);
             }
 
-            this.WaitForRunningDetected(target, e, new(version, state));
+            this.WaitForRunningDetected(target, e, state, version: version);
 
             return state;
         }
@@ -307,9 +295,8 @@ public partial class Remote
     {
         var e = Utilities.BuildPath(executionPath);
         var target = app.ToString();
-        LogArgs payload = new(app);
 
-        this.WaitForRunningStart(target, e, payload);
+        this.WaitForRunningStart(target, e, app: app);
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         cts.CancelAfter(TimeSpan.FromSeconds(15));
@@ -341,13 +328,13 @@ public partial class Remote
 
             var state = this.GetAppState_i(app, e);
 
-            this.WaitForRunningDetected(target, e, new(app, state));
+            this.WaitForRunningDetected(target, e, state, app: app);
 
             return state;
         }
         catch (OperationCanceledException ex)
         {
-            this.OperationCanceled(ex, e, new(app));
+            this.OperationCanceled(ex, e, app: app);
             return RunResponse.Timeout;
         }
     }

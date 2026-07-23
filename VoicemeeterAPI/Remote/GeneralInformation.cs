@@ -17,7 +17,7 @@ public partial class Remote
         (var result, var kind) = this.wrapper.GetVoicemeeterKind();
 
         LoginResponse login;
-        if (this.HandleResponse(result, e, new(kind)))
+        if (this.HandleResponse(result, kind, e))
         {
             login = LoginResponse.Ok;
         }
@@ -60,7 +60,7 @@ public partial class Remote
         (var result, var version) = this.wrapper.GetVoicemeeterVersion();
 
         LoginResponse login;
-        if (this.HandleResponse(result, e, new(version)))
+        if (this.HandleResponse(result, version, e))
         {
             login = LoginResponse.Ok;
         }
@@ -98,11 +98,11 @@ public partial class Remote
     {
         var e = Utilities.BuildPath(executionPath);
 
-        this.WrapperCall(nameof(this.wrapper.GetApplicationState), e, new(app));
+        this.WrapperCall(nameof(this.wrapper.GetApplicationState), e, app: app);
 
         var result = this.wrapper.GetApplicationState(app);
 
-        return this.HandleResponse(app, result, e);
+        return this.HandleResponse(result, app, e);
     }
 
     /// <inheritdoc/>

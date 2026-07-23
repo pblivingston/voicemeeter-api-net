@@ -4,6 +4,7 @@
 namespace PBLivingston.VoicemeeterAPI;
 
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 
 public partial class Remote
 {
@@ -18,10 +19,17 @@ public partial class Remote
             return;
         }
 
+        var payload = CacheLogArgs.New(
+            this.logger,
+            LogLevel.Warning,
+            this.lastConnectionState,
+            currentLoginStatus: currentLoginStatus
+        );
+
         Log.StaleConnectionState(
             this.logger,
             methodName,
-            new(this.lastConnectionState, currentLoginStatus),
+            payload,
             executionPath
         );
     }
@@ -37,10 +45,17 @@ public partial class Remote
             return;
         }
 
+        var payload = CacheLogArgs.New(
+            this.logger,
+            LogLevel.Warning,
+            this.lastConnectionState,
+            currentButtonsState: currentButtonsState
+        );
+
         Log.StaleConnectionState(
             this.logger,
             methodName,
-            new(this.lastConnectionState, currentButtonsState),
+            payload,
             executionPath
         );
     }
@@ -56,10 +71,17 @@ public partial class Remote
             return;
         }
 
+        var payload = CacheLogArgs.New(
+            this.logger,
+            LogLevel.Warning,
+            this.lastConnectionState,
+            currentRunningKind: currentRunningKind
+        );
+
         Log.StaleConnectionState(
             this.logger,
             methodName,
-            new(this.lastConnectionState, currentRunningKind),
+            payload,
             executionPath
         );
     }
@@ -75,10 +97,17 @@ public partial class Remote
             return;
         }
 
+        var payload = CacheLogArgs.New(
+            this.logger,
+            LogLevel.Warning,
+            this.lastConnectionState,
+            currentRunningVersion: currentRunningVersion
+        );
+
         Log.StaleConnectionState(
             this.logger,
             methodName,
-            new(this.lastConnectionState, currentRunningVersion),
+            payload,
             executionPath
         );
     }
@@ -107,10 +136,17 @@ public partial class Remote
 
         this.lastConnectionState = currentState;
 
+        var payload = CacheLogArgs.New(
+            this.logger,
+            LogLevel.Information,
+            previousState,
+            currentState: currentState
+        );
+
         Log.ConnectionStateChanged(
             this.logger,
             methodName,
-            new(previousState, currentState),
+            payload,
             executionPath
         );
     }

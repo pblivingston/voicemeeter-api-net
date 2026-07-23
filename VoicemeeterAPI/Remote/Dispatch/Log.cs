@@ -29,7 +29,7 @@ public partial class Remote
         [LoggerMessage(
             EventId = (int)Event.RemoteWrapperCall,
             Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
-                "Calling {WrapperMethodName}... " +
+                "Calling 'this.wrapper.{WrapperMethodName}'... " +
                 "{Payload}[{ExecutionPath}]"
         )]
         public static partial void RemoteWrapperCall(
@@ -80,7 +80,7 @@ public partial class Remote
         public static partial void ConnectionStateChanged(
             ILogger logger,
             string methodName,
-            ConnectionStateLogArgs payload,
+            CacheLogArgs payload,
             string executionPath
         );
 
@@ -173,7 +173,7 @@ public partial class Remote
         public static partial void StaleConnectionState(
             ILogger logger,
             string methodName,
-            ConnectionStateLogArgs payload,
+            CacheLogArgs payload,
             string executionPath
         );
 
