@@ -117,34 +117,4 @@ public static class AppUtils
     /// <inheritdoc cref="BitAdjust(int, bool?)"/>
     public static App BitAdjust(App app, bool? is64Bit = null)
         => (App)BitAdjust((int)app, is64Bit);
-
-    /// <summary>
-    ///   Attempts to parse the given string into an <see cref="App"/> and ensures a Voicemeeter app is the correct bit version based on the current operating system.
-    /// </summary>
-    /// <param name="appName"></param>
-    /// <param name="app"></param>
-    /// <returns></returns>
-    public static bool TryParseBit(string appName, out App app, bool? is64Bit = null)
-    {
-        app = App.None;
-
-        if (!Enum.TryParse(appName, true, out App result))
-        {
-            return false;
-        }
-
-        app = BitAdjust(result, is64Bit);
-        return true;
-    }
-
-    /// <summary>
-    ///   Parses the given string into an <see cref="App"/> and ensures a Voicemeeter app is the correct bit version based on the current operating system.
-    /// </summary>
-    /// <param name="appName"></param>
-    /// <returns></returns>
-    /// <exception cref="CannotParseAsTypeException"></exception>
-    public static App ParseBit(string appName, bool? is64Bit = null)
-        => TryParseBit(appName, out var app, is64Bit)
-            ? app
-            : throw new CannotParseAsTypeException(appName, typeof(App), nameof(appName));
 }
