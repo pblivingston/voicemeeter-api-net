@@ -7,6 +7,9 @@ using System.Runtime.CompilerServices;
 
 internal static class Utilities
 {
+    public static bool InByte(int value)
+        => (uint)value <= 0xFF;
+
     public static string BuildPath(string executionPath, [CallerMemberName] string methodName = "")
         => executionPath + "/" + methodName;
 }

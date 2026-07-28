@@ -5,9 +5,6 @@ namespace PBLivingston.VoicemeeterAPI;
 
 public static class VersionUtils
 {
-    public static bool InByte(int value)
-        => (uint)value <= 0xFF;
-
     public static int Pack(int kind, int maj, int min, int pat)
     {
         ReadOnlySpan<(string, int)> parts = [
@@ -18,7 +15,7 @@ public static class VersionUtils
         ];
         foreach ((var paramName, var value) in parts)
         {
-            if (!InByte(value))
+            if (!Utilities.InByte(value))
             {
                 throw new VmArgumentOutOfRangeException("Part does not fit in a byte.", paramName, value);
             }

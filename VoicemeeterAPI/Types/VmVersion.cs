@@ -150,7 +150,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 
     public static int Pack(int kind, SemVersion sem)
     {
-        if (!VersionUtils.InByte(kind))
+        if (!Utilities.InByte(kind))
         {
             throw new VmArgumentOutOfRangeException("Kind does not fit in a byte.", nameof(kind), kind);
         }
