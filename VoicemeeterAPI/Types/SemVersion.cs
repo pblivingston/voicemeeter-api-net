@@ -59,7 +59,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
         {
             _ when t == typeof(int) => (T)(object)this.V1,
             _ when t == typeof(Kind) => (T)(object)((IVersion)this).K,
-            _ => throw new TypeNotSupportedException(typeof(T), nameof(kind), SupportedTypes.KindTypes)
+            _ => throw SupportedTypes.CreateArgumentException<T>(nameof(T), SupportedTypes.KindTypes)
         };
 
         sem = this;
@@ -74,7 +74,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
         {
             _ when t == typeof(int) => (T)(object)this.V1,
             _ when t == typeof(Kind) => (T)(object)((IVersion)this).K,
-            _ => throw new TypeNotSupportedException(typeof(T), nameof(kind), SupportedTypes.KindTypes)
+            _ => throw SupportedTypes.CreateArgumentException<T>(nameof(T), SupportedTypes.KindTypes)
         };
 
         this.Deconstruct(out maj, out min, out pat);
@@ -124,7 +124,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
 
         if (k is not null)
         {
-            throw new VmArgumentException("Version string had more than three parts.", nameof(s));
+            throw new ArgumentException("Version string had more than three parts.", nameof(s));
         }
 
         return new(m, n, p);
@@ -178,7 +178,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     int IComparable.CompareTo(object? obj)
         => obj is SemVersion sem
             ? this.CompareTo(sem)
-            : throw new VmArgumentException("Object must be SemVersion", nameof(obj));
+            : throw new ArgumentException("Object must be SemVersion", nameof(obj));
 
     public static bool operator ==(SemVersion a, SemVersion b) => a.Packed == b.Packed;
     public static bool operator !=(SemVersion a, SemVersion b) => a.Packed != b.Packed;

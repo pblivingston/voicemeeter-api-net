@@ -6,6 +6,8 @@ namespace PBLivingston.VoicemeeterAPI.Internal;
 internal static class SupportedTypes
 {
     public static string ListString(Type[] types) => string.Join(", ", types.Select(t => t.Name));
+    public static ArgumentException CreateArgumentException<T>(string paramName, Type[] supportedTypes)
+        => new($"'{typeof(T).Name}' was not a supported type. Supported types: {ListString(supportedTypes)}", paramName);
 
     public static readonly Type[] KindTypes = [typeof(int), typeof(Kind)];
     public static readonly string KindTypes_Str = ListString(KindTypes);

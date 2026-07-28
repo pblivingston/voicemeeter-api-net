@@ -17,7 +17,7 @@ public static class VersionUtils
         {
             if (!Utilities.InByte(value))
             {
-                throw new VmArgumentOutOfRangeException("Part does not fit in a byte.", paramName, value);
+                throw new ArgumentOutOfRangeException(paramName, value, "Part does not fit in a byte.");
             }
         }
 
@@ -50,7 +50,7 @@ public static class VersionUtils
     {
         if (string.IsNullOrWhiteSpace(s))
         {
-            throw new VmArgumentException("String was null or whitespace.", nameof(s));
+            throw new ArgumentNullException(nameof(s));
         }
 
         var k = 0;
@@ -64,7 +64,7 @@ public static class VersionUtils
             || (!int.TryParse(parts[l - 1], out pat))
         )
         {
-            throw new CannotParseAsPartsException(s, nameof(s));
+            throw new ArgumentException($"Cannot parse '{s}' as requested version parts", nameof(s));
         }
 
         kind = l == 4 ? k : null;

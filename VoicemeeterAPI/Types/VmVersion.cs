@@ -91,7 +91,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
         {
             _ when t == typeof(int) => (T)(object)this.V1,
             _ when t == typeof(Kind) => (T)(object)this.K,
-            _ => throw new TypeNotSupportedException(typeof(T), nameof(kind), SupportedTypes.KindTypes)
+            _ => throw SupportedTypes.CreateArgumentException<T>(nameof(T), SupportedTypes.KindTypes)
         };
 
         maj = this.V2;
@@ -108,7 +108,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
         {
             _ when t == typeof(int) => (T)(object)this.V1,
             _ when t == typeof(Kind) => (T)(object)this.K,
-            _ => throw new TypeNotSupportedException(typeof(T), nameof(kind), SupportedTypes.KindTypes)
+            _ => throw SupportedTypes.CreateArgumentException<T>(nameof(T), SupportedTypes.KindTypes)
         };
 
         sem = this.Semantic;
@@ -152,12 +152,12 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     {
         if (!Utilities.InByte(kind))
         {
-            throw new VmArgumentOutOfRangeException("Kind does not fit in a byte.", nameof(kind), kind);
+            throw new ArgumentOutOfRangeException(nameof(kind), kind, "Kind does not fit in a byte.");
         }
 
         if (!(sem == default || sem.IsValid()))
         {
-            throw new VmArgumentOutOfRangeException("Semantic version does not fit in three bytes.", nameof(sem), sem);
+            throw new ArgumentOutOfRangeException(nameof(sem), sem, "Semantic version does not fit in three bytes.");
         }
 
         return (kind << 24) | sem.Packed;
@@ -221,7 +221,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 
         if (k is null)
         {
-            throw new VmArgumentException("Version string had less than four parts.", nameof(s));
+            throw new ArgumentException("Version string had less than four parts.", nameof(s));
         }
 
         return new((int)k, m, n, p);
@@ -286,7 +286,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     int IComparable.CompareTo(object? obj)
         => obj is VmVersion vm
             ? this.CompareTo(vm)
-            : throw new VmArgumentException("Object must be VmVersion", nameof(obj));
+            : throw new ArgumentException("Object must be VmVersion", nameof(obj));
 
     public static bool operator ==(VmVersion a, VmVersion b) => a.Packed == b.Packed;
     public static bool operator !=(VmVersion a, VmVersion b) => a.Packed != b.Packed;
