@@ -12,7 +12,3 @@ public class AppStateException(string message, App app)
         => base.Message + Environment.NewLine +
             $"App: {this.App}";
 }
-
-public class AppNotInstalledException(App app)
-    : AppStateException($"Requested application is not installed.", app)
-{ }

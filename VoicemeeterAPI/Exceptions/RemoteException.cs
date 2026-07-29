@@ -41,15 +41,3 @@ public class RemoteException : VmApiException
         }
     }
 }
-
-public class NoClientException(ConnectionState lastConnectionState)
-    : RemoteException("Cannot get remote client.", lastConnectionState)
-{ }
-
-public class AlreadyLoggedInException(ConnectionState lastConnectionState)
-    : RemoteException("Login should not be performed more than once in a single session.", lastConnectionState)
-{ }
-
-public class EngineNotRunningException(ConnectionState lastConnectionState)
-    : RemoteException("Operation cannot be performed while Voicemeeter is not running.", lastConnectionState)
-{ }
