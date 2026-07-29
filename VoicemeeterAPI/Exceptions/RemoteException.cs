@@ -8,21 +8,7 @@ public class RemoteException : VmApiException
     public ConnectionState LastConnectionState { get; }
     public object? Response { get; }
 
-    public RemoteException(string message, LoginResponse response, ConnectionState lastConnectionState)
-        : base(message)
-    {
-        this.LastConnectionState = lastConnectionState;
-        this.Response = response;
-    }
-
-    public RemoteException(string message, RunResponse response, ConnectionState lastConnectionState)
-        : base(message)
-    {
-        this.LastConnectionState = lastConnectionState;
-        this.Response = response;
-    }
-
-    public RemoteException(string message, Response response, ConnectionState lastConnectionState)
+    public RemoteException(string message, object response, ConnectionState lastConnectionState)
         : base(message)
     {
         this.LastConnectionState = lastConnectionState;

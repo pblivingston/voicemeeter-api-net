@@ -56,6 +56,11 @@ public sealed partial class Remote : IRemote
             using var lk = this.stateLock.EnterScope();
             return this.loginStatus;
         }
+        private set
+        {
+            using var lk = this.stateLock.EnterScope();
+            this.loginStatus = value;
+        }
     }
     /// <inheritdoc/>
     public bool LoggedIn => this.LoginStatus < LoginResponse.LoggedOut;
@@ -117,8 +122,7 @@ public sealed partial class Remote : IRemote
 
         remote.InternalLogin(e);
 
-        remote.Login_i(e);
-        (_, var state) = remote.GetConnectionState_i(e);
+        (_, var state) = remote.Login_i(e);
 
         return (remote, state);
     }

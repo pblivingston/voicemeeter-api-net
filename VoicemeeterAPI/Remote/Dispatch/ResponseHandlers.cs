@@ -8,153 +8,9 @@ using Microsoft.Extensions.Logging;
 
 public partial class Remote
 {
-    /// <summary>
-    ///   Accesses this.lastConnectionState - must be within this.stateLock scope!
-    /// </summary>
-    /// <param name="response"></param>
-    /// <param name="executionPath"></param>
-    /// <param name="methodName"></param>
-    /// <returns>
-    ///   Value for this.loginStatus
-    /// </returns>
-    private LoginResponse HandleResponse(
-        LoginResponse response,
-        string executionPath,
-        [CallerMemberName] string methodName = ""
-    )
-    {
-        LogArgs payload;
-
-        switch (response)
-        {
-            case LoginResponse.VoicemeeterNotRunning:
-            case LoginResponse.Ok:
-                payload = LogArgs.New(this.logger, LogLevel.Information, loginResponse: response);
-                Log.RemoteMethodSuccess(this.logger, LogLevel.Information, methodName, payload, executionPath);
-                return response;
-
-            case LoginResponse.NoClient:
-                payload = LogArgs.New(this.logger, LogLevel.Error, loginResponse: response);
-                var ex1 = new NoClientException(this.lastConnectionState);
-                Log.RemoteLoginFailed(this.logger, ex1, methodName, payload, executionPath);
-                throw ex1;
-
-            case LoginResponse.AlreadyLoggedIn:
-                payload = LogArgs.New(this.logger, LogLevel.Error, loginResponse: response);
-                var ex2 = new AlreadyLoggedInException(this.lastConnectionState);
-                Log.RemoteContractViolation(this.logger, ex2, methodName, "Already logged in.", payload, executionPath);
-                throw ex2;
-
-            case LoginResponse.Unknown:
-            case LoginResponse.LoggedOut:
-            default:
-                payload = LogArgs.New(this.logger, LogLevel.Critical, loginResponse: response);
-                var ex = new UnhandledResponseException(response, this.lastConnectionState);
-                Log.UnhandledResponse(this.logger, ex, methodName, payload, executionPath);
-                throw ex;
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="response"></param>
-    /// <param name="executionPath"></param>
-    /// <param name="methodName"></param>
-    /// <returns>
-    ///   Value for this.loginStatus
-    /// </returns>
-    private LoginResponse HandleLogoutResponse(
-        LoginResponse response,
-        string executionPath,
-        [CallerMemberName] string methodName = ""
-    )
-    {
-        LogArgs payload;
-
-        switch (response)
-        {
-            case LoginResponse.Ok:
-                payload = LogArgs.New(this.logger, LogLevel.Information, loginResponse: response);
-                Log.RemoteMethodSuccess(this.logger, LogLevel.Information, methodName, payload, executionPath);
-                return LoginResponse.LoggedOut;
-
-            case LoginResponse.Unknown:
-            case LoginResponse.LoggedOut:
-            case LoginResponse.VoicemeeterNotRunning:
-            case LoginResponse.NoClient:
-            case LoginResponse.AlreadyLoggedIn:
-            default:
-                payload = LogArgs.New(this.logger, LogLevel.Critical, loginResponse: response);
-                Log.UnhandledLogoutResponse(this.logger, methodName, payload, executionPath);
-                return LoginResponse.Unknown;
-        }
-    }
-
-    /// <summary>
-    ///   Accesses this.lastConnectionState - must be within this.stateLock scope!
-    /// </summary>
-    /// <param name="response"></param>
-    /// <param name="app"></param>
-    /// <param name="executionPath"></param>
-    /// <param name="paramName"></param>
-    /// <param name="methodName"></param>
-    /// <returns></returns>
-    private RunResponse HandleResponse(
-        RunResponse response,
-        App app,
-        string executionPath,
-        string paramName = "app",
-        [CallerMemberName] string methodName = ""
-    )
-    {
-        var aState = methodName is nameof(this.GetAppState_i);
-        LogArgs payload;
-
-        switch (response)
-        {
-            case RunResponse.NotResponding when aState:
-                payload = LogArgs.New(this.logger, LogLevel.Warning, app: app, state: response);
-                Log.RemoteMethodSuccess(this.logger, LogLevel.Warning, methodName, payload, executionPath);
-                return response;
-
-            case RunResponse.NotRunning when aState:
-            case RunResponse.Hidden when aState:
-            case RunResponse.Ok when aState:
-                payload = LogArgs.New(this.logger, LogLevel.Debug, app: app, state: response);
-                Log.RemoteMethodSuccess(this.logger, LogLevel.Debug, methodName, payload, executionPath);
-                return response;
-
-            case RunResponse.Ok:
-                payload = LogArgs.New(this.logger, LogLevel.Information, app: app);
-                Log.RemoteMethodSuccess(this.logger, LogLevel.Information, methodName, payload, executionPath);
-                return response;
-
-            case RunResponse.NotInstalled:
-                payload = LogArgs.New(this.logger, LogLevel.Error, app: app);
-                var ex1 = new AppNotInstalledException(app);
-                Log.AppCriticalState(this.logger, ex1, methodName, payload, executionPath);
-                throw ex1;
-
-            case RunResponse.UnknownApp:
-                payload = LogArgs.New(this.logger, LogLevel.Error, app: app);
-                var ex2 = new VmArgumentException($"'{app}' is not a valid VB-Audio application.", paramName);
-                Log.RemoteInvalidArgument(this.logger, ex2, methodName, payload, executionPath);
-                throw ex2;
-
-            case RunResponse.NotResponding:
-            case RunResponse.NotRunning:
-            case RunResponse.Hidden:
-            case RunResponse.Error:
-            case RunResponse.Timeout:
-            case RunResponse.AlreadyShutDown:
-            default:
-                payload = LogArgs.New(this.logger, LogLevel.Critical, app: app);
-                var ex = new UnhandledResponseException(response, this.lastConnectionState);
-                Log.UnhandledResponse(this.logger, ex, methodName, payload, executionPath);
-                throw ex;
-        }
-    }
+    private const string NotLoggedInMessage = "Operation cannot be performed while not logged in to VoicemeeterRemote.";
+    private const string NotConnectedMessage = "Operation cannot be performed while Voicemeeter is not running.";
+    private const string AmbiguousMessage = "VoicemeeterRemote operation could not be completed for an unknown reason.";
 
     /// <summary>
     ///   Can raise this.ParamsDirty or this.ButtonsDirty - must be outside lock scope!
@@ -163,7 +19,7 @@ public partial class Remote
     /// <param name="executionPath"></param>
     /// <param name="methodName"></param>
     /// <returns></returns>
-    private bool HandleResponse(
+    private Result<Response, bool> HandleDirtyResponse(
         Response response,
         string executionPath,
         [CallerMemberName] string methodName = ""
@@ -176,34 +32,34 @@ public partial class Remote
         {
             case Response.Dirty when pDirty:
                 this.OnParamsDirty();
-                return true;
+                return (response, true);
 
             case Response.Dirty:
                 this.OnButtonsDirty();
-                return true;
+                return (response, true);
 
             case Response.Ok:
-                return false;
+                return (response, false);
 
             case Response.Error when !this.LoggedIn:
-                var ex1a = new NoClientException(this.LastConnectionState);
+                var ex1a = new InvalidOperationException(NotLoggedInMessage);
                 Log.RemoteContractViolation(this.logger, ex1a, methodName, "Not logged in.", payload, executionPath);
                 throw ex1a;
 
             case Response.Error:
-                var ex1b = new RemoteException("Operation could not be completed as requested.", response, this.LastConnectionState);
+                var ex1b = new RemoteException(AmbiguousMessage, response, this.LastConnectionState);
                 Log.RemoteMethodError(this.logger, ex1b, methodName, payload, executionPath);
                 throw ex1b;
 
             case Response.NoServer when !this.Connected:
-                var ex2a = new EngineNotRunningException(this.LastConnectionState);
+                var ex2a = new InvalidOperationException(NotConnectedMessage);
                 Log.RemoteContractViolation(this.logger, ex2a, methodName, "Voicemeeter is not running.", payload, executionPath);
                 throw ex2a;
 
             case Response.NoServer:
-                var ex2b = new EngineNotRunningException(this.LastConnectionState);
-                Log.RemoteLostConnection(this.logger, ex2b, methodName, "Voicemeeter", payload, executionPath);
-                throw ex2b;
+                Log.RemoteLostConnection(this.logger, methodName, "Voicemeeter", payload, executionPath);
+                this.LoginStatus = LoginResponse.VoicemeeterNotRunning;
+                return response;
 
             case Response.UnknownParameter:
             case Response.StructureMismatch:
@@ -218,16 +74,18 @@ public partial class Remote
     /// <summary>
     ///
     /// </summary>
+    /// <typeparam name="T"></typeparam>
     /// <param name="response"></param>
     /// <param name="param"></param>
     /// <param name="value"></param>
     /// <param name="executionPath"></param>
     /// <param name="paramName"></param>
     /// <param name="methodName"></param>
-    private void HandleResponse(
+    /// <returns></returns>
+    private Result<Response, T> HandleGetParamResponse<T>(
         Response response,
         string param,
-        object value,
+        T value,
         string executionPath,
         string paramName = "param",
         [CallerMemberName] string methodName = ""
@@ -240,11 +98,11 @@ public partial class Remote
             case Response.Ok:
                 payload = LogArgs.New(this.logger, LogLevel.Trace, param: param, value: value);
                 Log.RemoteMethodSuccess(this.logger, LogLevel.Trace, methodName, payload, executionPath);
-                return;
+                return (response, value);
 
             case Response.Error when !this.LoggedIn:
                 payload = LogArgs.New(this.logger, LogLevel.Error, param: param, value: value);
-                var ex1a = new NoClientException(this.LastConnectionState);
+                var ex1a = new InvalidOperationException(NotLoggedInMessage);
                 Log.RemoteContractViolation(this.logger, ex1a, methodName, "Not logged in.", payload, executionPath);
                 throw ex1a;
 
@@ -258,25 +116,25 @@ public partial class Remote
             // which shouldn't be encountered here unless the underlying wrapper or the dll itself has changed or is broken.
             case Response.StructureMismatch:
                 payload = LogArgs.New(this.logger, LogLevel.Error, param: param, value: value);
-                var ex1b = new RemoteException("Operation could not be completed as requested.", response, this.LastConnectionState);
+                var ex1b = new RemoteException(AmbiguousMessage, response, this.LastConnectionState);
                 Log.RemoteMethodError(this.logger, ex1b, methodName, payload, executionPath);
                 throw ex1b;
 
             case Response.NoServer when !this.Connected:
                 payload = LogArgs.New(this.logger, LogLevel.Error, param: param, value: value);
-                var ex2a = new EngineNotRunningException(this.LastConnectionState);
+                var ex2a = new InvalidOperationException(NotConnectedMessage);
                 Log.RemoteContractViolation(this.logger, ex2a, methodName, "Voicemeeter is not running.", payload, executionPath);
                 throw ex2a;
 
             case Response.NoServer:
-                payload = LogArgs.New(this.logger, LogLevel.Error, param: param, value: value);
-                var ex2b = new EngineNotRunningException(this.LastConnectionState);
-                Log.RemoteLostConnection(this.logger, ex2b, methodName, "Voicemeeter", payload, executionPath);
-                throw ex2b;
+                payload = LogArgs.New(this.logger, LogLevel.Warning, param: param, value: value);
+                Log.RemoteLostConnection(this.logger, methodName, "Voicemeeter", payload, executionPath);
+                this.LoginStatus = LoginResponse.VoicemeeterNotRunning;
+                return response;
 
             case Response.UnknownParameter:
                 payload = LogArgs.New(this.logger, LogLevel.Error, param: param, value: value);
-                var ex3 = new VmArgumentException($"'{param}' is not a valid Voicemeeter parameter.", paramName);
+                var ex3 = new ArgumentException($"'{param}' is not a valid Voicemeeter parameter.", paramName);
                 Log.RemoteInvalidArgument(this.logger, ex3, methodName, payload, executionPath);
                 throw ex3;
 
@@ -298,7 +156,7 @@ public partial class Remote
     /// <param name="executionPath"></param>
     /// <param name="methodName"></param>
     /// <returns></returns>
-    private bool HandleResponse(
+    private Kind HandleGetKindResponse(
         Response response,
         Kind kind,
         string executionPath,
@@ -312,18 +170,20 @@ public partial class Remote
             case Response.Ok:
                 payload = LogArgs.New(this.logger, LogLevel.Debug, kind: kind);
                 Log.RemoteMethodSuccess(this.logger, LogLevel.Debug, methodName, payload, executionPath);
-                return true;
+                this.loginStatus = LoginResponse.Ok;
+                return kind;
 
             case Response.Error:
                 payload = LogArgs.New(this.logger, LogLevel.Error, kind: kind);
-                var ex1 = new NoClientException(this.lastConnectionState);
+                var ex1 = new InvalidOperationException(NotLoggedInMessage);
                 Log.RemoteContractViolation(this.logger, ex1, methodName, "Not logged in.", payload, executionPath);
                 throw ex1;
 
             case Response.NoServer:
                 payload = LogArgs.New(this.logger, LogLevel.Warning, kind: kind);
                 Log.RemoteMethodSuccess(this.logger, LogLevel.Warning, methodName, payload, executionPath);
-                return false;
+                this.loginStatus = LoginResponse.VoicemeeterNotRunning;
+                return default;
 
             case Response.Dirty:
             case Response.UnknownParameter:
@@ -345,7 +205,7 @@ public partial class Remote
     /// <param name="executionPath"></param>
     /// <param name="methodName"></param>
     /// <returns></returns>
-    private bool HandleResponse(
+    private VmVersion HandleGetVersionResponse(
         Response response,
         VmVersion version,
         string executionPath,
@@ -359,18 +219,20 @@ public partial class Remote
             case Response.Ok:
                 payload = LogArgs.New(this.logger, LogLevel.Debug, version: version);
                 Log.RemoteMethodSuccess(this.logger, LogLevel.Debug, methodName, payload, executionPath);
-                return true;
+                this.loginStatus = LoginResponse.Ok;
+                return version;
 
             case Response.Error:
                 payload = LogArgs.New(this.logger, LogLevel.Error, version: version);
-                var ex1 = new NoClientException(this.lastConnectionState);
+                var ex1 = new InvalidOperationException(NotLoggedInMessage);
                 Log.RemoteContractViolation(this.logger, ex1, methodName, "Not logged in.", payload, executionPath);
                 throw ex1;
 
             case Response.NoServer:
                 payload = LogArgs.New(this.logger, LogLevel.Warning, version: version);
                 Log.RemoteMethodSuccess(this.logger, LogLevel.Warning, methodName, payload, executionPath);
-                return false;
+                this.loginStatus = LoginResponse.VoicemeeterNotRunning;
+                return default;
 
             case Response.Dirty:
             case Response.UnknownParameter:
@@ -382,58 +244,5 @@ public partial class Remote
                 Log.UnhandledResponse(this.logger, ex, methodName, payload, executionPath);
                 throw ex;
         }
-    }
-
-    /// <summary>
-    ///   Logs warnings when Voicemeeter or MacroButtons are not running
-    /// </summary>
-    /// <param name="login"></param>
-    /// <param name="version"></param>
-    /// <param name="mbState"></param>
-    /// <param name="executionPath"></param>
-    /// <param name="methodName"></param>
-    /// <returns>
-    ///   Current state
-    /// </returns>
-    private ConnectionState HandleResponse(
-        LoginResponse login,
-        VmVersion version,
-        RunResponse mbState,
-        bool loggedOut,
-        string executionPath,
-        [CallerMemberName] string methodName = ""
-    )
-    {
-        LogArgs payload;
-
-        if (!(version == default || version.IsValid()))
-        {
-            var ex = new VersionNotSupportedException(version, this.lastConnectionState);
-            payload = LogArgs.New(this.logger, LogLevel.Error, version: version);
-            Log.RemoteContractViolation(this.logger, ex, methodName, "Voicemeeter version not supported.", payload, executionPath);
-            throw ex;
-        }
-
-        var state = new ConnectionState(login, mbState, version.K, version);
-
-        payload = LogArgs.New(this.logger, LogLevel.Information, connectionState: state);
-        Log.RemoteMethodSuccess(this.logger, LogLevel.Information, methodName, payload, executionPath);
-
-        if (loggedOut)
-        {
-            return state;
-        }
-
-        if (!state.Connected)
-        {
-            Log.RemoteNotConnected(this.logger, methodName, "Voicemeeter", executionPath);
-        }
-
-        if (!state.ButtonsRunning)
-        {
-            Log.RemoteNotConnected(this.logger, methodName, "MacroButtons", executionPath);
-        }
-
-        return state;
     }
 }

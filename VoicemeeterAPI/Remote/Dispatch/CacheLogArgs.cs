@@ -15,9 +15,11 @@ public partial class Remote
         public ConnectionState? PreviousState { get; }
         public ConnectionState? CurrentState { init; get; }
         public LoginResponse? CurrentLoginStatus { init; get; }
-        public RunResponse? CurrentButtonsState { init; get; }
-        public Kind? CurrentRunningKind { init; get; }
-        public VmVersion? CurrentRunningVersion { init; get; }
+        public RunResponse? CurrentVoicemeeterState { init; get; }
+        public Kind? CurrentVoicemeeterKind { init; get; }
+        public App? CurrentVoicemeeterApp { init; get; }
+        public VmVersion? CurrentVoicemeeterVersion { init; get; }
+        public RunResponse? CurrentMacroButtonsState { init; get; }
 
         private CacheLogArgs() { }
 
@@ -28,19 +30,33 @@ public partial class Remote
             ILogger logger,
             LogLevel level,
             ConnectionState previousState,
-            ConnectionState? currentState = null,
-            LoginResponse? currentLoginStatus = null,
-            RunResponse? currentButtonsState = null,
-            Kind? currentRunningKind = null,
-            VmVersion? currentRunningVersion = null
+            ConnectionState currentState
         ) => logger.IsEnabled(level)
         ? new(previousState)
         {
             CurrentState = currentState,
+        }
+        : Empty;
+
+        public static CacheLogArgs New(
+            ILogger logger,
+            LogLevel level,
+            ConnectionState previousState,
+            LoginResponse? currentLoginStatus = null,
+            RunResponse? currentVoicemeeterState = null,
+            Kind? currentVoicemeeterKind = null,
+            App? currentVoicemeeterApp = null,
+            VmVersion? currentVoicemeeterVersion = null,
+            RunResponse? currentMacroButtonsState = null
+        ) => logger.IsEnabled(level)
+        ? new(previousState)
+        {
             CurrentLoginStatus = currentLoginStatus,
-            CurrentButtonsState = currentButtonsState,
-            CurrentRunningKind = currentRunningKind,
-            CurrentRunningVersion = currentRunningVersion
+            CurrentVoicemeeterState = currentVoicemeeterState,
+            CurrentVoicemeeterKind = currentVoicemeeterKind,
+            CurrentVoicemeeterApp = currentVoicemeeterApp,
+            CurrentVoicemeeterVersion = currentVoicemeeterVersion,
+            CurrentMacroButtonsState = currentMacroButtonsState
         }
         : Empty;
 
@@ -57,9 +73,11 @@ public partial class Remote
                 .Append("{ ")
                 .AddNullableArg(nameof(this.CurrentState), this.CurrentState)
                 .AddNullableArg(nameof(this.CurrentLoginStatus), this.CurrentLoginStatus)
-                .AddNullableArg(nameof(this.CurrentButtonsState), this.CurrentButtonsState)
-                .AddNullableArg(nameof(this.CurrentRunningKind), this.CurrentRunningKind)
-                .AddNullableArg(nameof(this.CurrentRunningVersion), this.CurrentRunningVersion)
+                .AddNullableArg(nameof(this.CurrentVoicemeeterState), this.CurrentVoicemeeterState)
+                .AddNullableArg(nameof(this.CurrentVoicemeeterKind), this.CurrentVoicemeeterKind)
+                .AddNullableArg(nameof(this.CurrentVoicemeeterApp), this.CurrentVoicemeeterApp)
+                .AddNullableArg(nameof(this.CurrentVoicemeeterVersion), this.CurrentVoicemeeterVersion)
+                .AddNullableArg(nameof(this.CurrentMacroButtonsState), this.CurrentMacroButtonsState)
                 .AddNullableArg(nameof(this.PreviousState), this.PreviousState)
                 .Append("} ")
                 .ToString();

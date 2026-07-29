@@ -7,21 +7,25 @@ public partial class Remote
 {
     #region Login
 
-    internal LoginResponse Login_i(string executionPath)
+    internal (ConnectionState previousState, ConnectionState currentState) Login_i(string executionPath)
     {
         var e = Utilities.BuildPath(executionPath);
 
         this.WrapperCall(nameof(this.wrapper.Login), e);
 
-        var result = this.wrapper.Login();
+        var response = this.wrapper.Login();
 
-        this.loginStatus = this.HandleResponse(result, e);
+        this.HandleLoginResponse(response, e);
 
-        return this.loginStatus;
+        var states = this.GetConnectionState_i(e);
+
+        this.HandleConnectionState(states.currentState, e);
+
+        return states;
     }
 
     /// <inheritdoc/>
-    public LoginResponse Login()
+    public ConnectionState Login()
     {
         var e = nameof(this.Login);
 
@@ -29,18 +33,16 @@ public partial class Remote
 
         this.MethodStart();
 
-        LoginResponse result;
         ConnectionState previousState;
         ConnectionState currentState;
         using (this.stateLock.EnterScope())
         {
-            result = this.Login_i(e);
-            (previousState, currentState) = this.GetConnectionState_i(e);
+            (previousState, currentState) = this.Login_i(e);
         }
 
         this.OnConnectionStateChanged(previousState, currentState);
 
-        return result;
+        return currentState;
     }
 
     #endregion
@@ -48,21 +50,19 @@ public partial class Remote
     #region Logout
 
     /// <inheritdoc cref="IRemote.Logout()"/>
-    private LoginResponse Logout_i(string executionPath)
+    private void Logout_i(string executionPath)
     {
         var e = Utilities.BuildPath(executionPath);
 
         this.WrapperCall(nameof(this.wrapper.Logout), e);
 
-        var result = this.wrapper.Logout();
+        var response = this.wrapper.Logout();
 
-        this.loginStatus = this.HandleLogoutResponse(result, e);
-
-        return this.loginStatus;
+        this.HandleLogoutResponse(response, e);
     }
 
     /// <inheritdoc/>
-    public LoginResponse Logout()
+    public void Logout()
     {
         var e = nameof(this.Logout);
 
@@ -70,100 +70,93 @@ public partial class Remote
 
         this.MethodStart();
 
-        LoginResponse result;
         ConnectionState previousState;
         ConnectionState currentState;
         using (this.stateLock.EnterScope())
         {
-            result = this.Logout_i(e);
-            (previousState, currentState) = this.GetConnectionState_i(e, true);
+            this.Logout_i(e);
+            (previousState, currentState) = this.GetConnectionState_i(e);
         }
 
         this.OnConnectionStateChanged(previousState, currentState);
-
-        return result;
     }
 
     #endregion
 
     #region Run Voicemeeter
 
-    private RunResponse Run_p(App app, string executionPath)
+    private void Run_p(App app, string executionPath)
     {
         var e = Utilities.BuildPath(executionPath);
 
-        var state = this.GetAppState_i(app, e);
-
-        if (state is RunResponse.NotResponding)
-        {
-            this.AppUnexpectedState(app, state, e);
-            return state;
-        }
-
         this.WrapperCall(nameof(this.wrapper.RunVoicemeeter), e, app: app);
 
-        var result = this.wrapper.RunVoicemeeter(app);
+        var response = this.wrapper.RunVoicemeeter(app);
 
-        return this.HandleResponse(result, app, e);
+        this.HandleRunResponse(response, app, e);
     }
 
     #region Run
 
     /// <inheritdoc cref="IRemote.Run{T}(T)"/>
-    internal RunResponse Run_i(App app, string executionPath)
+    internal void Run_i(App app, string executionPath)
     {
         var e = Utilities.BuildPath(executionPath);
 
         using var lk = this.stateLock.EnterScope();
 
-        var result = this.Run_p(app, e);
+        this.Run_p(app, e);
 
-        if (result is RunResponse.NotResponding)
+        var loggedIn = this.loginStatus >= LoginResponse.Ok;
+
+        if (app.IsVoicemeeter() && loggedIn)
         {
-            return result;
+            this.HandleStaleCache(this.loginStatus, e);
         }
 
-        if (app.IsVoicemeeter() && this.LoggedIn)
-        {
-            this.HandleStaleCache(LoginResponse.Ok, e);
-        }
-
-        if (app is App.MacroButtons && this.LoggedIn)
+        if (app is App.MacroButtons && loggedIn)
         {
             this.HandleStaleCache(RunResponse.Ok, e);
         }
-
-        return result;
     }
 
     /// <inheritdoc cref="IRemote.Run{T}(T)"/>
-    public RunResponse Run(App app)
+    public void Run(App app)
     {
         using var scope = this.BeginCallScope();
 
         this.MethodStart(app: app);
 
-        return this.Run_i(app, nameof(this.Run));
+        this.Run_i(app, nameof(this.Run));
     }
 
     /// <inheritdoc cref="IRemote.Run{T}(T)"/>
-    public RunResponse Run(Kind kind)
+    public void Run(Kind kind)
     {
         using var scope = this.BeginCallScope();
 
         this.MethodStart(kind: kind);
 
-        return this.Run_i(kind.ToApp(this.wrapper.Is64Bit), nameof(this.Run));
+        this.Run_i(kind.ToApp(this.wrapper.Is64Bit), nameof(this.Run));
     }
 
     /// <inheritdoc/>
-    RunResponse IRemote.Run<T>(T app)
-        => app switch
+    void IRemote.Run<T>(T app)
+    {
+        switch (app)
         {
-            App a => this.Run(a),
-            Kind k => this.Run(k),
-            _ => throw this.TypeNotSupported<T>(SupportedTypes.RunTypes, nameof(IRemote.Run))
-        };
+            case App a:
+                this.Run(a);
+                break;
+
+            case Kind k:
+                this.Run(k);
+                break;
+
+            default:
+                throw this.TypeNotSupported<T>(SupportedTypes.RunTypes, nameof(IRemote.Run));
+        }
+    }
 
     #endregion
 
@@ -179,29 +172,13 @@ public partial class Remote
         ConnectionState currentState;
         using (await this.stateLock.EnterScopeAsync(cancellationToken))
         {
-            var r = this.Run_p(app, e);
+            this.Run_p(app, e);
 
-            if (r is RunResponse.NotResponding)
-            {
-                return r;
-            }
-
-            var vm = app.IsVoicemeeter();
-            var loggedOut = this.loginStatus >= LoginResponse.LoggedOut;
-
-            if (vm && loggedOut)
-            {
-                this.CannotWaitForVoicemeeter(e);
-                result = r;
-            }
-            else
-            {
-                result = vm
-                    ? await this.WaitForVoicemeeter(e, cancellationToken)
+            result = app.IsVoicemeeter() && this.loginStatus < LoginResponse.LoggedOut
+                    ? await this.WaitForEngine(e, cancellationToken)
                     : await this.WaitForRunning(app, e, cancellationToken);
-            }
 
-            (previousState, currentState) = this.GetConnectionState_i(e, loggedOut);
+            (previousState, currentState) = this.GetConnectionState_i(e);
         }
 
         this.OnConnectionStateChanged(previousState, currentState);
@@ -244,7 +221,7 @@ public partial class Remote
 
     #region Helpers
 
-    private async Task<RunResponse> WaitForVoicemeeter(string executionPath, CancellationToken cancellationToken)
+    private async Task<RunResponse> WaitForEngine(string executionPath, CancellationToken cancellationToken)
     {
         var e = Utilities.BuildPath(executionPath);
         var target = "Voicemeeter";
@@ -256,15 +233,14 @@ public partial class Remote
 
         try
         {
-            LoginResponse login;
             VmVersion version;
             do
             {
                 await Task.Delay(100, cts.Token);
 
-                (login, version) = this.GetVersion_i(e);
+                version = this.GetVersion_i(e);
             }
-            while (!(login is LoginResponse.Ok && version.IsValid()));
+            while (!version.IsValid());
 
             this.YieldForEngineSettle(target, e);
             bool pDirty;
@@ -273,8 +249,11 @@ public partial class Remote
             {
                 await Task.Delay(50, cts.Token);
 
-                pDirty = this.ParamsDirty_i(e);
-                bDirty = this.ButtonsDirty_i(e);
+                var pResult = this.ParamsDirty_i(e);
+                pDirty = !pResult.IsSuccess || pResult.Value;
+
+                var bResult = this.ButtonsDirty_i(e);
+                bDirty = !bResult.IsSuccess || pResult.Value;
             }
             while (pDirty || bDirty);
 
@@ -311,9 +290,28 @@ public partial class Remote
             Response idle;
             do
             {
-                await Task.Delay(100, cts.Token);
+                if (app.IsVoicemeeter())
+                {
+                    idle = Response.Dirty;
+                    for (var a = App.Standard; a <= App.Potatox64; a++)
+                    {
+                        await Task.Delay(100, cts.Token);
 
-                idle = this.wrapper.IsApplicationInputIdle(app);
+                        idle = this.wrapper.IsApplicationInputIdle(a);
+
+                        if (idle is Response.Ok)
+                        {
+                            app = a;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    await Task.Delay(100, cts.Token);
+
+                    idle = this.wrapper.IsApplicationInputIdle(app);
+                }
             }
             while (idle is not Response.Ok);
 
@@ -326,7 +324,8 @@ public partial class Remote
                 {
                     await Task.Delay(50, cts.Token);
 
-                    dirty = this.ButtonsDirty_i(e);
+                    var dResult = this.ButtonsDirty_i(e);
+                    dirty = !dResult.IsSuccess || dResult.Value;
                 }
                 while (dirty);
             }

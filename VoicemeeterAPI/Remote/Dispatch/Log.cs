@@ -152,39 +152,28 @@ public partial class Remote
             Level = LogLevel.Warning,
             Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
                 "{TargetDescription} is not running. " +
-                "[{ExecutionPath}]"
+                "{Payload}[{ExecutionPath}]"
         )]
         public static partial void RemoteNotConnected(
             ILogger logger,
             string methodName,
             string targetDescription,
-            string executionPath
-        );
-
-        [LoggerMessage(
-            EventId = (int)Event.AppUnexpectedState,
-            Level = LogLevel.Warning,
-            Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
-                "Application may need attention. " +
-                "{Payload}[{ExecutionPath}]"
-        )]
-        public static partial void AppUnexpectedState(
-            ILogger logger,
-            string methodName,
             LogArgs payload,
             string executionPath
         );
 
         [LoggerMessage(
-            EventId = (int)Event.CannotWaitForVoicemeeter,
-            Level = LogLevel.Warning,
+            EventId = (int)Event.RemoteLostConnection,
+            Level = LogLevel.Error,
             Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
-                "Cannot wait for Voicemeeter while not logged in. " +
-                "[{ExecutionPath}]"
+                "Lost connection to {TargetDescription}. " +
+                "{Payload}[{ExecutionPath}]"
         )]
-        public static partial void CannotWaitForVoicemeeter(
+        public static partial void RemoteLostConnection(
             ILogger logger,
             string methodName,
+            string targetDescription,
+            LogArgs payload,
             string executionPath
         );
 
@@ -192,7 +181,7 @@ public partial class Remote
             EventId = (int)Event.StaleConnectionState,
             Level = LogLevel.Warning,
             Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
-                "Returned value did not match LastConnectionState. " +
+                "Connection state has changed since LastConnectionState was cached. " +
                 "Recommend calling GetConnectionState to update. " +
                 "{Payload}[{ExecutionPath}]"
         )]
@@ -231,7 +220,7 @@ public partial class Remote
         )]
         public static partial void RemoteContractViolation(
             ILogger logger,
-            RemoteException ex,
+            InvalidOperationException ex,
             string methodName,
             string reason,
             LogArgs payload,
@@ -247,7 +236,7 @@ public partial class Remote
         )]
         public static partial void RemoteInvalidArgument(
             ILogger logger,
-            VmArgumentException ex,
+            ArgumentException ex,
             string methodName,
             LogArgs payload,
             string executionPath
@@ -257,7 +246,7 @@ public partial class Remote
             EventId = (int)Event.RemoteMethodError,
             Level = LogLevel.Error,
             Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
-                "Could not be performed as requested. " +
+                "Operation could not be completed as requested. " +
                 "{Payload}[{ExecutionPath}]"
         )]
         public static partial void RemoteMethodError(
@@ -281,7 +270,7 @@ public partial class Remote
         )]
         public static partial void RemoteLoginFailed(
             ILogger logger,
-            RemoteException ex,
+            CannotGetClientException ex,
             string methodName,
             LogArgs payload,
             string executionPath
@@ -298,22 +287,6 @@ public partial class Remote
             ILogger logger,
             AppStateException ex,
             string methodName,
-            LogArgs payload,
-            string executionPath
-        );
-
-        [LoggerMessage(
-            EventId = (int)Event.RemoteLostConnection,
-            Level = LogLevel.Error,
-            Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
-                "Lost connection to {TargetDescription}. " +
-                "{Payload}[{ExecutionPath}]"
-        )]
-        public static partial void RemoteLostConnection(
-            ILogger logger,
-            RemoteException ex,
-            string methodName,
-            string targetDescription,
             LogArgs payload,
             string executionPath
         );
@@ -343,7 +316,7 @@ public partial class Remote
         )]
         public static partial void UnhandledResponse(
             ILogger logger,
-            UnhandledResponseException ex,
+            RemoteException ex,
             string methodName,
             LogArgs payload,
             string executionPath

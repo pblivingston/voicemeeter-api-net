@@ -8,6 +8,12 @@ using Microsoft.Extensions.Logging;
 
 public partial class Remote
 {
+    /// <summary>
+    ///   Accesses this.lastConnectionState - must be within this.stateLock scope!
+    /// </summary>
+    /// <param name="currentLoginStatus"></param>
+    /// <param name="executionPath"></param>
+    /// <param name="methodName"></param>
     private void HandleStaleCache(
         LoginResponse currentLoginStatus,
         string executionPath,
@@ -34,13 +40,19 @@ public partial class Remote
         );
     }
 
+    /// <summary>
+    ///   Accesses this.lastConnectionState - must be within this.stateLock scope!
+    /// </summary>
+    /// <param name="currentVoicemeeterKind"></param>
+    /// <param name="executionPath"></param>
+    /// <param name="methodName"></param>
     private void HandleStaleCache(
-        RunResponse currentButtonsState,
+        Kind currentVoicemeeterKind,
         string executionPath,
         [CallerMemberName] string methodName = ""
     )
     {
-        if (currentButtonsState == this.lastConnectionState.ButtonsState)
+        if (currentVoicemeeterKind == this.lastConnectionState.VoicemeeterKind)
         {
             return;
         }
@@ -49,7 +61,7 @@ public partial class Remote
             this.logger,
             LogLevel.Warning,
             this.lastConnectionState,
-            currentButtonsState: currentButtonsState
+            currentVoicemeeterKind: currentVoicemeeterKind
         );
 
         Log.StaleConnectionState(
@@ -60,13 +72,23 @@ public partial class Remote
         );
     }
 
+    /// <summary>
+    ///   Accesses this.lastConnectionState - must be within this.stateLock scope!
+    /// </summary>
+    /// <param name="currentVoicemeeterApp"></param>
+    /// <param name="executionPath"></param>
+    /// <param name="methodName"></param>
     private void HandleStaleCache(
-        Kind currentRunningKind,
+        App currentVoicemeeterApp,
+        RunResponse currentVoicemeeterState,
         string executionPath,
         [CallerMemberName] string methodName = ""
     )
     {
-        if (currentRunningKind == this.lastConnectionState.RunningKind)
+        var previousState = this.lastConnectionState;
+
+        if (currentVoicemeeterApp == previousState.VoicemeeterApp
+            && currentVoicemeeterState == previousState.VoicemeeterState)
         {
             return;
         }
@@ -74,8 +96,9 @@ public partial class Remote
         var payload = CacheLogArgs.New(
             this.logger,
             LogLevel.Warning,
-            this.lastConnectionState,
-            currentRunningKind: currentRunningKind
+            previousState,
+            currentVoicemeeterApp: currentVoicemeeterApp,
+            currentVoicemeeterState: currentVoicemeeterState
         );
 
         Log.StaleConnectionState(
@@ -86,13 +109,19 @@ public partial class Remote
         );
     }
 
+    /// <summary>
+    ///   Accesses this.lastConnectionState - must be within this.stateLock scope!
+    /// </summary>
+    /// <param name="currentVoicemeeterVersion"></param>
+    /// <param name="executionPath"></param>
+    /// <param name="methodName"></param>
     private void HandleStaleCache(
-        VmVersion currentRunningVersion,
+        VmVersion currentVoicemeeterVersion,
         string executionPath,
         [CallerMemberName] string methodName = ""
     )
     {
-        if (currentRunningVersion == this.lastConnectionState.RunningVersion)
+        if (currentVoicemeeterVersion == this.lastConnectionState.VoicemeeterVersion)
         {
             return;
         }
@@ -101,7 +130,39 @@ public partial class Remote
             this.logger,
             LogLevel.Warning,
             this.lastConnectionState,
-            currentRunningVersion: currentRunningVersion
+            currentVoicemeeterVersion: currentVoicemeeterVersion
+        );
+
+        Log.StaleConnectionState(
+            this.logger,
+            methodName,
+            payload,
+            executionPath
+        );
+    }
+
+    /// <summary>
+    ///   Accesses this.lastConnectionState - must be within this.stateLock scope!
+    /// </summary>
+    /// <param name="currentMacroButtonsState"></param>
+    /// <param name="executionPath"></param>
+    /// <param name="methodName"></param>
+    private void HandleStaleCache(
+        RunResponse currentMacroButtonsState,
+        string executionPath,
+        [CallerMemberName] string methodName = ""
+    )
+    {
+        if (currentMacroButtonsState == this.lastConnectionState.MacroButtonsState)
+        {
+            return;
+        }
+
+        var payload = CacheLogArgs.New(
+            this.logger,
+            LogLevel.Warning,
+            this.lastConnectionState,
+            currentMacroButtonsState: currentMacroButtonsState
         );
 
         Log.StaleConnectionState(

@@ -8,19 +8,19 @@ public partial class Remote
     #region MacroButtons Is Dirty
 
     /// <inheritdoc cref="IRemote.IsButtonsDirty()"/>
-    internal bool ButtonsDirty_i(string executionPath)
+    internal Result<Response, bool> ButtonsDirty_i(string executionPath)
     {
-        Response result;
+        Response response;
         using (this.bDirtyLock.EnterScope())
         {
-            result = this.wrapper.MacroButtonIsDirty();
+            response = this.wrapper.MacroButtonIsDirty();
         }
 
-        return this.HandleResponse(result, Utilities.BuildPath(executionPath));
+        return this.HandleDirtyResponse(response, Utilities.BuildPath(executionPath));
     }
 
     /// <inheritdoc/>
-    public bool IsButtonsDirty()
+    public Result<Response, bool> IsButtonsDirty()
     {
         using var scope = this.BeginCallScope();
 

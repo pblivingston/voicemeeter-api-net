@@ -15,23 +15,25 @@ public class ConnectionStateEventArgs(ConnectionState previousState, ConnectionS
 ///   Snapshot of the state of a connection to VoicemeeterRemote.
 /// </summary>
 /// <param name="loginStatus"></param>
+/// <param name="vmState"></param>
+/// <param name="vmApp"></param>
+/// <param name="vmVersion"></param>
 /// <param name="buttonsState"></param>
-/// <param name="runningKind"></param>
-/// <param name="runningVersion"></param>
-public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse buttonsState, Kind runningKind, VmVersion runningVersion)
+public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vmState, App vmApp, VmVersion vmVersion, RunResponse buttonsState)
     : IEquatable<ConnectionState>
 {
     /// <summary>
-    ///   HashCode will be positive if logged in, negative if logged out.
+    ///   packed will be positive if logged in, negative if logged out.
     /// </summary>
     /// <remarks>
-    ///   <code>(int)LoginStatus &lt;&lt; 30 | (int)ButtonsState &lt;&lt; 28 | (int)RunningKind &lt;&lt; 26 | (int)RunningVersion</code>
+    ///   <code>(int)LoginStatus &lt;&lt; 30 | (int)MacroButtonsState &lt;&lt; 28 | (int)VoicemeeterKind &lt;&lt; 26 | (int)VoicemeeterVersion</code>
     /// </remarks>
-    public int HashCode { get; } = unchecked(
+    private readonly int packed = unchecked(
         ((int)loginStatus << 30) |
-        ((int)buttonsState << 28) |
-        ((int)runningKind << 26) |
-        ((int)runningVersion)
+        (((int)vmState & 0x1) << 29) |
+        ((vmApp < App.Standardx64 ? 0 : 1) << 28) |
+        ((int)vmVersion << 2) |
+        ((int)buttonsState)
     );
 
     /// <summary>
@@ -40,12 +42,17 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse bu
     /// <remarks>
     ///   Ok, VoicemeeterNotRunning, LoggedOut, Unknown
     /// </remarks>
-    public LoginResponse LoginStatus => (LoginResponse)((this.HashCode >> 30) & 0x3);
+    public LoginResponse LoginStatus => (LoginResponse)((this.packed >> 30) & 0x3);
 
     /// <summary>
-    ///
+    ///   The state of the Voicemeeter application.
     /// </summary>
-    public RunResponse ButtonsState => (RunResponse)((this.HashCode >> 28) & 0x3);
+    public RunResponse VoicemeeterState => this.LoginStatus < LoginResponse.LoggedOut
+        ? (RunResponse)((this.packed >> 29) & 0x3)
+        : (RunResponse)(
+            ((this.VoicemeeterKind is Kind.None ? 1 : 0) << 1) |
+            ((this.packed >> 29) & 0x1)
+        );
 
     /// <summary>
     ///   The running Voicemeeter Kind.
@@ -53,13 +60,25 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse bu
     /// <remarks>
     ///   None, Standard, Banana, Potato
     /// </remarks>
-    public Kind RunningKind => (Kind)((this.HashCode >> 26) & 0x3);
+    public Kind VoicemeeterKind => (Kind)((this.packed >> 26) & 0x3);
 
-    private int VmPacked => this.HashCode & 0x3FFFFFF;
+    /// <summary>
+    ///   The running Voicemeeter application.
+    /// </summary>
+    /// <remarks>
+    ///   None, Standard, Banana, Potato, Standardx64, Bananax64, Potatox64
+    /// </remarks>
+    public App VoicemeeterApp => this.VoicemeeterKind.ToApp(((this.packed >> 28) & 0x1) == 1);
+
     /// <summary>
     ///   The running Voicemeeter version.
     /// </summary>
-    public VmVersion RunningVersion => this.VmPacked == 0 ? default : (VmVersion)this.VmPacked;
+    public VmVersion VoicemeeterVersion => (VmVersion)((this.packed >> 2) & 0x3FFFFFF);
+
+    /// <summary>
+    ///   The state of the MacroButtons application.
+    /// </summary>
+    public RunResponse MacroButtonsState => (RunResponse)(this.packed & 0x3);
 
     /// <summary>
     ///   Simplifies <see cref="LoginStatus"/> checks.
@@ -75,27 +94,28 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse bu
     /// <remarks>
     ///   `true` if logged in to VoicemeeterRemote and Voicemeeter is running.
     /// </remarks>
-    public bool Connected => this.LoginStatus == LoginResponse.Ok;
+    public bool ConnectedToVoicemeeter => this.LoginStatus == LoginResponse.Ok;
 
     /// <summary>
-    ///   Simplifies <see cref="ButtonsState"/> checks.
+    ///   Simplifies <see cref="MacroButtonsState"/> checks.
     /// </summary>
     /// <remarks>
     ///   `true` if MacroButtons is running and responding.
     /// </remarks>
-    public bool ButtonsRunning => this.ButtonsState < RunResponse.NotRunning;
+    public bool MacroButtonsIsRunning => this.MacroButtonsState < RunResponse.NotRunning;
+
+    /// <summary>
+    ///   Simplifies MacroButtons checks.
+    /// </summary>
+    /// <remarks>
+    ///   `true` if MacroButtons is responding and reachable via Voicemeeter.
+    /// </remarks>
+    public bool ConnectedToMacroButtons => this.ConnectedToVoicemeeter && this.MacroButtonsIsRunning;
+
 
     public ConnectionState()
-        : this(LoginResponse.LoggedOut, RunResponse.NotRunning, Kind.None, default)
+        : this(LoginResponse.LoggedOut, RunResponse.NotRunning, App.None, default, RunResponse.NotRunning)
     { }
-
-    public void Deconstruct(out LoginResponse login, out RunResponse buttons, out Kind kind, out VmVersion version)
-    {
-        login = this.LoginStatus;
-        buttons = this.ButtonsState;
-        kind = this.RunningKind;
-        version = this.RunningVersion;
-    }
 
     public override string ToString()
     {
@@ -104,26 +124,23 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse bu
         return builder
             .Append("{ ")
             .AddArg(nameof(this.LoginStatus), this.LoginStatus)
-            .AddArg(nameof(this.ButtonsState), this.ButtonsState)
-            .AddArg(nameof(this.RunningKind), this.RunningKind)
-            .AddArg(nameof(this.RunningVersion), this.RunningVersion)
+            .AddArg(nameof(this.VoicemeeterState), this.VoicemeeterState)
+            .AddArg(nameof(this.VoicemeeterKind), this.VoicemeeterKind)
+            .AddArg(nameof(this.VoicemeeterApp), this.VoicemeeterApp)
+            .AddArg(nameof(this.VoicemeeterVersion), this.VoicemeeterVersion)
+            .AddArg(nameof(this.MacroButtonsState), this.MacroButtonsState)
             .Append('}')
             .ToString();
     }
 
-    public static explicit operator ConnectionState((LoginResponse login, RunResponse buttons, Kind kind, VmVersion version) t)
-        => new(t.login, t.buttons, t.kind, t.version);
-    public static explicit operator (LoginResponse login, RunResponse buttons, Kind kind, VmVersion version)(ConnectionState state)
-        => (state.LoginStatus, state.ButtonsState, state.RunningKind, state.RunningVersion);
-
     public bool Equals(ConnectionState other)
-        => this.HashCode == other.HashCode;
+        => this.packed == other.packed;
     public override bool Equals(object? obj)
         => obj is ConnectionState other
         && this.Equals(other);
     public override int GetHashCode()
-        => this.HashCode;
+        => this.packed;
 
-    public static bool operator ==(ConnectionState a, ConnectionState b) => a.HashCode == b.HashCode;
-    public static bool operator !=(ConnectionState a, ConnectionState b) => a.HashCode != b.HashCode;
+    public static bool operator ==(ConnectionState a, ConnectionState b) => a.packed == b.packed;
+    public static bool operator !=(ConnectionState a, ConnectionState b) => a.packed != b.packed;
 }

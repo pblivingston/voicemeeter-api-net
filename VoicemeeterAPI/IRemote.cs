@@ -82,7 +82,7 @@ public interface IRemote : IDisposable
     ///   </list>
     /// </remarks>
     /// <inheritdoc cref="IRemote" path="/example"/>
-    public LoginResponse Login();
+    public ConnectionState Login();
 
     /// <summary>
     ///   Closes communication pipe with VoicemeeterRemote.
@@ -104,7 +104,7 @@ public interface IRemote : IDisposable
     ///   </list>
     /// </remarks>
     /// <inheritdoc cref="IRemote" path="/example"/>
-    public LoginResponse Logout();
+    public void Logout();
 
     /// <summary>
     ///   Runs the specified <see cref="App"/>.
@@ -135,7 +135,7 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    public RunResponse Run<T>(T app)
+    public void Run<T>(T app)
         where T : struct, Enum;
 
     /// <summary>
@@ -219,6 +219,8 @@ public interface IRemote : IDisposable
     /// <exception cref="RemoteException{RunResponse}"></exception>
     public RunResponse GetAppState(App app);
 
+    public (App App, RunResponse State) GetVoicemeeterState();
+
     /// <summary>
     ///   Updates <see cref="LastConnectionState"/> and returns the current connection state.
     /// </summary>
@@ -252,7 +254,7 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    public bool IsParamsDirty();
+    public Result<Response, bool> IsParamsDirty();
 
     /// <summary>
     ///   Gets the requested Voicemeeter parameter.
@@ -287,7 +289,7 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    public T GetParam<T>(string param)
+    public Result<Response, T> GetParam<T>(string param)
         where T : notnull;
 
     #endregion
@@ -316,7 +318,7 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    public bool IsButtonsDirty();
+    public Result<Response, bool> IsButtonsDirty();
 
     #endregion
 }

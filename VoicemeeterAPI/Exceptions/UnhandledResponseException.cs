@@ -3,19 +3,6 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-public class UnhandledResponseException : RemoteException
-{
-    private const string UnhandledResponseMessage = "API or wrapper returned an unexpected response.";
-
-    public UnhandledResponseException(LoginResponse response, ConnectionState lastConnectionState)
-        : base(UnhandledResponseMessage, response, lastConnectionState)
-    { }
-
-    public UnhandledResponseException(RunResponse response, ConnectionState lastConnectionState)
-        : base(UnhandledResponseMessage, response, lastConnectionState)
-    { }
-
-    public UnhandledResponseException(Response response, ConnectionState lastConnectionState)
-        : base(UnhandledResponseMessage, response, lastConnectionState)
-    { }
-}
+public class UnhandledResponseException(object response, ConnectionState lastConnectionState)
+    : RemoteException("VoicemeeterRemote dll or wrapper returned an unexpected response.", response, lastConnectionState)
+{ }

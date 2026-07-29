@@ -96,22 +96,6 @@ public partial class Remote
 
     #region Warning
 
-    private void AppUnexpectedState(
-        App app,
-        RunResponse state,
-        string executionPath,
-        [CallerMemberName] string methodName = ""
-    )
-    {
-        var payload = LogArgs.New(this.logger, LogLevel.Warning, app: app, state: state);
-        Log.AppUnexpectedState(this.logger, methodName, payload, executionPath);
-    }
-
-    private void CannotWaitForVoicemeeter(
-        string executionPath,
-        [CallerMemberName] string methodName = ""
-    ) => Log.CannotWaitForVoicemeeter(this.logger, methodName, executionPath);
-
     private void OperationCanceled(
         OperationCanceledException ex,
         string executionPath,
@@ -127,7 +111,7 @@ public partial class Remote
 
     #region Dev Error
 
-    private CannotConvertToTypeException CannotConvertToType<T>(
+    private ArgumentException CannotConvertToType<T>(
         string voicemeeterParam,
         float returnedValue,
         string executionPath,
@@ -136,19 +120,20 @@ public partial class Remote
     )
     {
         var payload = LogArgs.New(this.logger, LogLevel.Error, param: voicemeeterParam, value: returnedValue);
-        var ex = new CannotConvertToTypeException(typeof(T), voicemeeterParam, returnedValue, paramName);
+        var message = $"Cannot convert '{voicemeeterParam}' value to '{typeof(T).Name}'.";
+        var ex = new ArgumentException(message, paramName);
         Log.RemoteInvalidArgument(this.logger, ex, methodName, payload, executionPath);
         return ex;
     }
 
-    private TypeNotSupportedException TypeNotSupported<T>(
+    private ArgumentException TypeNotSupported<T>(
         Type[] supportedTypes,
         string executionPath,
         string paramName = "T",
         [CallerMemberName] string methodName = ""
     )
     {
-        var ex = new TypeNotSupportedException(typeof(T), paramName, supportedTypes);
+        var ex = SupportedTypes.CreateArgumentException<T>(paramName, supportedTypes);
         Log.RemoteInvalidArgument(this.logger, ex, methodName, LogArgs.Empty, executionPath);
         return ex;
     }

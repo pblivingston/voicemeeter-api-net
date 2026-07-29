@@ -26,10 +26,7 @@ internal enum Event
 
     // 13xx Warning
     RemoteNotConnected = 1300,
-
-    AppUnexpectedState = 1310,
-
-    CannotWaitForVoicemeeter = 1320,
+    RemoteLostConnection = 1301,
 
     StaleConnectionState = 1330,
 
@@ -46,8 +43,6 @@ internal enum Event
     RemoteLoginFailed = 1500,
 
     AppCriticalState = 1510,
-
-    RemoteLostConnection = 1530, // EngineNotRunningException, AppNotRunningException, etc.
 
     UnhandledLogoutResponse = 1598,
     UnhandledResponse = 1599,
