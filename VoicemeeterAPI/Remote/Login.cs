@@ -268,7 +268,7 @@ public partial class Remote
 
             return state;
         }
-        catch (OperationCanceledException ex)
+        catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
         {
             this.OperationCanceled(ex, e);
             return RunResponse.Timeout;
@@ -287,33 +287,12 @@ public partial class Remote
 
         try
         {
-            Response idle;
-            do
+            var idle = await this.wrapper.WaitForApplicationInputIdle(app, cts.Token);
+
+            if (!idle.IsResponding())
             {
-                if (app.IsVoicemeeter())
-                {
-                    idle = Response.Dirty;
-                    for (var a = App.Standard; a <= App.Potatox64; a++)
-                    {
-                        await Task.Delay(100, cts.Token);
-
-                        idle = this.wrapper.IsApplicationInputIdle(a);
-
-                        if (idle is Response.Ok)
-                        {
-                            app = a;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    await Task.Delay(100, cts.Token);
-
-                    idle = this.wrapper.IsApplicationInputIdle(app);
-                }
+                return idle;
             }
-            while (idle is not Response.Ok);
 
             if (app is App.MacroButtons
                 && this.loginStatus < LoginResponse.LoggedOut)
@@ -336,7 +315,7 @@ public partial class Remote
 
             return state;
         }
-        catch (OperationCanceledException ex)
+        catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
         {
             this.OperationCanceled(ex, e, app: app);
             return RunResponse.Timeout;

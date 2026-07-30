@@ -25,6 +25,7 @@ public partial class Remote
 
         public bool Is64Bit { get; } = Environment.Is64BitProcess;
         public string InstallDir { get; } = GetInstallDirectory();
+        public App LastDetectedVoicemeeter { get; private set; } = App.None;
 
         private string DllName => VmrName + (this.Is64Bit ? "64.dll" : ".dll");
 
@@ -56,34 +57,6 @@ public partial class Remote
             this.ReleaseApps();
 
             this.remoteApiWrapper.Dispose();
-        }
-
-        private void InitApps()
-        {
-            this.apps.Add(App.Standard, new(App.Standard, this.InstallDir, "voicemeeter"));
-            this.apps.Add(App.Banana, new(App.Banana, this.InstallDir, "voicemeeterpro"));
-            this.apps.Add(App.Potato, new(App.Potato, this.InstallDir, "voicemeeter8"));
-            this.apps.Add(App.Standardx64, new(App.Standardx64, this.InstallDir, "voicemeeter_x64"));
-            this.apps.Add(App.Bananax64, new(App.Bananax64, this.InstallDir, "voicemeeterpro_x64"));
-            this.apps.Add(App.Potatox64, new(App.Potatox64, this.InstallDir, "voicemeeter8x64"));
-            this.apps.Add(App.DeviceCheck, new(App.DeviceCheck, this.InstallDir, "VBDeviceCheck"));
-            this.apps.Add(App.MacroButtons, new(App.MacroButtons, this.InstallDir, "VoicemeeterMacroButtons"));
-            this.apps.Add(App.StreamerView, new(App.StreamerView, this.InstallDir, "VMStreamerView"));
-            this.apps.Add(App.BUSMatrix8, new(App.BUSMatrix8, this.InstallDir, "VoicemeeterBUSMatrix8"));
-            this.apps.Add(App.BUSGEQ15, new(App.BUSGEQ15, this.InstallDir, "VoicemeeterBUSGEQ15"));
-            this.apps.Add(App.VBAN2MIDI, new(App.VBAN2MIDI, this.InstallDir, "VBAN2MIDI"));
-            this.apps.Add(App.CABLEControlPanel, new(App.CABLEControlPanel, this.InstallDir, "VBCABLE_ControlPanel"));
-            this.apps.Add(App.AUXControlPanel, new(App.AUXControlPanel, this.InstallDir, "VBVMAUX_ControlPanel"));
-            this.apps.Add(App.VAIO3ControlPanel, new(App.VAIO3ControlPanel, this.InstallDir, "VBVMVAIO3_ControlPanel"));
-            this.apps.Add(App.VAIOControlPanel, new(App.VAIOControlPanel, this.InstallDir, "VBVoicemeeterVAIO_ControlPanel"));
-        }
-
-        private void ReleaseApps()
-        {
-            foreach (var a in this.apps)
-            {
-                a.Value.Dispose();
-            }
         }
 
         private static string GetInstallDirectory()

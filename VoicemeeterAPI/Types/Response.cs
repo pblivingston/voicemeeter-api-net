@@ -55,11 +55,6 @@ public enum RunResponse
 
 public enum Response
 {
-    /// <summary>
-    ///   from VoicemeeterAPI
-    /// </summary>
-    UnknownApp = -101,
-
     StructureMismatch = -5,
     UnknownParameter = -3,
     NoServer = -2,
@@ -108,4 +103,13 @@ public enum CallbackResponse
     Error = -1,
     Ok = 0,
     AlreadyRegistered = 1
+}
+
+public static class ResponseExt
+{
+    public static bool IsResponding(this RunResponse response)
+        => response is RunResponse.Ok or RunResponse.Hidden;
+
+    public static bool IsRunning(this RunResponse response)
+        => response is RunResponse.Ok or RunResponse.Hidden or RunResponse.NotResponding;
 }

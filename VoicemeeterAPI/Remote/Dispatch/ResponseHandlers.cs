@@ -63,7 +63,6 @@ public partial class Remote
 
             case Response.UnknownParameter:
             case Response.StructureMismatch:
-            case Response.UnknownApp:
             default:
                 var ex = new UnhandledResponseException(response, this.LastConnectionState);
                 Log.UnhandledResponse(this.logger, ex, methodName, payload, executionPath);
@@ -139,7 +138,6 @@ public partial class Remote
                 throw ex3;
 
             case Response.Dirty:
-            case Response.UnknownApp:
             default:
                 payload = LogArgs.New(this.logger, LogLevel.Critical, param: param, value: value);
                 var ex = new UnhandledResponseException(response, this.LastConnectionState);
@@ -188,7 +186,6 @@ public partial class Remote
             case Response.Dirty:
             case Response.UnknownParameter:
             case Response.StructureMismatch:
-            case Response.UnknownApp:
             default:
                 payload = LogArgs.New(this.logger, LogLevel.Critical, kind: kind);
                 var ex = new UnhandledResponseException(response, this.lastConnectionState);
@@ -237,7 +234,6 @@ public partial class Remote
             case Response.Dirty:
             case Response.UnknownParameter:
             case Response.StructureMismatch:
-            case Response.UnknownApp:
             default:
                 payload = LogArgs.New(this.logger, LogLevel.Critical, version: version);
                 var ex = new UnhandledResponseException(response, this.lastConnectionState);

@@ -41,9 +41,9 @@ public partial class Remote
         public RunResponse GetApplicationState(App app);
         /// <inheritdoc cref="Wrapper.CloseApplication(App, bool)"/>
         public RunResponse CloseApplication(App app, bool force);
-        /// <inheritdoc cref="Wrapper.IsApplicationInputIdle(App)"/>
-        public Response IsApplicationInputIdle(App app);
+        /// <inheritdoc cref="Wrapper.WaitForApplicationInputIdle(App, CancellationToken)"/>
+        public Task<RunResponse> WaitForApplicationInputIdle(App app, CancellationToken cancellationToken);
         /// <inheritdoc cref="Wrapper.WaitForApplicationExit(App, CancellationToken)"/>
-        public Task<RunResponse> WaitForApplicationExit(App app, CancellationToken cancellationToken = default);
+        public Task<RunResponse> WaitForApplicationExit(App app, CancellationToken cancellationToken);
     }
 }

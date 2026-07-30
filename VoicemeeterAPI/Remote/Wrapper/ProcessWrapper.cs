@@ -9,79 +9,12 @@ public partial class Remote
 {
     private partial class Wrapper
     {
-        /// <summary>
-        ///   Gets the current state of the application.
-        /// </summary>
-        /// <param name="app"></param>
-        /// <returns>
-        ///   Ok<br/>
-        ///   Hidden<br/>
-        ///   NotRunning<br/>
-        ///   NotResponding<br/>
-        ///   NotInstalled<br/>
-        ///   UnknownApp<br/>
-        /// </returns>
-        public RunResponse GetApplicationState(App app)
-            => app.IsValid()
-                ? this.apps[app].GetState()
-                : RunResponse.UnknownApp;
-
-        /// <summary>
-        ///   Attempts to close the process.
-        /// </summary>
-        /// <param name="app"></param>
-        /// <param name="force"></param>
-        /// <returns>
-        ///   Error<br/>
-        ///   UnknownApp<br/>
-        ///   Last App State<br/>
-        /// </returns>
-        /// <remarks>
-        ///   If app has tray mode enabled, force will be required to shut it down.
-        /// </remarks>
-        public RunResponse CloseApplication(App app, bool force = false)
-            => app.IsValid()
-                ? this.apps[app].Close(force)
-                : RunResponse.UnknownApp;
-
-        /// <summary>
-        ///   Checks if application has entered an idle state.
-        /// </summary>
-        /// <param name="app"></param>
-        /// <returns>
-        ///   Ok<br/>
-        ///   Dirty<br/>
-        ///   NoServer<br/>
-        ///   Error<br/>
-        ///   UnknownApp<br/>
-        /// </returns>
-        public Response IsApplicationInputIdle(App app)
-            => app.IsValid()
-                ? this.apps[app].IsInputIdle()
-                : Response.UnknownApp;
-
-        /// <summary>
-        ///   Waits for the application to exit.
-        /// </summary>
-        /// <param name="app"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns>
-        ///   Error<br/>
-        ///   UnknownApp<br/>
-        ///   Last App State<br/>
-        /// </returns>
-        public async Task<RunResponse> WaitForApplicationExit(App app, CancellationToken cancellationToken = default)
-            => app.IsValid()
-                ? await this.apps[app].WaitForExit(cancellationToken)
-                : RunResponse.UnknownApp;
-
-        private class ProcessWrapper(App app, string installDir, string processName) : IDisposable
+        private class ProcessWrapper(ProcessName processName, string installDir) : IDisposable
         {
             private readonly LockObject cacheLock = new();
 
-            public App App { get; } = app;
+            public ProcessName ProcessName { get; } = processName;
             public string InstallDir { get; } = installDir;
-            public string ProcessName { get; } = processName;
             private Process? process;
 
             public void Dispose()
@@ -102,33 +35,28 @@ public partial class Remote
                 return GetState(this.GetProcess());
             }
 
-            public Response IsInputIdle()
-                => IsInputIdle(this.GetProcess());
-
             public RunResponse Close(bool force = false)
             {
                 var process = this.GetProcess();
                 var state = GetState(process);
 
-                if (process is null || (state is not RunResponse.Ok && !force))
+                if (state is RunResponse.NotRunning)
                 {
                     return state;
                 }
 
                 try
                 {
-                    if (state is RunResponse.Ok && process.CloseMainWindow())
-                    {
-                        return state;
-                    }
-
                     if (force)
                     {
-                        process.Kill();
-                        return state;
+                        process?.Kill();
+                    }
+                    else if (!process!.CloseMainWindow())
+                    {
+                        return RunResponse.Error;
                     }
 
-                    return RunResponse.Error;
+                    return state;
                 }
                 catch
                 {
@@ -136,12 +64,39 @@ public partial class Remote
                 }
             }
 
-            public async Task<RunResponse> WaitForExit(CancellationToken cancellationToken = default)
+            public async Task<RunResponse> WaitForInputIdle(CancellationToken cancellationToken)
+            {
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                cts.CancelAfter(TimeSpan.FromSeconds(15));
+
+                Process? process;
+                var idle = false;
+                do
+                {
+                    await Task.Delay(100, cts.Token);
+
+                    process = this.GetProcess();
+
+                    if (GetState(process).IsResponding())
+                    {
+                        try
+                        {
+                            idle = process!.WaitForInputIdle(0);
+                        }
+                        catch { }
+                    }
+                }
+                while (!idle);
+
+                return GetState(process);
+            }
+
+            public async Task<RunResponse> WaitForExit(CancellationToken cancellationToken)
             {
                 var process = this.GetProcess();
                 var state = GetState(process);
 
-                if (process is null || state is RunResponse.NotResponding)
+                if (!state.IsResponding())
                 {
                     return state;
                 }
@@ -156,81 +111,115 @@ public partial class Remote
 
                 try
                 {
-                    process.EnableRaisingEvents = true;
-                    process.Exited += OnExited;
+                    process?.EnableRaisingEvents = true;
+                    process?.Exited += OnExited;
 
-                    if (process.HasExited)
+                    if (process!.HasExited)
                     {
-                        return GetState(process);
+                        return this.GetState();
                     }
 
                     using var registration = cts.Token.Register(() => tcs.TrySetCanceled());
 
                     return await tcs.Task
-                        ? GetState(process)
+                        ? this.GetState()
                         : RunResponse.Error;
-                }
-                catch (OperationCanceledException)
-                {
-                    return GetState(process);
                 }
                 finally
                 {
-                    process.Exited -= OnExited;
+                    process?.Exited -= OnExited;
                 }
             }
 
             #region Helpers
 
-            private bool ExecutableExists()
-                => File.Exists(Path.Combine(this.InstallDir, this.ProcessName + ".exe"));
+            public bool TryAssignDiscovered(Process incomingProcess)
+            {
+                using var lk = this.cacheLock.EnterScope();
+
+                if (!this.ClearCacheIfExited())
+                {
+                    return false; // already have an active process
+                }
+
+                return this.TryAssign(incomingProcess);
+            }
 
             private Process? GetProcess()
             {
                 using var lk = this.cacheLock.EnterScope();
 
-                try
+                if (this.ClearCacheIfExited() && this.ExecutableExists())
                 {
-                    this.process?.Refresh();
-                    if (this.process?.HasExited ?? true)
-                    {
-                        this.process?.Dispose();
-                        this.process = null;
-                    }
-                }
-                catch { }
-
-                if (this.process is null && this.ExecutableExists())
-                {
-                    var processes = Process.GetProcessesByName(this.ProcessName);
+                    var processes = Process.GetProcessesByName(this.ProcessName.ToString());
 
                     foreach (var p in processes)
                     {
-                        if (this.process is null)
+                        if (!(this.process is null && this.TryAssign(p)))
                         {
-                            try
-                            {
-                                var f = p.MainModule?.FileName;
-                                if ((this.App is App.MacroButtons && p.MainModule is null)
-                                    || (f is not null && f.StartsWith(this.InstallDir, StringComparison.OrdinalIgnoreCase)))
-                                {
-                                    this.process = p;
-                                    continue;
-                                }
-                            }
-                            catch { }
+                            p.Dispose();
+                            continue;
                         }
-
-                        p.Dispose();
                     }
                 }
 
                 return this.process;
             }
 
+            private bool ExecutableExists()
+                => File.Exists(Path.Combine(this.InstallDir, this.ProcessName + ".exe"));
+
+            /// <summary>
+            ///   Must be within cacheLock
+            /// </summary>
+            /// <returns></returns>
+            private bool ClearCacheIfExited()
+            {
+                if (this.process is not null)
+                {
+                    if (this.process.SafeHandle is { IsClosed: false, IsInvalid: false })
+                    {
+                        this.process.Refresh();
+                        if (!this.process.HasExited)
+                        {
+                            return false; // active
+                        }
+                    }
+
+                    this.process.Dispose();
+                    this.process = null;
+                }
+
+                return true; // clear
+            }
+
+            /// <summary>
+            ///   Must be within cacheLock
+            /// </summary>
+            /// <param name="process"></param>
+            /// <returns></returns>
+            private bool TryAssign(Process process)
+            {
+                try
+                {
+                    var f = process.MainModule?.FileName;
+                    if (((App)this.ProcessName is App.MacroButtons && process.MainModule is null)
+                        || (f is not null && f.StartsWith(this.InstallDir, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        this.process = process;
+                        return true; // cached
+                    }
+                }
+                catch { }
+
+                return false; // failed
+            }
+
             private static RunResponse GetState(Process? process)
             {
-                if (process is null)
+                if (process is null
+                    || process.SafeHandle.IsClosed
+                    || process.SafeHandle.IsInvalid)
                 {
                     return RunResponse.NotRunning;
                 }
@@ -248,32 +237,6 @@ public partial class Remote
                 }
 
                 return RunResponse.Ok;
-            }
-
-            private static Response IsInputIdle(Process? process)
-            {
-                var state = GetState(process);
-
-                if (process is null)
-                {
-                    return Response.NoServer;
-                }
-
-                if (state is RunResponse.NotResponding)
-                {
-                    return Response.Error;
-                }
-
-                try
-                {
-                    return process.WaitForInputIdle(0)
-                        ? Response.Ok
-                        : Response.Dirty;
-                }
-                catch
-                {
-                    return Response.Error;
-                }
             }
 
             #endregion
