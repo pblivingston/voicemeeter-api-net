@@ -131,12 +131,12 @@ public partial class Remote
     /// <param name="methodName"></param>
     /// <returns></returns>
     private (App, RunResponse) HandleVmStateResponse(
-        RunResponse response,
-        App app,
+        (App, RunResponse) result,
         string executionPath,
         [CallerMemberName] string methodName = ""
     )
     {
+        (var app, var response) = result;
         LogArgs payload;
 
         switch (response)
@@ -153,7 +153,7 @@ public partial class Remote
                         ? LoginResponse.Ok
                         : LoginResponse.VoicemeeterNotRunning;
                 }
-                return (app, response);
+                return result;
 
             case RunResponse.NotInstalled:
                 payload = LogArgs.New(this.logger, LogLevel.Error, app: app);

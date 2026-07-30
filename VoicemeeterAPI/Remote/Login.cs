@@ -107,14 +107,12 @@ public partial class Remote
 
         this.Run_p(app, e);
 
-        var loggedIn = this.loginStatus >= LoginResponse.Ok;
-
-        if (app.IsVoicemeeter() && loggedIn)
+        if (app.IsVoicemeeter())
         {
             this.HandleStaleCache(this.loginStatus, e);
         }
 
-        if (app is App.MacroButtons && loggedIn)
+        if (app is App.MacroButtons)
         {
             this.HandleStaleCache(RunResponse.Ok, e);
         }

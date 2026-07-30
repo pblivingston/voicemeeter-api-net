@@ -20,7 +20,8 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     )
     {
-        if (currentLoginStatus == this.lastConnectionState.LoginStatus)
+        if (this.loginStatus >= LoginResponse.LoggedOut
+            || currentLoginStatus == this.lastConnectionState.LoginStatus)
         {
             return;
         }
@@ -52,7 +53,8 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     )
     {
-        if (currentVoicemeeterKind == this.lastConnectionState.VoicemeeterKind)
+        if (this.loginStatus >= LoginResponse.LoggedOut
+            || currentVoicemeeterKind == this.lastConnectionState.VoicemeeterKind)
         {
             return;
         }
@@ -75,20 +77,21 @@ public partial class Remote
     /// <summary>
     ///   Accesses this.lastConnectionState - must be within this.stateLock scope!
     /// </summary>
-    /// <param name="currentVoicemeeterApp"></param>
+    /// <param name="voicemeeterState"></param>
     /// <param name="executionPath"></param>
     /// <param name="methodName"></param>
     private void HandleStaleCache(
-        App currentVoicemeeterApp,
-        RunResponse currentVoicemeeterState,
+        (App, RunResponse) voicemeeterState,
         string executionPath,
         [CallerMemberName] string methodName = ""
     )
     {
+        (var currentVoicemeeterApp, var currentVoicemeeterState) = voicemeeterState;
         var previousState = this.lastConnectionState;
 
-        if (currentVoicemeeterApp == previousState.VoicemeeterApp
-            && currentVoicemeeterState == previousState.VoicemeeterState)
+        if (this.loginStatus >= LoginResponse.LoggedOut
+            || (currentVoicemeeterApp == previousState.VoicemeeterApp
+                && currentVoicemeeterState == previousState.VoicemeeterState))
         {
             return;
         }
@@ -121,7 +124,8 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     )
     {
-        if (currentVoicemeeterVersion == this.lastConnectionState.VoicemeeterVersion)
+        if (this.loginStatus >= LoginResponse.LoggedOut
+            || currentVoicemeeterVersion == this.lastConnectionState.VoicemeeterVersion)
         {
             return;
         }
@@ -153,7 +157,8 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     )
     {
-        if (currentMacroButtonsState == this.lastConnectionState.MacroButtonsState)
+        if (this.loginStatus >= LoginResponse.LoggedOut
+            || currentMacroButtonsState == this.lastConnectionState.MacroButtonsState)
         {
             return;
         }

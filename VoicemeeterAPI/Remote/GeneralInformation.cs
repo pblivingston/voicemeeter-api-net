@@ -91,11 +91,6 @@ public partial class Remote
 
         var result = this.GetAppState_i(app, e);
 
-        if (this.loginStatus >= LoginResponse.LoggedOut)
-        {
-            return result;
-        }
-
         if (app is App.MacroButtons)
         {
             this.HandleStaleCache(result, e);
@@ -103,7 +98,7 @@ public partial class Remote
 
         if (app.IsVoicemeeter() && result < RunResponse.NotRunning)
         {
-            this.HandleStaleCache(app, result, e);
+            this.HandleStaleCache((app, result), e);
         }
 
         return result;
@@ -118,26 +113,7 @@ public partial class Remote
     {
         var e = Utilities.BuildPath(executionPath);
 
-        App app;
-        var response = RunResponse.NotRunning;
-        for (app = App.Standard; app <= App.Potatox64; app++)
-        {
-            this.WrapperCall(nameof(this.wrapper.GetApplicationState), e, app: app);
-
-            response = this.wrapper.GetApplicationState(app);
-
-            if (response is not RunResponse.NotRunning)
-            {
-                break;
-            }
-        }
-
-        if (response is RunResponse.NotRunning)
-        {
-            app = App.None;
-        }
-
-        return this.HandleVmStateResponse(response, app, e);
+        return this.HandleVmStateResponse(this.wrapper.GetVoicemeeterState(), e);
     }
 
     /// <inheritdoc/>
@@ -150,17 +126,7 @@ public partial class Remote
 
         var result = this.GetVoicemeeterState_i(e);
 
-        if (this.loginStatus < LoginResponse.LoggedOut)
-        {
-            if (result.state < RunResponse.NotRunning)
-            {
-                this.HandleStaleCache(result.app, result.state, e);
-            }
-            else
-            {
-                this.HandleStaleCache(this.loginStatus, e);
-            }
-        }
+        this.HandleStaleCache(result, e);
 
         return result;
     }
