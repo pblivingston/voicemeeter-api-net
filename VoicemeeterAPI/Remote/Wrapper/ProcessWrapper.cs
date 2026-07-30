@@ -137,7 +137,7 @@ public partial class Remote
             {
                 using var lk = this.cacheLock.EnterScope();
 
-                if (!this.ClearCacheIfExited())
+                if (!this.TryClearExited())
                 {
                     return false; // already have an active process
                 }
@@ -149,7 +149,7 @@ public partial class Remote
             {
                 using var lk = this.cacheLock.EnterScope();
 
-                if (this.ClearCacheIfExited() && this.ExecutableExists())
+                if (this.TryClearExited() && this.ExecutableExists())
                 {
                     var processes = Process.GetProcessesByName(this.ProcessName.ToString());
 
@@ -158,7 +158,6 @@ public partial class Remote
                         if (!(this.process is null && this.TryAssign(p)))
                         {
                             p.Dispose();
-                            continue;
                         }
                     }
                 }
@@ -172,8 +171,10 @@ public partial class Remote
             /// <summary>
             ///   Must be within cacheLock
             /// </summary>
-            /// <returns></returns>
-            private bool ClearCacheIfExited()
+            /// <returns>
+            ///   'true' if clear
+            /// </returns>
+            private bool TryClearExited()
             {
                 if (this.process is not null)
                 {
@@ -182,7 +183,7 @@ public partial class Remote
                         this.process.Refresh();
                         if (!this.process.HasExited)
                         {
-                            return false; // active
+                            return false;
                         }
                     }
 
@@ -190,14 +191,16 @@ public partial class Remote
                     this.process = null;
                 }
 
-                return true; // clear
+                return true;
             }
 
             /// <summary>
             ///   Must be within cacheLock
             /// </summary>
             /// <param name="process"></param>
-            /// <returns></returns>
+            /// <returns>
+            ///   'true' if assigned successfully
+            /// </returns>
             private bool TryAssign(Process process)
             {
                 try
@@ -207,12 +210,12 @@ public partial class Remote
                         || (f is not null && f.StartsWith(this.InstallDir, StringComparison.OrdinalIgnoreCase)))
                     {
                         this.process = process;
-                        return true; // cached
+                        return true;
                     }
                 }
                 catch { }
 
-                return false; // failed
+                return false;
             }
 
             private static RunResponse GetState(Process? process)

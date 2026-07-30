@@ -3,6 +3,8 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
+using System.Diagnostics;
+
 public partial class Remote
 {
     private partial class Wrapper
@@ -21,8 +23,18 @@ public partial class Remote
         /// </returns>
         public RunResponse GetApplicationState(App app)
             => app.IsValid()
-                ? this.HandleDetectedVoicemeeter(app, this.apps[app].GetState())
+                ? this.apps[app].GetState()
                 : RunResponse.UnknownApp;
+
+        /// <summary>
+        ///   Gets the current Voicemeeter application and its state.
+        /// </summary>
+        /// <returns></returns>
+        public (App, RunResponse) GetVoicemeeterState()
+        {
+            var app = this.RefreshApps();
+            return (app, this.apps[app].GetState());
+        }
 
         /// <summary>
         ///   Attempts to close the process.
@@ -39,7 +51,7 @@ public partial class Remote
         /// </remarks>
         public RunResponse CloseApplication(App app, bool force = false)
             => app.IsValid()
-                ? this.HandleDetectedVoicemeeter(app, this.apps[app].Close(force))
+                ? this.apps[app].Close(force)
                 : RunResponse.UnknownApp;
 
         /// <summary>
@@ -54,7 +66,7 @@ public partial class Remote
         /// </returns>
         public async Task<RunResponse> WaitForApplicationInputIdle(App app, CancellationToken cancellationToken)
             => app.IsValid()
-                ? this.HandleDetectedVoicemeeter(app, await this.apps[app].WaitForInputIdle(cancellationToken))
+                ? await this.apps[app].WaitForInputIdle(cancellationToken)
                 : RunResponse.UnknownApp;
 
         /// <summary>
@@ -69,27 +81,8 @@ public partial class Remote
         /// </returns>
         public async Task<RunResponse> WaitForApplicationExit(App app, CancellationToken cancellationToken)
             => app.IsValid()
-                ? this.HandleDetectedVoicemeeter(app, await this.apps[app].WaitForExit(cancellationToken))
+                ? await this.apps[app].WaitForExit(cancellationToken)
                 : RunResponse.UnknownApp;
-
-        private RunResponse HandleDetectedVoicemeeter(App app, RunResponse state)
-        {
-            if (!app.IsVoicemeeter())
-            {
-                return state;
-            }
-
-            if (state.IsRunning())
-            {
-                this.LastDetectedVoicemeeter = app;
-            }
-            else if (app == this.LastDetectedVoicemeeter)
-            {
-                this.LastDetectedVoicemeeter = App.None;
-            }
-
-            return state;
-        }
 
         private enum ProcessName
         {
@@ -117,8 +110,6 @@ public partial class Remote
             {
                 this.apps.Add((App)name, new(name, this.InstallDir));
             }
-
-            this.RefreshApps();
         }
 
         private void ReleaseApps()
@@ -129,9 +120,37 @@ public partial class Remote
             }
         }
 
-        private void RefreshApps()
+        /// <summary>
+        ///   Assigns running VB-Audio apps to their appropriate cache entries.
+        /// </summary>
+        /// <returns>
+        ///   The active Voicemeeter application, otherwise 'None'.
+        /// </returns>
+        private App RefreshApps()
         {
+            var processes = Process.GetProcesses();
 
+            var vm = App.None;
+            foreach (var p in processes)
+            {
+                if (!(
+                    Enum.TryParse(p.ProcessName, out ProcessName name)
+                    && (App)name is var app
+                    && app.IsValid()
+                    && this.apps[app].TryAssignDiscovered(p)
+                ))
+                {
+                    p.Dispose();
+                    continue;
+                }
+
+                if (app.IsVoicemeeter())
+                {
+                    vm = app;
+                }
+            }
+
+            return vm;
         }
     }
 }

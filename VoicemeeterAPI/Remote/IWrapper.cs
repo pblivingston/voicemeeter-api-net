@@ -39,6 +39,8 @@ public partial class Remote
 
         /// <inheritdoc cref="Wrapper.GetApplicationState(App)"/>
         public RunResponse GetApplicationState(App app);
+        /// <inheritdoc cref="Wrapper.GetVoicemeeterState()"/>
+        public (App, RunResponse) GetVoicemeeterState();
         /// <inheritdoc cref="Wrapper.CloseApplication(App, bool)"/>
         public RunResponse CloseApplication(App app, bool force);
         /// <inheritdoc cref="Wrapper.WaitForApplicationInputIdle(App, CancellationToken)"/>

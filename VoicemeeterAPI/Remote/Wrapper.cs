@@ -25,7 +25,6 @@ public partial class Remote
 
         public bool Is64Bit { get; } = Environment.Is64BitProcess;
         public string InstallDir { get; } = GetInstallDirectory();
-        public App LastDetectedVoicemeeter { get; private set; } = App.None;
 
         private string DllName => VmrName + (this.Is64Bit ? "64.dll" : ".dll");
 
