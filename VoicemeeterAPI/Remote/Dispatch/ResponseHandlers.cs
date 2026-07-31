@@ -41,7 +41,7 @@ public partial class Remote
             case Response.Ok:
                 return (response, false);
 
-            case Response.Error when !this.LoggedIn:
+            case Response.Error when !this.LoginStatus.IsLoggedIn():
                 var ex1a = new InvalidOperationException(NotLoggedInMessage);
                 Log.RemoteContractViolation(this.logger, ex1a, methodName, "Not logged in.", payload, executionPath);
                 throw ex1a;
@@ -51,7 +51,7 @@ public partial class Remote
                 Log.RemoteMethodError(this.logger, ex1b, methodName, payload, executionPath);
                 throw ex1b;
 
-            case Response.NoServer when !this.Connected:
+            case Response.NoServer when !this.ConnectedToVoicemeeter:
                 var ex2a = new InvalidOperationException(NotConnectedMessage);
                 Log.RemoteContractViolation(this.logger, ex2a, methodName, "Voicemeeter is not running.", payload, executionPath);
                 throw ex2a;
@@ -99,7 +99,7 @@ public partial class Remote
                 Log.RemoteMethodSuccess(this.logger, LogLevel.Trace, methodName, payload, executionPath);
                 return (response, value);
 
-            case Response.Error when !this.LoggedIn:
+            case Response.Error when !this.LoginStatus.IsLoggedIn():
                 payload = LogArgs.New(this.logger, LogLevel.Error, param: param, value: value);
                 var ex1a = new InvalidOperationException(NotLoggedInMessage);
                 Log.RemoteContractViolation(this.logger, ex1a, methodName, "Not logged in.", payload, executionPath);
@@ -119,7 +119,7 @@ public partial class Remote
                 Log.RemoteMethodError(this.logger, ex1b, methodName, payload, executionPath);
                 throw ex1b;
 
-            case Response.NoServer when !this.Connected:
+            case Response.NoServer when !this.ConnectedToVoicemeeter:
                 payload = LogArgs.New(this.logger, LogLevel.Error, param: param, value: value);
                 var ex2a = new InvalidOperationException(NotConnectedMessage);
                 Log.RemoteContractViolation(this.logger, ex2a, methodName, "Voicemeeter is not running.", payload, executionPath);

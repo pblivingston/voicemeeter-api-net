@@ -37,17 +37,9 @@ public interface IRemote : IDisposable
     ///   Simplifies <see cref="LoginStatus"/> checks.
     /// </summary>
     /// <remarks>
-    ///   `true` if logged in to VoicemeeterRemote.
-    /// </remarks>
-    public bool LoggedIn { get; }
-
-    /// <summary>
-    ///   Simplifies <see cref="LoginStatus"/> checks.
-    /// </summary>
-    /// <remarks>
     ///   `true` if logged in to VoicemeeterRemote and Voicemeeter is running.
     /// </remarks>
-    public bool Connected { get; }
+    public bool ConnectedToVoicemeeter { get; }
 
     /// <summary>
     ///   Reflects the most recently cached connection state.

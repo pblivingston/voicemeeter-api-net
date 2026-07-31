@@ -107,6 +107,9 @@ public enum CallbackResponse
 
 public static class ResponseExt
 {
+    public static bool IsLoggedIn(this LoginResponse response)
+        => response is LoginResponse.Ok or LoginResponse.VoicemeeterNotRunning;
+
     public static bool IsResponding(this RunResponse response)
         => response is RunResponse.Ok or RunResponse.Hidden;
 

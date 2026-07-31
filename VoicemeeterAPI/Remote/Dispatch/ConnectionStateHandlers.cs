@@ -48,7 +48,7 @@ public partial class Remote
             Log.RemoteNotConnected(this.logger, methodName, "Voicemeeter", payload, executionPath);
         }
 
-        if (!connectionState.MacroButtonsIsRunning)
+        if (!connectionState.ConnectedToMacroButtons)
         {
             var payload = LogArgs.New(this.logger, LogLevel.Warning, connectionState: connectionState);
             Log.RemoteNotConnected(this.logger, methodName, "MacroButtons", payload, executionPath);

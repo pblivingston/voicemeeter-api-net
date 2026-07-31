@@ -84,25 +84,9 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
     ///   Simplifies <see cref="LoginStatus"/> checks.
     /// </summary>
     /// <remarks>
-    ///   `true` if logged in to VoicemeeterRemote.
-    /// </remarks>
-    public bool LoggedIn => this.LoginStatus < LoginResponse.LoggedOut;
-
-    /// <summary>
-    ///   Simplifies <see cref="LoginStatus"/> checks.
-    /// </summary>
-    /// <remarks>
     ///   `true` if logged in to VoicemeeterRemote and Voicemeeter is running.
     /// </remarks>
     public bool ConnectedToVoicemeeter => this.LoginStatus == LoginResponse.Ok;
-
-    /// <summary>
-    ///   Simplifies <see cref="MacroButtonsState"/> checks.
-    /// </summary>
-    /// <remarks>
-    ///   `true` if MacroButtons is running and responding.
-    /// </remarks>
-    public bool MacroButtonsIsRunning => this.MacroButtonsState < RunResponse.NotRunning;
 
     /// <summary>
     ///   Simplifies MacroButtons checks.
@@ -110,7 +94,7 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
     /// <remarks>
     ///   `true` if MacroButtons is responding and reachable via Voicemeeter.
     /// </remarks>
-    public bool ConnectedToMacroButtons => this.ConnectedToVoicemeeter && this.MacroButtonsIsRunning;
+    public bool ConnectedToMacroButtons => this.ConnectedToVoicemeeter && this.MacroButtonsState.IsResponding();
 
 
     public ConnectionState()
@@ -125,7 +109,6 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
             .Append("{ ")
             .AddArg(nameof(this.LoginStatus), this.LoginStatus)
             .AddArg(nameof(this.VoicemeeterState), this.VoicemeeterState)
-            .AddArg(nameof(this.VoicemeeterKind), this.VoicemeeterKind)
             .AddArg(nameof(this.VoicemeeterApp), this.VoicemeeterApp)
             .AddArg(nameof(this.VoicemeeterVersion), this.VoicemeeterVersion)
             .AddArg(nameof(this.MacroButtonsState), this.MacroButtonsState)

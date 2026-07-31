@@ -63,9 +63,7 @@ public sealed partial class Remote : IRemote
         }
     }
     /// <inheritdoc/>
-    public bool LoggedIn => this.LoginStatus < LoginResponse.LoggedOut;
-    /// <inheritdoc/>
-    public bool Connected => this.LoginStatus == LoginResponse.Ok;
+    public bool ConnectedToVoicemeeter => this.LoginStatus == LoginResponse.Ok;
     /// <inheritdoc/>
     public ConnectionState LastConnectionState
     {
@@ -164,7 +162,7 @@ public sealed partial class Remote : IRemote
             {
                 using var lk = this.stateLock.EnterScope();
 
-                if (this.loginStatus < LoginResponse.LoggedOut)
+                if (this.loginStatus != LoginResponse.LoggedOut)
                 {
                     this.InternalLogout(e);
 
