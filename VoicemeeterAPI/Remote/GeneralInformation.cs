@@ -113,6 +113,8 @@ public partial class Remote
     {
         var e = Utilities.BuildPath(executionPath);
 
+        this.WrapperCall(nameof(this.wrapper.GetVoicemeeterState), e);
+
         return this.HandleVmStateResponse(this.wrapper.GetVoicemeeterState(), e);
     }
 
