@@ -154,7 +154,7 @@ public sealed partial class Remote : IRemote
 
         var e = nameof(this.Dispose);
 
-        using var scope = this.BeginCallScope();
+        using var scope = Log.CallScope(this.logger, this.instanceId, Guid.NewGuid());
 
         if (disposing)
         {
