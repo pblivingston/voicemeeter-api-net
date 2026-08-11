@@ -79,20 +79,11 @@ public abstract class MockRemote : IDisposable
     /// <summary>
     ///   Sets up and performs a mock login sequence where:<br/>
     ///   Voicemeeter is not running<br/>
-    ///   MacroButtons is running<br/>
+    ///   MacroButtons is not running<br/>
     /// </summary>
     /// <inheritdoc cref="MockLogin_p"/>
     protected void MockLogin()
-        => this.MockLogin(RunResponse.Ok);
-
-    /// <summary>
-    ///   Sets up and performs a mock login sequence where:<br/>
-    ///   The given Voicemeeter kind/version is running<br/>
-    ///   MacroButtons is running<br/>
-    /// </summary>
-    /// <inheritdoc cref="MockLogin_p"/>
-    protected void MockLogin(int kind, int version)
-        => this.MockLogin(RunResponse.Ok, kind, version);
+        => this.MockLogin(RunResponse.NotRunning);
 
     /// <summary>
     ///   Sets up and performs a mock login sequence where:<br/>
@@ -101,16 +92,25 @@ public abstract class MockRemote : IDisposable
     /// </summary>
     /// <inheritdoc cref="MockLogin_p"/>
     protected void MockLogin(RunResponse buttonsState)
-        => this.MockLogin_p(LoginResponse.VoicemeeterNotRunning, buttonsState, (int)Kind.None, 0x0000_0000);
+        => this.MockLogin_p(LoginResponse.VoicemeeterNotRunning, RunResponse.NotRunning, App.None, default, buttonsState);
 
     /// <summary>
     ///   Sets up and performs a mock login sequence where:<br/>
-    ///   The given Voicemeeter kind/version is running<br/>
+    ///   The given Voicemeeter app/version is the given state<br/>
+    ///   MacroButtons is not running<br/>
+    /// </summary>
+    /// <inheritdoc cref="MockLogin_p"/>
+    protected void MockLogin(RunResponse vmState, App vmApp, VmVersion vmVersion)
+        => this.MockLogin(vmState, vmApp, vmVersion, RunResponse.NotRunning);
+
+    /// <summary>
+    ///   Sets up and performs a mock login sequence where:<br/>
+    ///   The given Voicemeeter app/version is the given state<br/>
     ///   MacroButtons is the given state<br/>
     /// </summary>
     /// <inheritdoc cref="MockLogin_p"/>
-    protected void MockLogin(RunResponse buttonsState, int kind, int version)
-        => this.MockLogin_p(LoginResponse.Ok, buttonsState, kind, version);
+    protected void MockLogin(RunResponse vmState, App vmApp, VmVersion vmVersion, RunResponse buttonsState)
+        => this.MockLogin_p(LoginResponse.Ok, vmState, vmApp, vmVersion, buttonsState);
 
     /// <summary>
     ///   Sets up and performs a mock login sequence
@@ -122,35 +122,29 @@ public abstract class MockRemote : IDisposable
     /// <remarks>
     ///   Calls:<br/>
     ///   <see cref="Remote.IWrapper.Login()"/> once<br/>
-    ///   <see cref="Remote.IWrapper.GetVoicemeeterType()"/> once<br/>
+    ///   <see cref="Remote.IWrapper.GetVoicemeeterState()"/> once<br/>
     ///   <see cref="Remote.IWrapper.GetVoicemeeterVersion()"/> once<br/>
     ///   <see cref="Remote.IWrapper.GetApplicationState(App)"/> once with <see cref="App.MacroButtons"/><br/>
     /// </remarks>
-    private void MockLogin_p(LoginResponse loginStatus, RunResponse buttonsState, int kind, int version)
+    private void MockLogin_p(LoginResponse loginStatus, RunResponse vmState, App vmApp, VmVersion vmVersion, RunResponse buttonsState)
     {
-        VmVersion runningVersion = default;
-        var infoResponse = InfoResponse.NoServer;
+        var expectedState = new ConnectionState(loginStatus, vmState, vmApp, vmVersion, buttonsState);
 
-        if (version != 0)
-        {
-            runningVersion = (VmVersion)version;
-            infoResponse = InfoResponse.Ok;
-        }
-
-        var expectedState = new ConnectionState(loginStatus, buttonsState, (Kind)kind, runningVersion);
+        var versionResponse = vmApp is App.None
+            ? Response.NoServer
+            : Response.Ok;
 
         this.MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType()).Returns((infoResponse, kind));
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((infoResponse, version));
+        this.MockWrapper.Setup(w => w.GetVoicemeeterState()).Returns((vmApp, vmState));
+        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((versionResponse, vmVersion));
         this.MockWrapper.Setup(w => w.GetApplicationState(App.MacroButtons)).Returns(buttonsState);
 
         var result = this.Remote.Login();
 
         Assert.Multiple(
-            () => Assert.Equal(loginStatus, result),
-            () => Assert.Equal(expectedState, this.Remote.LastConnectionState),
+            () => Assert.Equal(expectedState, result),
             () => this.MockWrapper.Verify(w => w.Login(), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Once()),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterState(), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Once())
         );
