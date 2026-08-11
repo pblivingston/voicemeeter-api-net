@@ -108,7 +108,7 @@ public sealed partial class Remote : IRemote
 
     #region Factory
 
-    public static (Remote, ConnectionState) NewSession(ILogger<Remote>? logger = null)
+    public static Remote NewSession(ILogger<Remote>? logger = null)
     {
         var e = nameof(NewSession);
 
@@ -120,9 +120,11 @@ public sealed partial class Remote : IRemote
 
         remote.InternalLogin(e);
 
-        (_, var state) = remote.Login_i(e);
+        (var previous, var current) = remote.Login_i(e);
 
-        return (remote, state);
+        remote.OnConnectionStateChanged(previous, current);
+
+        return remote;
     }
 
     /// <summary>
