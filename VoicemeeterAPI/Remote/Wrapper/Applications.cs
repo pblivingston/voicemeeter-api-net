@@ -33,7 +33,11 @@ public partial class Remote
         public (App, RunResponse) GetVoicemeeterState()
         {
             var app = this.RefreshApps();
-            return (app, this.apps[app].GetState());
+            return (
+                app, app is App.None
+                    ? RunResponse.NotRunning
+                    : this.apps[app].GetState()
+            );
         }
 
         /// <summary>
