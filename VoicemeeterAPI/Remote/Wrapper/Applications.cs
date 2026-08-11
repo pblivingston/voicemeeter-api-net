@@ -106,7 +106,11 @@ public partial class Remote
 
         private void InitApps()
         {
+#if NET5_0_OR_GREATER
+            foreach (var name in Enum.GetValues<ProcessName>())
+#else
             foreach (ProcessName name in Enum.GetValues(typeof(ProcessName)))
+#endif
             {
                 this.apps.Add((App)name, new(name, this.InstallDir));
             }
