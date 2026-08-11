@@ -83,17 +83,13 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     }
 
     /// <inheritdoc/>
+    void IVersion.Deconstruct(out int maj, out int min, out int pat)
+        => this.Deconstruct(out int _, out maj, out min, out pat);
+
+    /// <inheritdoc/>
     void IVersion.Deconstruct<T>(out T kind, out int maj, out int min, out int pat)
     {
-        var t = typeof(T);
-
-        kind = t switch
-        {
-            _ when t == typeof(int) => (T)(object)this.V1,
-            _ when t == typeof(Kind) => (T)(object)this.K,
-            _ => throw SupportedTypes.CreateArgumentException<T>(nameof(T), SupportedTypes.KindTypes)
-        };
-
+        kind = this.GetKind<T>();
         maj = this.V2;
         min = this.V3;
         pat = this.V4;
@@ -102,21 +98,21 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     /// <inheritdoc/>
     void IVersion.Deconstruct<T>(out T kind, out SemVersion sem)
     {
+        kind = this.GetKind<T>();
+        sem = this.Semantic;
+    }
+
+    private T GetKind<T>()
+    {
         var t = typeof(T);
 
-        kind = t switch
+        return t switch
         {
             _ when t == typeof(int) => (T)(object)this.V1,
             _ when t == typeof(Kind) => (T)(object)this.K,
             _ => throw SupportedTypes.CreateArgumentException<T>(nameof(T), SupportedTypes.KindTypes)
         };
-
-        sem = this.Semantic;
     }
-
-    /// <inheritdoc/>
-    void IVersion.Deconstruct(out int maj, out int min, out int pat)
-        => this.Deconstruct(out int _, out maj, out min, out pat);
 
     #endregion
 
@@ -150,10 +146,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 
     public static int Pack(int kind, SemVersion sem)
     {
-        if (!Utilities.InByte(kind))
-        {
-            throw new ArgumentOutOfRangeException(nameof(kind), kind, "Kind does not fit in a byte.");
-        }
+        Utilities.ThrowIfNotInByte(kind);
 
         if (!(sem == default || sem.IsValid()))
         {

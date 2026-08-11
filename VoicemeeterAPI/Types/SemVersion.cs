@@ -53,31 +53,27 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     /// <inheritdoc/>
     void IVersion.Deconstruct<T>(out T kind, out SemVersion sem)
     {
-        var t = typeof(T);
-
-        kind = t switch
-        {
-            _ when t == typeof(int) => (T)(object)this.V1,
-            _ when t == typeof(Kind) => (T)(object)((IVersion)this).K,
-            _ => throw SupportedTypes.CreateArgumentException<T>(nameof(T), SupportedTypes.KindTypes)
-        };
-
+        kind = this.GetKind<T>();
         sem = this;
     }
 
     /// <inheritdoc/>
     void IVersion.Deconstruct<T>(out T kind, out int maj, out int min, out int pat)
     {
+        kind = this.GetKind<T>();
+        this.Deconstruct(out maj, out min, out pat);
+    }
+
+    private T GetKind<T>()
+    {
         var t = typeof(T);
 
-        kind = t switch
+        return t switch
         {
             _ when t == typeof(int) => (T)(object)this.V1,
             _ when t == typeof(Kind) => (T)(object)((IVersion)this).K,
             _ => throw SupportedTypes.CreateArgumentException<T>(nameof(T), SupportedTypes.KindTypes)
         };
-
-        this.Deconstruct(out maj, out min, out pat);
     }
 
     #endregion

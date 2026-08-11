@@ -15,10 +15,7 @@ public static class VersionUtils
         ];
         foreach ((var paramName, var value) in parts)
         {
-            if (!Utilities.InByte(value))
-            {
-                throw new ArgumentOutOfRangeException(paramName, value, "Part does not fit in a byte.");
-            }
+            Utilities.ThrowIfNotInByte(value, paramName);
         }
 
         return (kind << 24) | (maj << 16) | (min << 8) | pat;
