@@ -125,8 +125,8 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
         => vm.IsValid();
 
     public static bool IsValid(int packed)
-        => ((packed >> 24) & 0xFF) is >= 1 and <= 3
-        && (packed & 0x00FF_FFFF) > 0;
+        => KindUtils.IsValid((packed >> 24) & 0xFF)
+        && SemVersion.IsValid(packed & 0x00FF_FFFF);
 
     #endregion
 
