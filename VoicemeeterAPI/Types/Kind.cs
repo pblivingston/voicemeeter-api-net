@@ -38,9 +38,20 @@ public static class KindUtils
             ? App.Unknown
             : ((App)kind).BitAdjust(is64Bit);
 
-    public static bool IsValid(int kind)
-        => kind is >= 1 and <= 3;
-
     public static bool IsValid(Kind kind)
-        => IsValid((int)kind);
+    {
+        if (kind <= Kind.None)
+        {
+            return false;
+        }
+
+#if NET5_0_OR_GREATER
+        return Enum.IsDefined(kind);
+#else
+        return Enum.IsDefined(typeof(Kind), kind);
+#endif
+    }
+
+    public static bool IsValid(int kind)
+        => IsValid((Kind)kind);
 }

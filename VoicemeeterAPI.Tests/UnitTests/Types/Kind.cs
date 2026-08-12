@@ -1,75 +1,20 @@
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types;
 
-using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.KindData;
-
 public class KindTests
 {
     [Theory]
-    [ClassData(typeof(KindData))]
-    public void ToAppReturnsExpectedApp(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        var app = Environment.Is64BitOperatingSystem ? data.App64 : data.App32;
-
-        Assert.Equal(app, data.K.ToApp());
-    }
+    [InlineData(Kind.Standard, true, App.Standardx64)]
+    [InlineData(Kind.Potato, false, App.Potato)]
+    [InlineData(Kind.None, true, App.None)]
+    [InlineData(Kind.Unknown, false, App.Unknown)]
+    public void ToAppReturnsExpectedApp(Kind kind, bool is64BitOS, App app)
+        => Assert.Equal(app, kind.ToApp(is64BitOS));
 
     [Theory]
-    [ClassData(typeof(KindData))]
-    public void IsValidIntReturnsExpectedBool(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        Assert.Equal(data.Valid, KindUtils.IsValid(data.Kind));
-    }
-
-    [Theory]
-    [ClassData(typeof(KindData))]
-    public void IsValidKindReturnsExpectedBool(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        Assert.Equal(data.Valid, data.K.IsValid());
-    }
-}
-
-public class KindData : TheoryData<CaseName, CaseRecord>
-{
-    public KindData()
-    {
-        this.Add(CaseName.Potato, new(
-            3, Kind.Potato, App.Potato, App.Potatox64, true
-        ));
-        this.Add(CaseName.None, new(
-            0, Kind.None, App.None, App.None, false
-        ));
-        this.Add(CaseName.Unknown, new(
-            -1, Kind.Unknown, App.Unknown, App.Unknown, false
-        ));
-    }
-
-    public record CaseRecord(
-        int Kind,
-        Kind K,
-        App App32,
-        App App64,
-        bool Valid,
-        CaseTag Tags = CaseTag.None
-    ) : SerializableRecord
-    {
-        public CaseRecord() : this(0, default, default, default, false) { }
-        public override string ToString() => $"Tags = {this.Tags}";
-    }
-
-    public enum CaseName
-    {
-        Potato, None, Unknown
-    }
-
-    [Flags]
-    public enum CaseTag
-    {
-        None = 0
-    }
+    [InlineData(0, false)]
+    [InlineData(3, true)]
+    [InlineData(-1, false)]
+    [InlineData(5, false)]
+    public void IsValidReturnsExpectedBool(int kind, bool valid)
+        => Assert.Equal(valid, KindUtils.IsValid(kind));
 }
