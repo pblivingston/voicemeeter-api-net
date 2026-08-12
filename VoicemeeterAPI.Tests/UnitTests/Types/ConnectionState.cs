@@ -1,283 +1,56 @@
 namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types;
 
-using System.Text.Json.Serialization;
-using static PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types.ConnectionStateData;
-
 public class ConnectionStateTests
 {
     [Theory]
-    [ClassData(typeof(ConnectionStateData))]
-    public void ContsructorReturnsExpectedParts(CaseName scenario, CaseRecord data)
+    [InlineData(LoginResponse.LoggedOut, RunResponse.NotRunning, App.None, 0, RunResponse.NotRunning)]
+    [InlineData(LoginResponse.LoggedOut, RunResponse.Ok, App.Standard, 0x0102_0304, RunResponse.Ok)]
+    [InlineData(LoginResponse.LoggedOut, RunResponse.Hidden, App.Banana, 0x0203_0405, RunResponse.Hidden)]
+    [InlineData(LoginResponse.LoggedOut, RunResponse.NotResponding, App.Potato, 0x0304_0506, RunResponse.NotResponding)]
+    [InlineData(LoginResponse.VoicemeeterNotRunning, RunResponse.NotRunning, App.None, 0, RunResponse.NotRunning)]
+    [InlineData(LoginResponse.VoicemeeterNotRunning, RunResponse.NotResponding, App.Standardx64, 0x0102_0304, RunResponse.NotResponding)]
+    [InlineData(LoginResponse.Ok, RunResponse.Ok, App.Bananax64, 0x0203_0405, RunResponse.Ok)]
+    [InlineData(LoginResponse.Ok, RunResponse.Hidden, App.Potatox64, 0x0304_0506, RunResponse.Hidden)]
+    public void ConstructorReturnsExpectedPartsWhenValid(LoginResponse loginStatus, RunResponse vmState, App vmApp, int vmVersion, RunResponse buttonsState)
     {
-        _ = scenario;
-
-        ConnectionState state = new(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
+        ConnectionState state = new(loginStatus, vmState, vmApp, (VmVersion)vmVersion, buttonsState);
 
         Assert.Multiple(
-            () => Assert.Equal(data.HashCode, state.HashCode),
-            () => Assert.Equal(data.LoginStatus, state.LoginStatus),
-            () => Assert.Equal(data.ButtonsState, state.ButtonsState),
-            () => Assert.Equal(data.RunningKind, state.RunningKind),
-            () => Assert.Equal(data.RunningVersion, state.RunningVersion)
+            () => Assert.Equal(loginStatus, state.LoginStatus),
+            () => Assert.Equal(vmState, state.VoicemeeterState),
+            () => Assert.Equal(vmApp, state.VoicemeeterApp),
+            () => Assert.Equal(vmVersion, (int)state.VoicemeeterVersion),
+            () => Assert.Equal(buttonsState, state.MacroButtonsState)
         );
     }
 
-    [Theory]
-    [ClassData(typeof(ConnectionStateData))]
-    public void LoggedInReturnsExpectedBool(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        ConnectionState state = new(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
-
-        Assert.Equal(data.LoggedIn, state.LoggedIn);
-    }
-
-    [Theory]
-    [ClassData(typeof(ConnectionStateData))]
-    public void ConnectedReturnsExpectedBool(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        ConnectionState state = new(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
-
-        Assert.Equal(data.Connected, state.Connected);
-    }
-
-    [Theory]
-    [ClassData(typeof(ConnectionStateData))]
-    public void ButtonsRunningReturnsExpectedBool(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        ConnectionState state = new(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
-
-        Assert.Equal(data.ButtonsRunning, state.ButtonsRunning);
-    }
-
-    [Theory]
-    [ClassData(typeof(ConnectionStateData))]
-    public void DeconstructorReturnsExpectedParts(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        ConnectionState state = new(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
-        state.Deconstruct(out var login, out var buttons, out var kind, out var version);
-
-        Assert.Multiple(
-            () => Assert.Equal(data.LoginStatus, login),
-            () => Assert.Equal(data.ButtonsState, buttons),
-            () => Assert.Equal(data.RunningKind, kind),
-            () => Assert.Equal(data.RunningVersion, version)
+    [Fact]
+    public void PackThrowsArgumentOutOfRangeExceptionWhenLoginStatusOutOfRange()
+        => Assert.Throws<ArgumentOutOfRangeException>(
+            () => ConnectionState.Pack(LoginResponse.Unknown, RunResponse.NotRunning, App.None, default, RunResponse.NotRunning)
         );
-    }
 
-    [Theory]
-    [ClassData(typeof(ConnectionStateData))]
-    public void CastToTupleReturnsExpectedParts(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        ConnectionState state = new(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
-
-        var (login, buttons, kind, version) = ((LoginResponse, RunResponse, Kind, VmVersion))state;
-
-        Assert.Multiple(
-            () => Assert.Equal(data.LoginStatus, login),
-            () => Assert.Equal(data.ButtonsState, buttons),
-            () => Assert.Equal(data.RunningKind, kind),
-            () => Assert.Equal(data.RunningVersion, version)
+    [Fact]
+    public void PackThrowsArgumentOutOfRangeExceptionWhenVoicemeeterStateOutOfRange()
+        => Assert.Throws<ArgumentOutOfRangeException>(
+            () => ConnectionState.Pack(LoginResponse.LoggedOut, RunResponse.NotInstalled, App.None, default, RunResponse.NotRunning)
         );
-    }
 
-    [Theory]
-    [ClassData(typeof(ConnectionStateData))]
-    public void CastFromTupleReturnsExpectedHashCode(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
+    [Fact]
+    public void PackThrowsArgumentOutOfRangeExceptionWhenVoicemeeterAppOutOfRange()
+        => Assert.Throws<ArgumentOutOfRangeException>(
+            () => ConnectionState.Pack(LoginResponse.Ok, RunResponse.Ok, App.MacroButtons, VmVersion.MaxValue, RunResponse.NotRunning)
+        );
 
-        var state = (ConnectionState)(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
+    [Fact]
+    public void PackThrowsArgumentOutOfRangeExceptionWhenVoicemeeterVersionOutOfRange()
+        => Assert.Throws<ArgumentOutOfRangeException>(
+            () => ConnectionState.Pack(LoginResponse.Ok, RunResponse.Hidden, App.Potatox64, (VmVersion)0x0B0C_0D0E, RunResponse.NotRunning)
+        );
 
-        Assert.Equal(data.HashCode, state.HashCode);
-    }
-
-    [Theory]
-    [ClassData(typeof(ConnectionStateData))]
-    public void EqualsStateReturnsExpectedTrue(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        ConnectionState stateA = new(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
-        var stateB = (ConnectionState)(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
-
-        Assert.True(stateA.Equals(stateB));
-    }
-
-    [Theory]
-    [ClassData(typeof(ConnectionStateData))]
-    public void EqualsStateReturnsExpectedFalse(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        var testVersion = (VmVersion)0x0106_0102;
-        if (data.RunningVersion == testVersion)
-        {
-            testVersion = (VmVersion)0x0109_0901;
-        }
-
-        ConnectionState stateA = new(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
-        ConnectionState stateB = new(LoginResponse.Unknown, RunResponse.NotResponding, Kind.Standard, testVersion);
-
-        Assert.False(stateA.Equals(stateB));
-    }
-
-    [Theory]
-    [ClassData(typeof(ConnectionStateData))]
-    public void EqualsObjectReturnsExpectedTrue(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        ConnectionState stateA = new(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
-        var stateB = (object)new ConnectionState(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
-
-        Assert.True(stateA.Equals(stateB));
-    }
-
-    [Theory]
-    [ClassData(typeof(ConnectionStateData))]
-    public void EqualsObjectReturnsExpectedFalseVal(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        var testVersion = (VmVersion)0x0106_0102;
-        if (data.RunningVersion == testVersion)
-        {
-            testVersion = (VmVersion)0x0109_0901;
-        }
-
-        ConnectionState stateA = new(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
-        var stateB = (object)new ConnectionState(LoginResponse.Unknown, RunResponse.NotResponding, Kind.Standard, testVersion);
-
-        Assert.False(stateA.Equals(stateB));
-    }
-
-    [Theory]
-    [ClassData(typeof(ConnectionStateData))]
-    public void EqualsObjectReturnsExpectedFalseObj(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        ConnectionState state = new(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
-
-        Assert.False(state.Equals(data.RunningVersion));
-    }
-
-    [Theory]
-    [ClassData(typeof(ConnectionStateData))]
-    public void GetHashCodeReturnsExpectedHashCode(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        ConnectionState state = new(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
-
-        Assert.Equal(data.HashCode, state.GetHashCode());
-    }
-
-    [Theory]
-    [ClassData(typeof(ConnectionStateData))]
-    public void EqualToReturnsExpectedBool(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        var expected = data.HashCode == 0x0501_0202;
-
-        ConnectionState stateA = new(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
-        ConnectionState stateB = new(LoginResponse.Ok, RunResponse.Ok, Kind.Standard, (VmVersion)0x0101_0202);
-
-        Assert.Equal(expected, stateA == stateB);
-    }
-
-    [Theory]
-    [ClassData(typeof(ConnectionStateData))]
-    public void NotEqualToReturnsExpectedBool(CaseName scenario, CaseRecord data)
-    {
-        _ = scenario;
-
-        var expected = data.HashCode != 0x0501_0202;
-
-        ConnectionState stateA = new(data.LoginStatus, data.ButtonsState, data.RunningKind, data.RunningVersion);
-        ConnectionState stateB = new(LoginResponse.Ok, RunResponse.Ok, Kind.Standard, (VmVersion)0x0101_0202);
-
-        Assert.Equal(expected, stateA != stateB);
-    }
+    [Fact]
+    public void PackThrowsArgumentOutOfRangeExceptionWhenButtonsStatusOutOfRange()
+        => Assert.Throws<ArgumentOutOfRangeException>(
+            () => ConnectionState.Pack(LoginResponse.VoicemeeterNotRunning, RunResponse.NotRunning, App.None, default, RunResponse.NotInstalled)
+        );
 }
-
-#region ConnectionStateData
-public class ConnectionStateData : TheoryData<CaseName, CaseRecord>
-{
-    public ConnectionStateData()
-    {
-        this.Add(CaseName.Initial, new(
-            unchecked((int)0xA000_0000), LoginResponse.LoggedOut, RunResponse.NotRunning, Kind.None, default, false, false, false
-        ));
-        this.Add(CaseName.Connected, new(
-            0x0501_0202, LoginResponse.Ok, RunResponse.Ok, Kind.Standard, (VmVersion)0x0101_0202, true, true, true
-        ));
-        this.Add(CaseName.NothingRunning, new(
-            0x6000_0000, LoginResponse.VoicemeeterNotRunning, RunResponse.NotRunning, Kind.None, default, true, false, false
-        ));
-        this.Add(CaseName.VoicemeeterNotRunning, new(
-            0x4000_0000, LoginResponse.VoicemeeterNotRunning, RunResponse.Ok, Kind.None, default, true, false, true
-        ));
-        this.Add(CaseName.ButtonsNotRunning, new(
-            0x2501_0202, LoginResponse.Ok, RunResponse.NotRunning, Kind.Standard, (VmVersion)0x0101_0202, true, true, false
-        ));
-        this.Add(CaseName.ButtonsNotResponding, new(
-            0x3A01_0202, LoginResponse.Ok, RunResponse.NotResponding, Kind.Banana, (VmVersion)0x0201_0202, true, true, false
-        ));
-        this.Add(CaseName.ButtonsHidden, new(
-            0x1F01_0202, LoginResponse.Ok, RunResponse.Hidden, Kind.Potato, (VmVersion)0x0301_0202, true, true, true
-        ));
-        this.Add(CaseName.LoggedOut, new(
-            unchecked((int)0x8A01_0202), LoginResponse.LoggedOut, RunResponse.Ok, Kind.Banana, (VmVersion)0x0201_0202, false, false, true
-        ));
-        this.Add(CaseName.Unknown, new(
-            unchecked((int)0xCF01_0202), LoginResponse.Unknown, RunResponse.Ok, Kind.Potato, (VmVersion)0x0301_0202, false, false, true
-        ));
-    }
-
-    public record CaseRecord(
-        [property: JsonPropertyName("hc")] int HashCode,
-        [property: JsonPropertyName("ls")] LoginResponse LoginStatus,
-        [property: JsonPropertyName("bs")] RunResponse ButtonsState,
-        [property: JsonPropertyName("rk")] Kind RunningKind,
-        [property: JsonPropertyName("rv")] VmVersion RunningVersion,
-        [property: JsonPropertyName("li")] bool LoggedIn,
-        [property: JsonPropertyName("c")] bool Connected,
-        [property: JsonPropertyName("br")] bool ButtonsRunning,
-        [property: JsonPropertyName("t")] CaseTag Tags = CaseTag.None
-    ) : SerializableRecord
-    {
-        public CaseRecord() : this(0xA000_000, LoginResponse.LoggedOut, RunResponse.NotRunning, Kind.None, default, false, false, false) { }
-        public override string ToString() => $"Tags = {this.Tags}";
-    }
-
-    public enum CaseName
-    {
-        Initial,
-        Connected,
-        NothingRunning,
-        VoicemeeterNotRunning,
-        ButtonsNotRunning,
-        ButtonsNotResponding,
-        ButtonsHidden,
-        LoggedOut,
-        Unknown
-    }
-
-    public enum CaseTag
-    {
-        None = 0
-    }
-}
-#endregion

@@ -150,8 +150,8 @@ public partial class Remote
         RunResponse mbState;
         if (this.loginStatus >= LoginResponse.LoggedOut)
         {
-            vmState = previousState.VoicemeeterState;
             vmApp = previousState.VoicemeeterApp;
+            vmState = previousState.VoicemeeterState;
             vmVersion = previousState.VoicemeeterVersion;
             mbState = previousState.MacroButtonsState;
         }

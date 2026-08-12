@@ -168,7 +168,6 @@ public partial class Remote
             case Response.Ok:
                 payload = LogArgs.New(this.logger, LogLevel.Debug, kind: kind);
                 Log.RemoteMethodSuccess(this.logger, LogLevel.Debug, methodName, payload, executionPath);
-                this.loginStatus = LoginResponse.Ok;
                 return kind;
 
             case Response.Error:
@@ -216,7 +215,6 @@ public partial class Remote
             case Response.Ok:
                 payload = LogArgs.New(this.logger, LogLevel.Debug, version: version);
                 Log.RemoteMethodSuccess(this.logger, LogLevel.Debug, methodName, payload, executionPath);
-                this.loginStatus = LoginResponse.Ok;
                 return version;
 
             case Response.Error:

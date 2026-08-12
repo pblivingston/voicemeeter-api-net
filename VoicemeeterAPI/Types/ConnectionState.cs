@@ -28,31 +28,22 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
     /// <remarks>
     ///   <code>(int)LoginStatus &lt;&lt; 30 | (int)MacroButtonsState &lt;&lt; 28 | (int)VoicemeeterKind &lt;&lt; 26 | (int)VoicemeeterVersion</code>
     /// </remarks>
-    private readonly int packed = unchecked(
-        ((int)loginStatus << 30) |
-        (((int)vmState & 0x1) << 29) |
-        ((vmApp < App.Standardx64 ? 0 : 1) << 28) |
-        ((int)vmVersion << 2) |
-        ((int)buttonsState)
-    );
+    private readonly int packed = Pack(loginStatus, vmState, vmApp, vmVersion, buttonsState);
 
     /// <summary>
     ///   The login status of the <see cref="IRemote"/> instance.
     /// </summary>
     /// <remarks>
-    ///   Ok, VoicemeeterNotRunning, LoggedOut, Unknown
+    ///   Ok, VoicemeeterNotRunning, LoggedOut
     /// </remarks>
-    public LoginResponse LoginStatus => (LoginResponse)((this.packed >> 30) & 0x3);
+    public LoginResponse LoginStatus => ((this.packed >> 31) & 1) == 0
+        ? (LoginResponse)((this.packed >> 30) & 0x3)
+        : LoginResponse.LoggedOut;
 
     /// <summary>
     ///   The state of the Voicemeeter application.
     /// </summary>
-    public RunResponse VoicemeeterState => this.LoginStatus < LoginResponse.LoggedOut
-        ? (RunResponse)((this.packed >> 29) & 0x3)
-        : (RunResponse)(
-            ((this.VoicemeeterKind is Kind.None ? 1 : 0) << 1) |
-            ((this.packed >> 29) & 0x1)
-        );
+    public RunResponse VoicemeeterState => (RunResponse)((this.packed >> 29) & 0x3);
 
     /// <summary>
     ///   The running Voicemeeter Kind.
@@ -96,10 +87,36 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
     /// </remarks>
     public bool ConnectedToMacroButtons => this.ConnectedToVoicemeeter && this.MacroButtonsState.IsResponding();
 
-
     public ConnectionState()
         : this(LoginResponse.LoggedOut, RunResponse.NotRunning, App.None, default, RunResponse.NotRunning)
     { }
+
+    public static int Pack(LoginResponse loginStatus, RunResponse vmState, App vmApp, VmVersion vmVersion, RunResponse buttonsState)
+    {
+        Utilities.ThrowIfNotInRange(loginStatus, LoginResponse.Ok, LoginResponse.LoggedOut);
+        Utilities.ThrowIfNotInRange(vmState, RunResponse.Ok, RunResponse.NotResponding);
+        Utilities.ThrowIfNotInRange(vmApp, App.Standard, App.Potatox64);
+        Utilities.ThrowIfNotInRange(vmVersion, default, VmVersion.MaxValue);
+        Utilities.ThrowIfNotInRange(buttonsState, RunResponse.Ok, RunResponse.NotResponding);
+        return unchecked(
+            // 000: Ok & Ok
+            // 001: Ok & Hidden
+            // 010: VoicemeeterNotRunning & NotRunning
+            // 011: VoicemeeterNotRunning & NotResponding
+            // 100: LoggedOut & previously Ok
+            // 101: LoggedOut & previously Hidden
+            // 110: LoggedOut & previously NotRunning
+            // 111: LoggedOut & previously NotResponding
+            // LoginResponse.Unknown would lose data
+            (((int)loginStatus >> 1) << 31) | // only grab top bit "logged in/out"
+            ((int)vmState << 29) |
+            // 0: 32 bit app
+            // 1: 64 bit app
+            ((vmApp < App.Standardx64 ? 0 : 1) << 28) |
+            ((int)vmVersion << 2) |
+            ((int)buttonsState)
+        );
+    }
 
     public override string ToString()
     {
