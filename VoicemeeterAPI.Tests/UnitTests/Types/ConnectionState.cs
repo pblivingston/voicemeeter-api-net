@@ -39,13 +39,13 @@ public class ConnectionStateTests
     [Fact]
     public void PackThrowsArgumentOutOfRangeExceptionWhenVoicemeeterAppOutOfRange()
         => Assert.Throws<ArgumentOutOfRangeException>(
-            () => ConnectionState.Pack(LoginResponse.Ok, RunResponse.Ok, App.MacroButtons, VmVersion.MaxValue, RunResponse.NotRunning)
+            () => ConnectionState.Pack(LoginResponse.Ok, RunResponse.Ok, App.MacroButtons, VmVersion.MaxValid, RunResponse.NotRunning)
         );
 
     [Fact]
     public void PackThrowsArgumentOutOfRangeExceptionWhenVoicemeeterVersionOutOfRange()
         => Assert.Throws<ArgumentOutOfRangeException>(
-            () => ConnectionState.Pack(LoginResponse.Ok, RunResponse.Hidden, App.Potatox64, (VmVersion)0x0B0C_0D0E, RunResponse.NotRunning)
+            () => ConnectionState.Pack(LoginResponse.Ok, RunResponse.Hidden, App.Potatox64, VmVersion.MaxValue, RunResponse.NotRunning)
         );
 
     [Fact]

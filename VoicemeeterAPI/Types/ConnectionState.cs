@@ -96,7 +96,7 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
         Utilities.ThrowIfNotInRange(loginStatus, LoginResponse.Ok, LoginResponse.LoggedOut);
         Utilities.ThrowIfNotInRange(vmState, RunResponse.Ok, RunResponse.NotResponding);
         Utilities.ThrowIfNotInRange(vmApp, App.Standard, App.Potatox64);
-        Utilities.ThrowIfNotInRange(vmVersion, default, VmVersion.MaxValue);
+        Utilities.ThrowIfNotInRange(vmVersion, default, VmVersion.MaxValid);
         Utilities.ThrowIfNotInRange(buttonsState, RunResponse.Ok, RunResponse.NotResponding);
         return unchecked(
             // 000: Ok & Ok

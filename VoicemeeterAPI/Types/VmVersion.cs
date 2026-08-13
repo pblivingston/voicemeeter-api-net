@@ -5,8 +5,10 @@ namespace PBLivingston.VoicemeeterAPI;
 
 public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 {
-    public const int MaxPacked = 0x03FF_FFFF;
-    public static VmVersion MaxValue { get; } = new(MaxPacked);
+    public const int MaxValuePacked = -1;
+    public const int MaxValidPacked = 0x03FF_FFFF;
+    public static VmVersion MaxValue { get; } = new(MaxValuePacked);
+    public static VmVersion MaxValid { get; } = new(MaxValidPacked);
 
     /// <inheritdoc/>
     public int Packed { get; } = packed;
@@ -29,7 +31,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     /// <inheritdoc/>
     public Kind K => (Kind)this.V1;
     /// <inheritdoc/>
-    public SemVersion Semantic => new(this.Packed & SemVersion.MaxPacked);
+    public SemVersion Semantic => new(this.Packed & SemVersion.MaxValidPacked);
 
     #region Constructors
 
@@ -129,7 +131,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 
     public static bool IsValid(int packed)
         => KindUtils.IsValid((packed >> 24) & 0xFF)
-        && SemVersion.IsValid(packed & SemVersion.MaxPacked);
+        && SemVersion.IsValid(packed & SemVersion.MaxValidPacked);
 
     #endregion
 
@@ -195,7 +197,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public static void Unpack(int packed, out int kind, out SemVersion sem)
     {
         kind = (packed >> 24) & 0xFF;
-        sem = new(packed & SemVersion.MaxPacked);
+        sem = new(packed & SemVersion.MaxValidPacked);
     }
 
     public static void Unpack(int packed, out Kind kind, out SemVersion sem)

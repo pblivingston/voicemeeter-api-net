@@ -5,8 +5,10 @@ namespace PBLivingston.VoicemeeterAPI;
 
 public readonly struct SemVersion(int packed) : IVersion<SemVersion>
 {
-    public const int MaxPacked = 0x00FF_FFFF;
-    public static SemVersion MaxValue { get; } = new(MaxPacked);
+    public const int MaxValuePacked = -1;
+    public const int MaxValidPacked = 0x00FF_FFFF;
+    public static SemVersion MaxValue { get; } = new(MaxValuePacked);
+    public static SemVersion MaxValid { get; } = new(MaxValidPacked);
 
     /// <inheritdoc/>
     public int Packed { get; } = packed;
@@ -90,7 +92,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
         => sem.IsValid();
 
     public static bool IsValid(int packed)
-        => (uint)packed <= MaxPacked
+        => (uint)packed <= MaxValidPacked
         && packed > 0;
 
     #endregion
