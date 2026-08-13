@@ -3,8 +3,6 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-using System.Runtime.CompilerServices;
-
 public static class Result
 {
     /// <summary>
@@ -102,7 +100,7 @@ public readonly struct Result<TResponse, TValue> where TResponse : struct, Enum
     /// <summary>
     ///   'true' if Response is 'Ok' (0) or greater.
     /// </summary>
-    public bool IsSuccess => AsInt(this.Response) >= 0;
+    public bool IsSuccess => Comparer<TResponse>.Default.Compare(this.Response, default) >= 0;
     /// <summary>
     ///   'true' if Response is less than 'Ok' (0).
     /// </summary>
@@ -134,7 +132,4 @@ public readonly struct Result<TResponse, TValue> where TResponse : struct, Enum
         => new(response);
     public static implicit operator Result<TResponse, TValue>((TResponse response, TValue value) t)
         => new(t.response, t.value);
-
-    private static int AsInt(TResponse response)
-        => Unsafe.As<TResponse, int>(ref response);
 }
