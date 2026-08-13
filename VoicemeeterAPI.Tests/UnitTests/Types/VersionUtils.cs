@@ -3,7 +3,7 @@ namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types;
 public class VersionUtilsTests
 {
     [Theory]
-    [InlineData(0xFFFF_FFFF, 255, 255, 255, 255)]
+    [InlineData(-1, 255, 255, 255, 255)]
     [InlineData(0, 0, 0, 0, 0)]
     public void PackReturnsExpectedIntWhenPartsFitInByte(int packed, int kind, int maj, int min, int pat)
         => Assert.Equal(packed, VersionUtils.Pack(kind, maj, min, pat));
