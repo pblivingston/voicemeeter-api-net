@@ -98,6 +98,18 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
         Utilities.ThrowIfNotInRange(vmApp, App.Standard, App.Potatox64);
         Utilities.ThrowIfNotInRange(vmVersion, default, VmVersion.MaxValid);
         Utilities.ThrowIfNotInRange(buttonsState, RunResponse.Ok, RunResponse.NotResponding);
+
+        if ((loginStatus is LoginResponse.Ok && vmState is not (RunResponse.Ok or RunResponse.Hidden)) ||
+            (loginStatus is LoginResponse.VoicemeeterNotRunning && vmState is not (RunResponse.NotRunning or RunResponse.NotResponding)))
+        {
+            throw new ArgumentException($"LoginStatus '{loginStatus}' does not match VoicemeeterState '{vmState}'.");
+        }
+
+        if (vmApp.ToKind() != vmVersion.K)
+        {
+            throw new ArgumentException($"Voicemeeter app '{vmApp}' does not match Voicemeeter version '{vmVersion}'.");
+        }
+
         return unchecked(
             // 000: Ok & Ok
             // 001: Ok & Hidden
