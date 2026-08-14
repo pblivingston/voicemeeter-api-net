@@ -108,11 +108,11 @@ public sealed partial class Remote : IRemote
 
     #region Factory
 
-    public static Remote NewSession(ILogger<Remote>? logger = null)
+    internal static Remote NewSession(IWrapper wrapper, ILogger<Remote>? logger = null)
     {
         var e = nameof(NewSession);
 
-        var remote = new Remote(new Wrapper(), logger);
+        var remote = new Remote(wrapper, logger);
 
         using var scope = remote.BeginCallScope();
 
@@ -126,6 +126,9 @@ public sealed partial class Remote : IRemote
 
         return remote;
     }
+
+    public static Remote NewSession(ILogger<Remote>? logger = null)
+        => NewSession(new Wrapper(), logger);
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="RemoteApiWrapper"/>.

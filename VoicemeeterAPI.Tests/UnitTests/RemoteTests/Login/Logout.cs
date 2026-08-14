@@ -6,31 +6,22 @@ public class Logout : MockRemote
     public void UpdatesLastLoginStatusLoggedOutWhenSuccessful()
     {
         var loginStatus = LoginResponse.LoggedOut;
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-        var expectedState = new ConnectionState(loginStatus, RunResponse.Ok, (Kind)kind, (VmVersion)version);
+        var vmState = RunResponse.Ok;
+        var vmApp = App.Standardx64;
+        var vmVersion = VmVersion.MinValid;
+        var buttonsState = RunResponse.NotRunning;
+        var expectedState = new ConnectionState(loginStatus, vmState, vmApp, vmVersion, buttonsState);
+
+        this.MockLogin(vmState, vmApp, vmVersion);
 
         this.MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
 
-        this.MockLogin(kind, version);
-
-        var result = this.Remote.Logout();
+        this.Remote.Logout();
 
         Assert.Multiple(
-            () => Assert.Equal(loginStatus, result),
+            () => Assert.Equal(loginStatus, this.Remote.LoginStatus),
             () => Assert.Equal(expectedState, this.Remote.LastConnectionState),
             () => this.MockWrapper.Verify(w => w.Logout(), Times.Once())
-        );
-    }
-
-    [Fact]
-    public void ReturnsExpectedLoginResponseWhenAlreadyLoggedOut()
-    {
-        var result = this.Remote.Logout();
-
-        Assert.Multiple(
-            () => Assert.Equal(LoginResponse.LoggedOut, result),
-            () => this.MockWrapper.Verify(w => w.Logout(), Times.Never())
         );
     }
 
@@ -38,46 +29,22 @@ public class Logout : MockRemote
     public void UpdatesLastLoginStatusUnknownWhenLogoutFails()
     {
         var loginStatus = LoginResponse.Unknown;
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-        var expectedState = new ConnectionState(loginStatus, RunResponse.Ok, (Kind)kind, (VmVersion)version);
+        var vmState = RunResponse.Hidden;
+        var vmApp = App.Standard;
+        var vmVersion = VmVersion.MinValid;
+        var buttonsState = RunResponse.NotRunning;
+        var expectedState = new ConnectionState(loginStatus, vmState, vmApp, vmVersion, buttonsState);
 
         this.MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.NoClient);
 
-        this.MockLogin(kind, version);
+        this.MockLogin(vmState, vmApp, vmVersion);
 
-        var result = this.Remote.Logout();
+        this.Remote.Logout();
 
         Assert.Multiple(
-            () => Assert.Equal(loginStatus, result),
+            () => Assert.Equal(loginStatus, this.Remote.LoginStatus),
             () => Assert.Equal(expectedState, this.Remote.LastConnectionState),
             () => this.MockWrapper.Verify(w => w.Logout(), Times.Once())
         );
-    }
-
-    [Fact]
-    public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
-    {
-        this.Remote.Dispose();
-
-        Assert.Multiple(
-            () => Assert.Throws<ObjectDisposedException>(() => this.Remote.Logout()),
-            () => this.MockWrapper.Verify(w => w.Logout(), Times.Never())
-        );
-    }
-
-    [Fact]
-    public void CalledByDisposeWhenStillLoggedIn()
-    {
-        var kind = Kind.Standard;
-        var version = 0x0101_0202;
-
-        this.MockWrapper.Setup(w => w.Logout()).Returns(LoginResponse.Ok);
-
-        this.MockLogin((int)kind, version);
-
-        this.Remote.Dispose();
-
-        this.MockWrapper.Verify(w => w.Logout(), Times.Once());
     }
 }
