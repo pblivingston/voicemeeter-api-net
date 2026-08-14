@@ -128,8 +128,6 @@ public abstract class MockRemote : IDisposable
     /// </remarks>
     private void MockLogin_p(LoginResponse loginStatus, RunResponse vmState, App vmApp, VmVersion vmVersion, RunResponse buttonsState)
     {
-        var expectedState = new ConnectionState(loginStatus, vmState, vmApp, vmVersion, buttonsState);
-
         var versionResponse = vmApp is App.None
             ? Response.NoServer
             : Response.Ok;
@@ -138,6 +136,8 @@ public abstract class MockRemote : IDisposable
         this.MockWrapper.Setup(w => w.GetVoicemeeterState()).Returns((vmApp, vmState));
         this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((versionResponse, vmVersion));
         this.MockWrapper.Setup(w => w.GetApplicationState(App.MacroButtons)).Returns(buttonsState);
+
+        var expectedState = new ConnectionState(loginStatus, vmState, vmApp, vmVersion, buttonsState);
 
         var result = this.Remote.Login();
 

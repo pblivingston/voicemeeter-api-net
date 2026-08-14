@@ -2,103 +2,84 @@ namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.Login;
 
 public class Login : MockRemote
 {
-    [Fact]
-    public void UpdatesLastConnectionStateOkWhenAllConditionsMet()
-    {
-        var loginStatus = LoginResponse.Ok;
-        var buttonsState = RunResponse.Ok;
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-        var expectedState = new ConnectionState(loginStatus, buttonsState, (Kind)kind, (VmVersion)version);
-
-        this.MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType()).Returns((InfoResponse.Ok, kind));
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((InfoResponse.Ok, version));
-        this.MockWrapper.Setup(w => w.GetApplicationState(App.MacroButtons)).Returns(buttonsState);
-
-        var result = this.Remote.Login();
-
-        Assert.Multiple(
-            () => Assert.Equal(loginStatus, result),
-            () => Assert.Equal(expectedState, this.Remote.LastConnectionState),
-            () => this.MockWrapper.Verify(w => w.Login(), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Once())
-        );
-    }
-
-    [Fact]
-    public void UpdatesLastLoginStatusVoicemeeterNotRunningWhenVoicemeeterNotRunning()
-    {
-        var loginStatus = LoginResponse.VoicemeeterNotRunning;
-        var buttonsState = RunResponse.Ok;
-        var kind = (int)Kind.None;
-        var version = 0x0000_0000;
-        var expectedState = new ConnectionState(loginStatus, buttonsState, Kind.None, default);
-
-        this.MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType()).Returns((InfoResponse.NoServer, kind));
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((InfoResponse.NoServer, version));
-        this.MockWrapper.Setup(w => w.GetApplicationState(App.MacroButtons)).Returns(buttonsState);
-
-        var result = this.Remote.Login();
-
-        Assert.Multiple(
-            () => Assert.Equal(loginStatus, result),
-            () => Assert.Equal(expectedState, this.Remote.LastConnectionState),
-            () => this.MockWrapper.Verify(w => w.Login(), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Once())
-        );
-    }
-
     [Theory]
-    [InlineData(RunResponse.Hidden)]
-    [InlineData(RunResponse.NotRunning)]
-    [InlineData(RunResponse.NotResponding)]
-    public void UpdatesLastButtonsStateWhenButtonsIsState(RunResponse buttonsState)
+    [InlineData(LoginResponse.Ok, RunResponse.Ok, App.Standard, 0x0102_0304, RunResponse.NotResponding)]
+    [InlineData(LoginResponse.Ok, RunResponse.Hidden, App.Potatox64, 0x0304_0506, RunResponse.NotRunning)]
+    [InlineData(LoginResponse.VoicemeeterNotRunning, RunResponse.NotRunning, App.None, 0, RunResponse.Hidden)]
+    [InlineData(LoginResponse.VoicemeeterNotRunning, RunResponse.NotResponding, App.Banana, 0x0203_0405, RunResponse.Ok)]
+    public void UpdatesLastConnectionStateWhenAllConditionsMet(LoginResponse loginStatus, RunResponse vmState, App vmApp, int vmPacked, RunResponse buttonsState)
     {
-        var loginStatus = LoginResponse.Ok;
-        var kind = (int)Kind.Standard;
-        var version = 0x0101_0202;
-        var expectedState = new ConnectionState(loginStatus, buttonsState, (Kind)kind, (VmVersion)version);
+        var vmVersion = (VmVersion)vmPacked;
+        var versionResponse = vmApp is App.None
+            ? Response.NoServer
+            : Response.Ok;
 
         this.MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
-        this.MockWrapper.Setup(w => w.GetVoicemeeterType()).Returns((InfoResponse.Ok, kind));
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((InfoResponse.Ok, version));
+        this.MockWrapper.Setup(w => w.GetVoicemeeterState()).Returns((vmApp, vmState));
+        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((versionResponse, vmVersion));
         this.MockWrapper.Setup(w => w.GetApplicationState(App.MacroButtons)).Returns(buttonsState);
+
+        var expectedState = new ConnectionState(loginStatus, vmState, vmApp, vmVersion, buttonsState);
 
         var result = this.Remote.Login();
 
         Assert.Multiple(
-            () => Assert.Equal(loginStatus, result),
+            () => Assert.Equal(expectedState, result),
+            () => Assert.Equal(loginStatus, this.Remote.LoginStatus),
             () => Assert.Equal(expectedState, this.Remote.LastConnectionState),
             () => this.MockWrapper.Verify(w => w.Login(), Times.Once()),
-            () => this.MockWrapper.Verify(w => w.GetVoicemeeterType(), Times.Once()),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterState(), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Once())
         );
     }
 
-    [Theory]
-    [InlineData(LoginResponse.AlreadyLoggedIn)]
-    [InlineData(LoginResponse.NoClient)]
-    public void ThrowsExceptionRemoteWhenLoginFails(LoginResponse expectedResponse)
+    [Fact]
+    public void ThrowsCannotGetClientExceptionWhenLoginFails()
     {
-        this.MockWrapper.Setup(w => w.Login()).Returns(expectedResponse);
+        this.MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.NoClient);
 
-        var ex = Assert.Throws<RemoteException<LoginResponse>>(() => this.Remote.Login());
+        var expectedState = new ConnectionState(LoginResponse.LoggedOut, RunResponse.NotRunning, App.None, default, RunResponse.NotRunning);
+
+        var ex = Assert.Throws<CannotGetClientException>(() => this.Remote.Login());
 
         Assert.Multiple(
-            () => Assert.Equal(expectedResponse, ex.Response),
+            () => Assert.Equal(expectedState, ex.LastConnectionState),
             () => this.MockWrapper.Verify(w => w.Login(), Times.Once())
         );
     }
 
     [Fact]
-    public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
+    public void ThrowsInvalidOperationExceptionWhenAlreadyLoggedIn()
+    {
+        this.MockWrapper.Setup(w => w.Login()).Returns(LoginResponse.AlreadyLoggedIn);
+
+        Assert.Multiple(
+            () => Assert.Throws<InvalidOperationException>(() => this.Remote.Login()),
+            () => this.MockWrapper.Verify(w => w.Login(), Times.Once())
+        );
+    }
+
+    [Theory]
+    [InlineData(LoginResponse.Unknown)]
+    [InlineData(LoginResponse.LoggedOut)]
+    public void ThrowsUnhandledResponseExceptionWhenUnhandledResponse(LoginResponse response)
+    {
+        this.MockWrapper.Setup(w => w.Login()).Returns(response);
+
+        var expectedState = new ConnectionState(LoginResponse.LoggedOut, RunResponse.NotRunning, App.None, default, RunResponse.NotRunning);
+
+        var ex = Assert.Throws<UnhandledResponseException>(() => this.Remote.Login());
+
+        Assert.Multiple(
+            () => Assert.Equal(response, ex.Response),
+            () => Assert.Equal(expectedState, ex.LastConnectionState),
+            () => this.MockWrapper.Verify(w => w.Login(), Times.Once())
+        );
+    }
+
+    [Fact]
+    public void BeginCallScopeThrowsObjectDisposedExceptionWhenObjectDisposed()
     {
         this.Remote.Dispose();
 
