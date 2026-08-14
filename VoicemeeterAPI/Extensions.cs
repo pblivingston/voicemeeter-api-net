@@ -57,26 +57,3 @@ internal static class SemaphoreExt
             => this.semaphore?.Release();
     }
 }
-
-#if NET9_0_OR_GREATER
-#else
-internal static class LockExt
-{
-    public static Scope EnterScope(this LockObject lockObject)
-        => new(lockObject);
-
-    public readonly ref struct Scope : IDisposable
-    {
-        private readonly LockObject lockObject;
-
-        public Scope(LockObject lockObject)
-        {
-            this.lockObject = lockObject;
-            Monitor.Enter(this.lockObject);
-        }
-
-        public void Dispose()
-            => Monitor.Exit(this.lockObject);
-    }
-}
-#endif
