@@ -7,8 +7,10 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 {
     public const int MaxValuePacked = -1;
     public const int MaxValidPacked = 0x03FF_FFFF;
+    public const int MinValidPacked = 0x0100_0001;
     public static VmVersion MaxValue { get; } = new(MaxValuePacked);
     public static VmVersion MaxValid { get; } = new(MaxValidPacked);
+    public static VmVersion MinValid { get; } = new(MinValidPacked);
 
     /// <inheritdoc/>
     public int Packed { get; } = packed;
@@ -130,8 +132,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
         => vm.IsValid();
 
     public static bool IsValid(int packed)
-        => KindUtils.IsValid((packed >> 24) & 0xFF)
-        && SemVersion.IsValid(packed & SemVersion.MaxValidPacked);
+        => packed is >= MinValidPacked and <= MaxValidPacked;
 
     #endregion
 

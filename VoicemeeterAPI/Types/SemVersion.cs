@@ -7,8 +7,10 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
 {
     public const int MaxValuePacked = -1;
     public const int MaxValidPacked = 0x00FF_FFFF;
+    public const int MinValidPacked = 0x0000_0001;
     public static SemVersion MaxValue { get; } = new(MaxValuePacked);
     public static SemVersion MaxValid { get; } = new(MaxValidPacked);
+    public static SemVersion MinValid { get; } = new(MinValidPacked);
 
     /// <inheritdoc/>
     public int Packed { get; } = packed;
@@ -92,8 +94,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
         => sem.IsValid();
 
     public static bool IsValid(int packed)
-        => (uint)packed <= MaxValidPacked
-        && packed > 0;
+        => packed is >= MinValidPacked and <= MaxValidPacked;
 
     #endregion
 
