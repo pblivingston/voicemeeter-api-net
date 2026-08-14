@@ -23,7 +23,6 @@ internal static class Utilities
             2 => Unsafe.As<T, ushort>(ref value) <= 0xFF,
             4 => Unsafe.As<T, uint>(ref value) <= 0xFF,
             8 => Unsafe.As<T, ulong>(ref value) <= 0xFF,
-            16 => Unsafe.As<T, UInt128>(ref value) <= 0xFF,
 
             _ => false
         };
