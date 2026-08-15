@@ -161,11 +161,11 @@ public partial class Remote
     #region RunAsync
 
     /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
-    internal async Task<RunResponse> RunAsync_i(App app, string executionPath, CancellationToken cancellationToken)
+    internal async Task<Result<RunResponse, App>> RunAsync_i(App app, string executionPath, CancellationToken cancellationToken)
     {
         var e = Utilities.BuildPath(executionPath);
 
-        RunResponse result;
+        Result<RunResponse, App> result;
         ConnectionState previousState;
         ConnectionState currentState;
         using (await this.stateLock.EnterScopeAsync(cancellationToken))
@@ -185,7 +185,7 @@ public partial class Remote
     }
 
     /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
-    public async Task<RunResponse> RunAsync(App app, CancellationToken cancellationToken = default)
+    public async Task<Result<RunResponse, App>> RunAsync(App app, CancellationToken cancellationToken = default)
     {
         using var scope = this.BeginCallScope();
 
@@ -195,7 +195,7 @@ public partial class Remote
     }
 
     /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
-    public async Task<RunResponse> RunAsync(Kind kind, CancellationToken cancellationToken = default)
+    public async Task<Result<RunResponse, App>> RunAsync(Kind kind, CancellationToken cancellationToken = default)
     {
         using var scope = this.BeginCallScope();
 
@@ -205,7 +205,7 @@ public partial class Remote
     }
 
     /// <inheritdoc/>
-    async Task<RunResponse> IRemote.RunAsync<T>(T app, CancellationToken cancellationToken)
+    async Task<Result<RunResponse, App>> IRemote.RunAsync<T>(T app, CancellationToken cancellationToken)
         => app switch
         {
             App a => await this.RunAsync(a, cancellationToken),
@@ -219,7 +219,7 @@ public partial class Remote
 
     #region Helpers
 
-    private async Task<RunResponse> WaitForEngine(string executionPath, CancellationToken cancellationToken)
+    private async Task<Result<RunResponse, App>> WaitForEngine(string executionPath, CancellationToken cancellationToken)
     {
         var e = Utilities.BuildPath(executionPath);
         var target = "Voicemeeter";
@@ -253,16 +253,11 @@ public partial class Remote
             while (pDirty.IsFailure || pDirty
                 || bDirty.IsFailure || bDirty);
 
-            var state = this.GetAppState_i(version.K.ToApp(this.wrapper.Is64Bit), e);
+            (var app, var state) = this.GetVoicemeeterState_i(e);
 
-            if (this.wrapper.Is64Bit && state is RunResponse.NotRunning)
-            {
-                state = this.GetAppState_i(version.K.ToApp(false), e);
-            }
+            this.WaitForRunningDetected(target, e, state, version, app);
 
-            this.WaitForRunningDetected(target, e, state, version: version);
-
-            return state;
+            return (state, app, true);
         }
         catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
         {
@@ -271,7 +266,7 @@ public partial class Remote
         }
     }
 
-    private async Task<RunResponse> WaitForRunning(App app, string executionPath, CancellationToken cancellationToken)
+    private async Task<Result<RunResponse, App>> WaitForRunning(App app, string executionPath, CancellationToken cancellationToken)
     {
         var e = Utilities.BuildPath(executionPath);
         var target = app.ToString();
@@ -308,12 +303,12 @@ public partial class Remote
 
             this.WaitForRunningDetected(target, e, state, app: app);
 
-            return state;
+            return (state, app, true);
         }
         catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
         {
             this.OperationCanceled(ex, e, app: app);
-            return RunResponse.Timeout;
+            return (RunResponse.Timeout, app, false);
         }
     }
 

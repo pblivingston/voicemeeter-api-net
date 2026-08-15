@@ -32,14 +32,14 @@ public partial class Remote
         {
             case Response.Dirty when pDirty:
                 this.OnParamsDirty();
-                return (response, true);
+                return (response, true, true);
 
             case Response.Dirty:
                 this.OnButtonsDirty();
-                return (response, true);
+                return (response, true, true);
 
             case Response.Ok:
-                return (response, false);
+                return (response, false, true);
 
             case Response.Error when !this.LoginStatus.IsLoggedIn():
                 var ex1a = new InvalidOperationException(NotLoggedInMessage);
@@ -97,7 +97,7 @@ public partial class Remote
             case Response.Ok:
                 payload = LogArgs.New(this.logger, LogLevel.Trace, param: param, value: value);
                 Log.RemoteMethodSuccess(this.logger, LogLevel.Trace, methodName, payload, executionPath);
-                return (response, value);
+                return (response, value, true);
 
             case Response.Error when !this.LoginStatus.IsLoggedIn():
                 payload = LogArgs.New(this.logger, LogLevel.Error, param: param, value: value);

@@ -95,18 +95,14 @@ public enum GetMidiResponse
     Error = -1
 }
 
+/// <summary>
+///   >0: number of bytes sent
+/// </summary>
 public enum SendMidiResponse
 {
     CannotSend = -5,
     NoServer = -2,
-    Error = -1,
-
-    /// <summary>
-    ///   from VoicemeeterAPI
-    /// </summary>
-    Ok = 0
-
-    // >0: number of bytes sent
+    Error = -1
 }
 
 public enum CallbackResponse
