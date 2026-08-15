@@ -241,19 +241,17 @@ public partial class Remote
             while (!version.IsValid());
 
             this.YieldForEngineSettle(target, e);
-            bool pDirty;
-            bool bDirty;
+            Result<Response, bool> pDirty;
+            Result<Response, bool> bDirty;
             do
             {
                 await Task.Delay(50, cts.Token);
 
-                var pResult = this.ParamsDirty_i(e);
-                pDirty = !pResult.IsSuccess || pResult.Value;
-
-                var bResult = this.ButtonsDirty_i(e);
-                bDirty = !bResult.IsSuccess || pResult.Value;
+                pDirty = this.ParamsDirty_i(e);
+                bDirty = this.ButtonsDirty_i(e);
             }
-            while (pDirty || bDirty);
+            while (pDirty.IsFailure || pDirty
+                || bDirty.IsFailure || bDirty);
 
             var state = this.GetAppState_i(version.K.ToApp(this.wrapper.Is64Bit), e);
 
@@ -296,15 +294,14 @@ public partial class Remote
                 && this.loginStatus < LoginResponse.LoggedOut)
             {
                 this.YieldForEngineSettle(target, e);
-                bool dirty;
+                Result<Response, bool> dirty;
                 do
                 {
                     await Task.Delay(50, cts.Token);
 
-                    var dResult = this.ButtonsDirty_i(e);
-                    dirty = !dResult.IsSuccess || dResult.Value;
+                    dirty = this.ButtonsDirty_i(e);
                 }
-                while (dirty);
+                while (dirty.IsFailure || dirty);
             }
 
             var state = this.GetAppState_i(app, e);

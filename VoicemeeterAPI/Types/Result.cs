@@ -64,13 +64,16 @@ public static class Result
 public readonly struct Result<TResponse> where TResponse : struct, Enum
 {
     /// <summary>
-    ///   Represents the actual response code returned by VoicemeeterRemote.
+    ///   Represents the response code returned by VoicemeeterRemote.
     /// </summary>
     public TResponse Response { get; }
     /// <summary>
     ///   'true' if Response is 'Ok' (0).
     /// </summary>
     public bool IsSuccess => EqualityComparer<TResponse>.Default.Equals(this.Response, default);
+    /// <summary>
+    ///   'true' if Response is not 'Ok' (0).
+    /// </summary>
     public bool IsFailure => !this.IsSuccess;
 
     private Result(TResponse response)
@@ -93,8 +96,7 @@ public readonly struct Result<TResponse, TValue> where TResponse : struct, Enum
     private readonly TValue? value;
 
     /// <summary>
-    ///   Represents the actual response code returned by VoicemeeterRemote.<br/>
-    ///   'Ok' where the response code reflects the value or additional information.
+    ///   Represents the response code returned by VoicemeeterRemote.
     /// </summary>
     public TResponse Response { get; }
     /// <summary>
@@ -107,7 +109,7 @@ public readonly struct Result<TResponse, TValue> where TResponse : struct, Enum
     public bool IsFailure => !this.IsSuccess;
 
     /// <summary>
-    ///   The actual value returned or value reflected by the actual response code.
+    ///   The actual value returned.
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
     public TValue Value => this.IsSuccess
@@ -132,4 +134,7 @@ public readonly struct Result<TResponse, TValue> where TResponse : struct, Enum
         => new(response);
     public static implicit operator Result<TResponse, TValue>((TResponse response, TValue value) t)
         => new(t.response, t.value);
+
+    public static implicit operator TValue(Result<TResponse, TValue> result)
+        => result.Value;
 }

@@ -63,14 +63,16 @@ public enum Response
     Dirty = 1
 }
 
+/// <summary>
+///   >0: script line causing error
+/// </summary>
 public enum ScriptResponse
 {
     Error4 = -4,
     Error3 = -3,
     NoServer = -2,
     Error = -1,
-    Ok = 0,
-    ScriptError
+    Ok = 0
 }
 
 public enum LevelResponse
@@ -82,6 +84,9 @@ public enum LevelResponse
     Ok = 0
 }
 
+/// <summary>
+///   >0: number of bytes placed in buffer
+/// </summary>
 public enum GetMidiResponse
 {
     NoData6 = -6,
@@ -94,7 +99,14 @@ public enum SendMidiResponse
 {
     CannotSend = -5,
     NoServer = -2,
-    Error = -1
+    Error = -1,
+
+    /// <summary>
+    ///   from VoicemeeterAPI
+    /// </summary>
+    Ok = 0
+
+    // >0: number of bytes sent
 }
 
 public enum CallbackResponse
