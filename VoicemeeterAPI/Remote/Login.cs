@@ -268,7 +268,7 @@ public partial class Remote
         }
         catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
         {
-            this.OperationCanceled(ex, e);
+            this.OperationTimeout(ex, e);
             return RunResponse.Timeout;
         }
     }
@@ -309,7 +309,7 @@ public partial class Remote
         }
         catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
         {
-            this.OperationCanceled(ex, e, app: app);
+            this.OperationTimeout(ex, e, app: app);
             return (RunResponse.Timeout, app, false);
         }
     }

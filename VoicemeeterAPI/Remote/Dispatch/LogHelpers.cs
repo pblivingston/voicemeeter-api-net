@@ -96,7 +96,7 @@ public partial class Remote
 
     #region Warning
 
-    private void OperationCanceled(
+    private void OperationTimeout(
         OperationCanceledException ex,
         string executionPath,
         App? app = null,
@@ -104,7 +104,7 @@ public partial class Remote
     )
     {
         var payload = LogArgs.New(this.logger, LogLevel.Warning, app: app);
-        Log.RemoteOperationCanceled(this.logger, ex, methodName, payload, executionPath);
+        Log.RemoteOperationTimeout(this.logger, ex, methodName, payload, executionPath);
     }
 
     #endregion

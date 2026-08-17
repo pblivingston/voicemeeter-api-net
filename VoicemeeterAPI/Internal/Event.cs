@@ -30,7 +30,7 @@ internal enum Event
 
     StaleConnectionState = 1330,
 
-    RemoteOperationCanceled = 1350,
+    RemoteOperationTimeout = 1350,
 
     // 14xx Dev Error
     RemoteContractViolation = 1400, // NotLoggedInException, AlreadyLoggedInException, etc.

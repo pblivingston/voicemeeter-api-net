@@ -193,13 +193,13 @@ public partial class Remote
         );
 
         [LoggerMessage(
-            EventId = (int)Event.RemoteOperationCanceled,
+            EventId = (int)Event.RemoteOperationTimeout,
             Level = LogLevel.Warning,
             Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
-                "Operation canceled by request or timed out. " +
+                "Operation timed out. " +
                 "{Payload}[{ExecutionPath}]"
         )]
-        public static partial void RemoteOperationCanceled(
+        public static partial void RemoteOperationTimeout(
             ILogger logger,
             OperationCanceledException ex,
             string methodName,
