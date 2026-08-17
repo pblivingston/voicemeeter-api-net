@@ -18,6 +18,10 @@ public static class Result
         where TResponse : struct, Enum
         => Result<TResponse, TValue>.Success(response, value);
 
+    public static Result<TResponse, TValue> Failure<TResponse, TValue>(TResponse response, TValue value)
+        where TResponse : struct, Enum
+        => Result<TResponse, TValue>.Success(response, value);
+
     public static Result<TResponse, TValue> Failure<TResponse, TValue>(TResponse response)
         where TResponse : struct, Enum
         => Result<TResponse, TValue>.Failure(response);

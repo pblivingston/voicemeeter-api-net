@@ -170,13 +170,20 @@ public partial class Remote
         ConnectionState currentState;
         using (await this.stateLock.EnterScopeAsync(cancellationToken))
         {
+            if (app.IsVoicemeeter() && !this.loginStatus.IsLoggedIn())
+            {
+                throw this.CannotWaitForEngine(app, e);
+            }
+
             this.Run_p(app, e);
 
-            result = app.IsVoicemeeter() && this.loginStatus < LoginResponse.LoggedOut
+            result = app.IsVoicemeeter()
                     ? await this.WaitForEngine(e, cancellationToken)
                     : await this.WaitForRunning(app, e, cancellationToken);
 
-            (previousState, currentState) = this.GetConnectionState_i(e);
+            (previousState, currentState) = result.IsSuccess && (app.IsVoicemeeter() || app is App.MacroButtons)
+                ? this.GetConnectionState_i(e)
+                : (default, default);
         }
 
         this.OnConnectionStateChanged(previousState, currentState);
@@ -278,15 +285,10 @@ public partial class Remote
 
         try
         {
-            var idle = await this.wrapper.WaitForApplicationInputIdle(app, cts.Token);
-
-            if (!idle.IsResponding())
-            {
-                return idle;
-            }
+            await this.wrapper.WaitForApplicationInputIdle(app, cts.Token);
 
             if (app is App.MacroButtons
-                && this.loginStatus < LoginResponse.LoggedOut)
+                && this.loginStatus == LoginResponse.Ok)
             {
                 this.YieldForEngineSettle(target, e);
                 Result<Response, bool> dirty;

@@ -138,5 +138,17 @@ public partial class Remote
         return ex;
     }
 
+    private InvalidOperationException CannotWaitForEngine(
+        App voicemeeterApp,
+        string executionPath,
+        [CallerMemberName] string methodName = ""
+    )
+    {
+        var payload = LogArgs.New(this.logger, LogLevel.Error, app: voicemeeterApp);
+        var ex = new InvalidOperationException($"Cannot wait for Voicemeeter when not logged in. Log in first or use '{nameof(Run)}'.");
+        Log.RemoteContractViolation(this.logger, ex, methodName, "Not logged in.", payload, executionPath);
+        return ex;
+    }
+
     #endregion
 }

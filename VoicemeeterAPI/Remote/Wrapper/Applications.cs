@@ -19,12 +19,9 @@ public partial class Remote
         ///   NotRunning<br/>
         ///   NotResponding<br/>
         ///   NotInstalled<br/>
-        ///   UnknownApp<br/>
         /// </returns>
         public RunResponse GetApplicationState(App app)
-            => app.IsValid()
-                ? this.apps[app].GetState()
-                : RunResponse.UnknownApp;
+            => this.apps[app].GetState();
 
         /// <summary>
         ///   Gets the current Voicemeeter application and its state.
@@ -47,16 +44,13 @@ public partial class Remote
         /// <param name="force"></param>
         /// <returns>
         ///   Error<br/>
-        ///   UnknownApp<br/>
         ///   Last App State<br/>
         /// </returns>
         /// <remarks>
         ///   If app has tray mode enabled, force will be required to shut it down.
         /// </remarks>
         public RunResponse CloseApplication(App app, bool force = false)
-            => app.IsValid()
-                ? this.apps[app].Close(force)
-                : RunResponse.UnknownApp;
+            => this.apps[app].Close(force);
 
         /// <summary>
         ///   Waits for the application to enter an idle state.
@@ -65,13 +59,10 @@ public partial class Remote
         /// <param name="cancellationToken"></param>
         /// <returns>
         ///   Error<br/>
-        ///   UnknownApp<br/>
         ///   App State<br/>
         /// </returns>
-        public async Task<RunResponse> WaitForApplicationInputIdle(App app, CancellationToken cancellationToken)
-            => app.IsValid()
-                ? await this.apps[app].WaitForInputIdle(cancellationToken)
-                : RunResponse.UnknownApp;
+        public async Task WaitForApplicationInputIdle(App app, CancellationToken cancellationToken)
+            => await this.apps[app].WaitForInputIdle(cancellationToken);
 
         /// <summary>
         ///   Waits for the application to exit.
@@ -80,13 +71,10 @@ public partial class Remote
         /// <param name="cancellationToken"></param>
         /// <returns>
         ///   Error<br/>
-        ///   UnknownApp<br/>
         ///   App State<br/>
         /// </returns>
         public async Task<RunResponse> WaitForApplicationExit(App app, CancellationToken cancellationToken)
-            => app.IsValid()
-                ? await this.apps[app].WaitForExit(cancellationToken)
-                : RunResponse.UnknownApp;
+            => await this.apps[app].WaitForExit(cancellationToken);
 
         private enum ProcessName
         {

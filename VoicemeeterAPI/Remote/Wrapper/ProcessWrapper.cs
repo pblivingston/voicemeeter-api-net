@@ -64,20 +64,22 @@ public partial class Remote
                 }
             }
 
-            public async Task<RunResponse> WaitForInputIdle(CancellationToken cancellationToken)
+            public async Task WaitForInputIdle(CancellationToken cancellationToken)
             {
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 cts.CancelAfter(TimeSpan.FromSeconds(15));
 
                 Process? process;
+                RunResponse state;
                 var idle = false;
                 do
                 {
                     await Task.Delay(100, cts.Token);
 
                     process = this.GetProcess();
+                    state = GetState(process);
 
-                    if (GetState(process).IsResponding())
+                    if (state.IsResponding())
                     {
                         try
                         {
@@ -87,8 +89,6 @@ public partial class Remote
                     }
                 }
                 while (!idle);
-
-                return GetState(process);
             }
 
             public async Task<RunResponse> WaitForExit(CancellationToken cancellationToken)
