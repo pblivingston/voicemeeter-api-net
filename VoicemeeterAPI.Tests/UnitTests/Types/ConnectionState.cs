@@ -27,7 +27,7 @@ public class ConnectionStateTests
     [Fact]
     public void PackThrowsArgumentOutOfRangeExceptionWhenLoginStatusOutOfRange()
         => Assert.Throws<ArgumentOutOfRangeException>(
-            () => ConnectionState.Pack(LoginResponse.Unknown, RunResponse.NotRunning, App.None, default, RunResponse.NotRunning)
+            () => ConnectionState.Pack(LoginResponse.NoClient, RunResponse.NotRunning, App.None, default, RunResponse.NotRunning)
         );
 
     [Fact]

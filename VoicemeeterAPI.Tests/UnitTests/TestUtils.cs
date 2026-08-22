@@ -122,19 +122,21 @@ public abstract class MockRemote : IDisposable
     /// <remarks>
     ///   Calls:<br/>
     ///   <see cref="Remote.IWrapper.Login()"/> once<br/>
+    ///   <see cref="Remote.IWrapper.GetVoicemeeterKind()"/> once<br/>
     ///   <see cref="Remote.IWrapper.GetVoicemeeterState()"/> once<br/>
     ///   <see cref="Remote.IWrapper.GetVoicemeeterVersion()"/> once<br/>
     ///   <see cref="Remote.IWrapper.GetApplicationState(App)"/> once with <see cref="App.MacroButtons"/><br/>
     /// </remarks>
     private void MockLogin_p(LoginResponse loginStatus, RunResponse vmState, App vmApp, VmVersion vmVersion, RunResponse buttonsState)
     {
-        var versionResponse = vmApp is App.None
+        var response = vmApp is App.None
             ? Response.NoServer
             : Response.Ok;
 
         this.MockWrapper.Setup(w => w.Login()).Returns(loginStatus);
+        this.MockWrapper.Setup(w => w.GetVoicemeeterKind()).Returns((response, vmVersion.K));
         this.MockWrapper.Setup(w => w.GetVoicemeeterState()).Returns((vmApp, vmState));
-        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((versionResponse, vmVersion));
+        this.MockWrapper.Setup(w => w.GetVoicemeeterVersion()).Returns((response, vmVersion));
         this.MockWrapper.Setup(w => w.GetApplicationState(App.MacroButtons)).Returns(buttonsState);
 
         var expectedState = new ConnectionState(loginStatus, vmState, vmApp, vmVersion, buttonsState);
@@ -144,6 +146,7 @@ public abstract class MockRemote : IDisposable
         Assert.Multiple(
             () => Assert.Equal(expectedState, result),
             () => this.MockWrapper.Verify(w => w.Login(), Times.Once()),
+            () => this.MockWrapper.Verify(w => w.GetVoicemeeterKind(), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetVoicemeeterState(), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetVoicemeeterVersion(), Times.Once()),
             () => this.MockWrapper.Verify(w => w.GetApplicationState(App.MacroButtons), Times.Once())
