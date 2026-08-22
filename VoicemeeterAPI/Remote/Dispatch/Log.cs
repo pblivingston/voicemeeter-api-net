@@ -267,21 +267,6 @@ public partial class Remote
         );
 
         [LoggerMessage(
-            EventId = (int)Event.UnhandledLogoutResponse,
-            Level = LogLevel.Critical,
-            Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
-                "CRITICAL: UNHANDLED RESPONSE. " +
-                "Please escalate this log to the library maintainer immediately! " +
-                "{Payload}[{ExecutionPath}]"
-        )]
-        public static partial void UnhandledLogoutResponse(
-            ILogger logger,
-            string methodName,
-            LogArgs payload,
-            string executionPath
-        );
-
-        [LoggerMessage(
             EventId = (int)Event.UnhandledResponse,
             Level = LogLevel.Critical,
             Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
@@ -291,7 +276,7 @@ public partial class Remote
         )]
         public static partial void UnhandledResponse(
             ILogger logger,
-            RemoteException ex,
+            RemoteException? ex,
             string methodName,
             LogArgs payload,
             string executionPath

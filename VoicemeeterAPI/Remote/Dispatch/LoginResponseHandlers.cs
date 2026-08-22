@@ -78,7 +78,7 @@ public partial class Remote
             case LoginResponse.AlreadyLoggedIn:
             default:
                 payload = LogArgs.New(this.logger, LogLevel.Critical, loginResponse: response);
-                Log.UnhandledLogoutResponse(this.logger, methodName, payload, executionPath);
+                Log.UnhandledResponse(this.logger, null, methodName, payload, executionPath);
                 break;
         }
     }

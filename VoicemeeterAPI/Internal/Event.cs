@@ -41,7 +41,6 @@ internal enum Event
 
     AppCriticalState = 1510,
 
-    UnhandledLogoutResponse = 1598,
     UnhandledResponse = 1599,
 
     // 19xx Teardown/Cleanup
