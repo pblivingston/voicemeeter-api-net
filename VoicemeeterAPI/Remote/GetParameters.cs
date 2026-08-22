@@ -71,7 +71,7 @@ public partial class Remote
             throw this.CannotConvertToType<int>(param, val, e);
         }
 
-        return (result.Response, value);
+        return (result.Response, value, true);
     }
 
     public Result<Response, int> GetParamInt(string param)
@@ -101,7 +101,7 @@ public partial class Remote
             throw this.CannotConvertToType<bool>(param, val, e);
         }
 
-        return (result.Response, v == 1);
+        return (result.Response, v == 1, true);
     }
 
     public Result<Response, bool> GetParamBool(string param)
@@ -146,22 +146,22 @@ public partial class Remote
         {
             _ when t == typeof(float)
                 => this.GetParamFloat(param) is var r && r.IsSuccess
-                    ? (r.Response, (T)(object)r.Value)
+                    ? (r.Response, (T)(object)r.Value, true)
                     : r.Response,
 
             _ when t == typeof(int)
                 => this.GetParamInt(param) is var r && r.IsSuccess
-                    ? (r.Response, (T)(object)r.Value)
+                    ? (r.Response, (T)(object)r.Value, true)
                     : r.Response,
 
             _ when t == typeof(bool)
                 => this.GetParamBool(param) is var r && r.IsSuccess
-                    ? (r.Response, (T)(object)r.Value)
+                    ? (r.Response, (T)(object)r.Value, true)
                     : r.Response,
 
             _ when t == typeof(string)
                 => this.GetParamString(param) is var r && r.IsSuccess
-                    ? (r.Response, (T)(object)r.Value)
+                    ? (r.Response, (T)(object)r.Value, true)
                     : r.Response,
 
             _ => throw this.TypeNotSupported<T>(SupportedTypes.ParamTypes, nameof(IRemote.GetParam))
