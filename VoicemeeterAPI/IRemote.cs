@@ -11,7 +11,7 @@ using AtgDev.Voicemeeter;
 public interface IRemote : IDisposable
 {
     /// <summary>
-    ///   Raised when <see cref="LastConnectionState"/> has changed.
+    ///   Raised when <see cref="ConnectionState"/> has changed.
     /// </summary>
     public event EventHandler<ConnectionStateEventArgs> ConnectionStateChanged;
 
@@ -26,25 +26,9 @@ public interface IRemote : IDisposable
     public event EventHandler ButtonsDirty;
 
     /// <summary>
-    ///   The login status of the <see cref="IRemote"/> instance.
-    /// </summary>
-    /// <remarks>
-    ///   Ok, VoicemeeterNotRunning, LoggedOut, Unknown
-    /// </remarks>
-    public LoginResponse LoginStatus { get; }
-
-    /// <summary>
-    ///   Simplifies <see cref="LoginStatus"/> checks.
-    /// </summary>
-    /// <remarks>
-    ///   `true` if logged in to VoicemeeterRemote and Voicemeeter is running.
-    /// </remarks>
-    public bool ConnectedToVoicemeeter { get; }
-
-    /// <summary>
     ///   Reflects the most recently cached connection state.
     /// </summary>
-    public ConnectionState LastConnectionState { get; }
+    public ConnectionState ConnectionState { get; }
 
     #region Login
 
@@ -149,6 +133,8 @@ public interface IRemote : IDisposable
 
     #region General Information
 
+    public LoginResponse GetLoginStatus();
+
     /// <summary>
     ///   Gets the currently running Voicemeeter kind.
     /// </summary>
@@ -214,11 +200,11 @@ public interface IRemote : IDisposable
     public (App App, RunResponse State) GetVoicemeeterState();
 
     /// <summary>
-    ///   Updates <see cref="LastConnectionState"/> and returns the current connection state.
+    ///   Updates <see cref="ConnectionState"/> and returns the current connection state.
     /// </summary>
     /// <returns></returns>
     /// <exception cref="ObjectDisposedException"></exception>
-    public ConnectionState GetConnectionState();
+    public ConnectionState RefreshConnectionState();
 
     #endregion
 

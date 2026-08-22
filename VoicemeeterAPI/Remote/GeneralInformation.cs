@@ -5,6 +5,37 @@ namespace PBLivingston.VoicemeeterAPI;
 
 public partial class Remote
 {
+    #region Get Login Status
+
+    /// <inheritdoc cref="IRemote.GetLoginStatus()"/>
+    internal LoginResponse GetLoginStatus_i(string executionPath)
+    {
+        var e = Utilities.BuildPath(executionPath);
+
+        this.WrapperCall(nameof(this.wrapper.GetVoicemeeterKind), e);
+
+        (var response, _) = this.wrapper.GetVoicemeeterKind();
+
+        return this.HandleLoginStatusResponse(response, e);
+    }
+
+    /// <inheritdoc/>
+    public LoginResponse GetLoginStatus()
+    {
+        var e = nameof(this.GetLoginStatus);
+
+        using var scope = this.BeginCallScope();
+        using var lk = this.stateLock.EnterScope();
+
+        var status = this.GetLoginStatus_i(e);
+
+        this.HandleStaleCache(status, e);
+
+        return status;
+    }
+
+    #endregion
+
     #region Get Voicemeeter Kind
 
     /// <inheritdoc cref="IRemote.GetKind()"/>
@@ -96,7 +127,7 @@ public partial class Remote
             this.HandleStaleCache(result, e);
         }
 
-        if (app.IsVoicemeeter() && result < RunResponse.NotRunning)
+        if (app.IsVoicemeeter())
         {
             this.HandleStaleCache((app, result), e);
         }
@@ -135,20 +166,22 @@ public partial class Remote
 
     #endregion
 
-    #region Get Connection State
+    #region Refresh Connection State
 
-    /// <inheritdoc cref="IRemote.GetConnectionState()"/>
-    internal (ConnectionState previousState, ConnectionState currentState) GetConnectionState_i(string executionPath)
+    /// <inheritdoc cref="IRemote.RefreshConnectionState()"/>
+    internal (ConnectionState previousState, ConnectionState currentState) RefreshConnectionState_i(string executionPath)
     {
         var e = Utilities.BuildPath(executionPath);
 
-        var previousState = this.lastConnectionState;
+        var previousState = this.connectionState;
+
+        var loginStatus = this.GetLoginStatus_i(e);
 
         RunResponse vmState;
         App vmApp;
         VmVersion vmVersion;
         RunResponse mbState;
-        if (this.loginStatus >= LoginResponse.LoggedOut)
+        if (loginStatus >= LoginResponse.LoggedOut)
         {
             vmApp = previousState.VoicemeeterApp;
             vmState = previousState.VoicemeeterState;
@@ -162,14 +195,14 @@ public partial class Remote
             mbState = this.GetAppState_i(App.MacroButtons, e);
         }
 
-        var currentState = this.HandleConnectionState(this.loginStatus, vmState, vmApp, vmVersion, mbState, e);
+        var currentState = this.HandleConnectionState(loginStatus, vmState, vmApp, vmVersion, mbState, e);
         this.HandleStaleCache(currentState, e);
 
         return (previousState, currentState);
     }
 
     /// <inheritdoc/>
-    public ConnectionState GetConnectionState()
+    public ConnectionState RefreshConnectionState()
     {
         using var scope = this.BeginCallScope();
 
@@ -179,7 +212,7 @@ public partial class Remote
         ConnectionState currentState;
         using (this.stateLock.EnterScope())
         {
-            (previousState, currentState) = this.GetConnectionState_i(nameof(this.GetConnectionState));
+            (previousState, currentState) = this.RefreshConnectionState_i(nameof(this.RefreshConnectionState));
         }
 
         this.OnConnectionStateChanged(previousState, currentState);

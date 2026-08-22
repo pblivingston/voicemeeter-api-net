@@ -17,7 +17,7 @@ public partial class Remote
 
         this.HandleLoginResponse(response, e);
 
-        var states = this.GetConnectionState_i(e);
+        var states = this.RefreshConnectionState_i(e);
 
         this.HandleConnectionState(states.currentState, e);
 
@@ -75,7 +75,7 @@ public partial class Remote
         using (this.stateLock.EnterScope())
         {
             this.Logout_i(e);
-            (previousState, currentState) = this.GetConnectionState_i(e);
+            (previousState, currentState) = this.RefreshConnectionState_i(e);
         }
 
         this.OnConnectionStateChanged(previousState, currentState);
@@ -109,7 +109,7 @@ public partial class Remote
 
         if (app.IsVoicemeeter())
         {
-            this.HandleStaleCache(this.loginStatus, e);
+            this.HandleStaleCache((app, RunResponse.Ok), e);
         }
 
         if (app is App.MacroButtons)
@@ -170,7 +170,7 @@ public partial class Remote
         ConnectionState currentState;
         using (await this.stateLock.EnterScopeAsync(cancellationToken))
         {
-            if (app.IsVoicemeeter() && !this.loginStatus.IsLoggedIn())
+            if (app.IsVoicemeeter() && !this.connectionState.LoginStatus.IsLoggedIn())
             {
                 throw this.CannotWaitForEngine(app, e);
             }
@@ -182,7 +182,7 @@ public partial class Remote
                     : await this.WaitForRunning(app, e, cancellationToken);
 
             (previousState, currentState) = result.IsSuccess && (app.IsVoicemeeter() || app is App.MacroButtons)
-                ? this.GetConnectionState_i(e)
+                ? this.RefreshConnectionState_i(e)
                 : (default, default);
         }
 
@@ -288,7 +288,7 @@ public partial class Remote
             await this.wrapper.WaitForApplicationInputIdle(app, cts.Token);
 
             if (app is App.MacroButtons
-                && this.loginStatus == LoginResponse.Ok)
+                && this.connectionState.ConnectedToVoicemeeter)
             {
                 this.YieldForEngineSettle(target, e);
                 Result<Response, bool> dirty;

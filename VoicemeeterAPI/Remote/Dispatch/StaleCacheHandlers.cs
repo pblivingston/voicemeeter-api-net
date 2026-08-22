@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 public partial class Remote
 {
     /// <summary>
-    ///   Accesses this.lastConnectionState - must be within this.stateLock scope!
+    ///   Accesses <see cref="connectionState"/> - must be within <see cref="stateLock"/> scope!
     /// </summary>
     /// <param name="currentLoginStatus"></param>
     /// <param name="executionPath"></param>
@@ -20,8 +20,7 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     )
     {
-        if (this.loginStatus >= LoginResponse.LoggedOut
-            || currentLoginStatus == this.lastConnectionState.LoginStatus)
+        if (currentLoginStatus == this.connectionState.LoginStatus)
         {
             return;
         }
@@ -29,7 +28,7 @@ public partial class Remote
         var payload = CacheLogArgs.New(
             this.logger,
             LogLevel.Warning,
-            this.lastConnectionState,
+            this.connectionState,
             currentLoginStatus: currentLoginStatus
         );
 
@@ -42,7 +41,7 @@ public partial class Remote
     }
 
     /// <summary>
-    ///   Accesses this.lastConnectionState - must be within this.stateLock scope!
+    ///   Accesses <see cref="connectionState"/> - must be within <see cref="stateLock"/> scope!
     /// </summary>
     /// <param name="currentVoicemeeterKind"></param>
     /// <param name="executionPath"></param>
@@ -53,8 +52,7 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     )
     {
-        if (this.loginStatus >= LoginResponse.LoggedOut
-            || currentVoicemeeterKind == this.lastConnectionState.VoicemeeterKind)
+        if (currentVoicemeeterKind == this.connectionState.VoicemeeterKind)
         {
             return;
         }
@@ -62,7 +60,7 @@ public partial class Remote
         var payload = CacheLogArgs.New(
             this.logger,
             LogLevel.Warning,
-            this.lastConnectionState,
+            this.connectionState,
             currentVoicemeeterKind: currentVoicemeeterKind
         );
 
@@ -75,23 +73,24 @@ public partial class Remote
     }
 
     /// <summary>
-    ///   Accesses this.lastConnectionState - must be within this.stateLock scope!
+    ///   Accesses <see cref="connectionState"/> - must be within <see cref="stateLock"/> scope!
     /// </summary>
     /// <param name="voicemeeterState"></param>
     /// <param name="executionPath"></param>
     /// <param name="methodName"></param>
     private void HandleStaleCache(
-        (App, RunResponse) voicemeeterState,
+        (App, RunResponse) currentVoicemeeterAppState,
         string executionPath,
         [CallerMemberName] string methodName = ""
     )
     {
-        (var currentVoicemeeterApp, var currentVoicemeeterState) = voicemeeterState;
-        var previousState = this.lastConnectionState;
+        (var app, var state) = currentVoicemeeterAppState;
+        var previousState = this.connectionState;
 
-        if (this.loginStatus >= LoginResponse.LoggedOut
-            || (currentVoicemeeterApp == previousState.VoicemeeterApp
-                && currentVoicemeeterState == previousState.VoicemeeterState))
+        if ((app == previousState.VoicemeeterApp
+                && state == previousState.VoicemeeterState)
+            || (app != previousState.VoicemeeterApp
+                && !(state.IsRunning() || app is App.None)))
         {
             return;
         }
@@ -100,8 +99,8 @@ public partial class Remote
             this.logger,
             LogLevel.Warning,
             previousState,
-            currentVoicemeeterApp: currentVoicemeeterApp,
-            currentVoicemeeterState: currentVoicemeeterState
+            currentVoicemeeterApp: app,
+            currentVoicemeeterState: state
         );
 
         Log.StaleConnectionState(
@@ -113,7 +112,7 @@ public partial class Remote
     }
 
     /// <summary>
-    ///   Accesses this.lastConnectionState - must be within this.stateLock scope!
+    ///   Accesses <see cref="connectionState"/> - must be within <see cref="stateLock"/> scope!
     /// </summary>
     /// <param name="currentVoicemeeterVersion"></param>
     /// <param name="executionPath"></param>
@@ -124,8 +123,7 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     )
     {
-        if (this.loginStatus >= LoginResponse.LoggedOut
-            || currentVoicemeeterVersion == this.lastConnectionState.VoicemeeterVersion)
+        if (currentVoicemeeterVersion == this.connectionState.VoicemeeterVersion)
         {
             return;
         }
@@ -133,7 +131,7 @@ public partial class Remote
         var payload = CacheLogArgs.New(
             this.logger,
             LogLevel.Warning,
-            this.lastConnectionState,
+            this.connectionState,
             currentVoicemeeterVersion: currentVoicemeeterVersion
         );
 
@@ -146,7 +144,7 @@ public partial class Remote
     }
 
     /// <summary>
-    ///   Accesses this.lastConnectionState - must be within this.stateLock scope!
+    ///   Accesses <see cref="connectionState"/> - must be within <see cref="stateLock"/> scope!
     /// </summary>
     /// <param name="currentMacroButtonsState"></param>
     /// <param name="executionPath"></param>
@@ -157,8 +155,7 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     )
     {
-        if (this.loginStatus >= LoginResponse.LoggedOut
-            || currentMacroButtonsState == this.lastConnectionState.MacroButtonsState)
+        if (currentMacroButtonsState == this.connectionState.MacroButtonsState)
         {
             return;
         }
@@ -166,7 +163,7 @@ public partial class Remote
         var payload = CacheLogArgs.New(
             this.logger,
             LogLevel.Warning,
-            this.lastConnectionState,
+            this.connectionState,
             currentMacroButtonsState: currentMacroButtonsState
         );
 
@@ -179,7 +176,7 @@ public partial class Remote
     }
 
     /// <summary>
-    ///   Updates this.lastConnectionState - must be within this.stateLock scope!
+    ///   Accesses <see cref="connectionState"/> - must be within <see cref="stateLock"/> scope!
     /// </summary>
     /// <param name="currentState"></param>
     /// <param name="executionPath"></param>
@@ -193,14 +190,14 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     )
     {
-        var previousState = this.lastConnectionState;
+        var previousState = this.connectionState;
 
         if (currentState == previousState)
         {
             return;
         }
 
-        this.lastConnectionState = currentState;
+        this.connectionState = currentState;
 
         var payload = CacheLogArgs.New(
             this.logger,

@@ -18,20 +18,11 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     )
     {
-        InvalidOperationException ex;
         LogArgs payload;
-
-        if (login is LoginResponse.Unknown)
-        {
-            ex = new($"Cannot get Connection State when LoginStatus is Unknown.");
-            payload = LogArgs.New(this.logger, LogLevel.Error, loginResponse: login);
-            Log.RemoteContractViolation(this.logger, ex, methodName, "LoginStatus is Unknown.", payload, executionPath);
-            throw ex;
-        }
 
         if (!(vmVersion == default || vmVersion.IsValid()))
         {
-            ex = new($"This library does not support Voicemeeter version '{vmVersion}' (currently running).");
+            var ex = new InvalidOperationException($"This library does not support Voicemeeter version '{vmVersion}' (currently running).");
             payload = LogArgs.New(this.logger, LogLevel.Error, version: vmVersion);
             Log.RemoteContractViolation(this.logger, ex, methodName, "Voicemeeter version not supported.", payload, executionPath);
             throw ex;

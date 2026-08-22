@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 public partial class Remote
 {
     /// <summary>
-    ///   Accesses this.loginStatus and this.lastConnectionState - must be within this.stateLock scope!
+    ///   Accesses <see cref="connectionState"/> - must be within <see cref="stateLock"/> scope!
     /// </summary>
     /// <param name="response"></param>
     /// <param name="app"></param>
@@ -32,10 +32,6 @@ public partial class Remote
             case RunResponse.Ok:
                 payload = LogArgs.New(this.logger, LogLevel.Information, app: app);
                 Log.RemoteMethodSuccess(this.logger, LogLevel.Information, methodName, payload, executionPath);
-                if (app.IsVoicemeeter() && this.loginStatus < LoginResponse.LoggedOut)
-                {
-                    this.loginStatus = LoginResponse.Ok;
-                }
                 break;
 
             case RunResponse.NotInstalled:
@@ -58,14 +54,14 @@ public partial class Remote
             case RunResponse.AlreadyShutDown:
             default:
                 payload = LogArgs.New(this.logger, LogLevel.Critical, app: app);
-                var ex = new UnhandledResponseException(response, this.lastConnectionState);
+                var ex = new UnhandledResponseException(response, this.connectionState);
                 Log.UnhandledResponse(this.logger, ex, methodName, payload, executionPath);
                 throw ex;
         }
     }
 
     /// <summary>
-    ///   Accesses this.loginStatus and this.lastConnectionState - must be within this.stateLock scope!
+    ///   Accesses <see cref="connectionState"/> - must be within <see cref="stateLock"/> scope!
     /// </summary>
     /// <param name="response"></param>
     /// <param name="app"></param>
@@ -91,11 +87,6 @@ public partial class Remote
             case RunResponse.Ok:
                 payload = LogArgs.New(this.logger, LogLevel.Debug, app: app, state: response);
                 Log.RemoteMethodSuccess(this.logger, LogLevel.Debug, methodName, payload, executionPath);
-                if (app.IsVoicemeeter() && this.loginStatus < LoginResponse.LoggedOut
-                    && response < RunResponse.NotRunning)
-                {
-                    this.loginStatus = LoginResponse.Ok;
-                }
                 return response;
 
             case RunResponse.NotInstalled:
@@ -115,14 +106,14 @@ public partial class Remote
             case RunResponse.AlreadyShutDown:
             default:
                 payload = LogArgs.New(this.logger, LogLevel.Critical, app: app);
-                var ex = new UnhandledResponseException(response, this.lastConnectionState);
+                var ex = new UnhandledResponseException(response, this.connectionState);
                 Log.UnhandledResponse(this.logger, ex, methodName, payload, executionPath);
                 throw ex;
         }
     }
 
     /// <summary>
-    ///   Accesses this.loginStatus and this.lastConnectionState - must be within this.stateLock scope!
+    ///   Accesses <see cref="connectionState"/> - must be within <see cref="stateLock"/> scope!
     /// </summary>
     /// <param name="response"></param>
     /// <param name="app"></param>
@@ -147,12 +138,6 @@ public partial class Remote
             case RunResponse.Ok:
                 payload = LogArgs.New(this.logger, LogLevel.Debug, app: app, state: response);
                 Log.RemoteMethodSuccess(this.logger, LogLevel.Debug, methodName, payload, executionPath);
-                if (this.loginStatus < LoginResponse.LoggedOut)
-                {
-                    this.loginStatus = response < RunResponse.NotRunning
-                        ? LoginResponse.Ok
-                        : LoginResponse.VoicemeeterNotRunning;
-                }
                 return result;
 
             case RunResponse.NotInstalled:
@@ -167,7 +152,7 @@ public partial class Remote
             case RunResponse.AlreadyShutDown:
             default:
                 payload = LogArgs.New(this.logger, LogLevel.Critical, app: app);
-                var ex = new UnhandledResponseException(response, this.lastConnectionState);
+                var ex = new UnhandledResponseException(response, this.connectionState);
                 Log.UnhandledResponse(this.logger, ex, methodName, payload, executionPath);
                 throw ex;
         }

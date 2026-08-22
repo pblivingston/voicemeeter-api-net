@@ -36,9 +36,6 @@ public sealed partial class Remote : IRemote
     private readonly LockObject bDirtyLock = new();
 
     private int isDisposed;
-    private LoginResponse loginStatus = LoginResponse.LoggedOut;
-    private ConnectionState lastConnectionState = new();
-
     private bool IsDisposed => Volatile.Read(ref this.isDisposed) != 0;
 
     /// <inheritdoc/>
@@ -48,34 +45,14 @@ public sealed partial class Remote : IRemote
     /// <inheritdoc/>
     public event EventHandler? ButtonsDirty;
 
+    private ConnectionState connectionState = new();
     /// <inheritdoc/>
-    public LoginResponse LoginStatus
+    public ConnectionState ConnectionState
     {
         get
         {
             using var lk = this.stateLock.EnterScope();
-            return this.loginStatus;
-        }
-        private set
-        {
-            using var lk = this.stateLock.EnterScope();
-            this.loginStatus = value;
-        }
-    }
-    /// <inheritdoc/>
-    public bool ConnectedToVoicemeeter => this.LoginStatus == LoginResponse.Ok;
-    /// <inheritdoc/>
-    public ConnectionState LastConnectionState
-    {
-        get
-        {
-            using var lk = this.stateLock.EnterScope();
-            return this.lastConnectionState;
-        }
-        private set
-        {
-            using var lk = this.stateLock.EnterScope();
-            this.lastConnectionState = value;
+            return this.connectionState;
         }
     }
 
@@ -167,7 +144,7 @@ public sealed partial class Remote : IRemote
             {
                 using var lk = this.stateLock.EnterScope();
 
-                if (this.loginStatus != LoginResponse.LoggedOut)
+                if (this.connectionState.LoginStatus.IsLoggedIn())
                 {
                     this.InternalLogout(e);
 

@@ -95,7 +95,7 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
     {
         Utilities.ThrowIfNotInRange(loginStatus, LoginResponse.Ok, LoginResponse.LoggedOut);
         Utilities.ThrowIfNotInRange(vmState, RunResponse.Ok, RunResponse.NotResponding);
-        Utilities.ThrowIfNotInRange(vmApp, App.Standard, App.Potatox64);
+        Utilities.ThrowIfNotInRange(vmApp, App.None, App.Potatox64);
         Utilities.ThrowIfNotInRange(vmVersion, default, VmVersion.MaxValid);
         Utilities.ThrowIfNotInRange(buttonsState, RunResponse.Ok, RunResponse.NotResponding);
 
@@ -119,7 +119,6 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
             // 101: LoggedOut & previously Hidden
             // 110: LoggedOut & previously NotRunning
             // 111: LoggedOut & previously NotResponding
-            // LoginResponse.Unknown would lose data
             (((int)loginStatus >> 1) << 31) | // only grab top bit "logged in/out"
             ((int)vmState << 29) |
             // 0: 32 bit app

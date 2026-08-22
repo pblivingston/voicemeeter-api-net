@@ -100,7 +100,7 @@ public partial class Remote
             EventId = (int)Event.ConnectionStateChanged,
             Level = LogLevel.Information,
             Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
-                "Connection state changed. Updated LastConnectionState. " +
+                "ConnectionState changed. " +
                 "{Payload}[{ExecutionPath}]"
         )]
         public static partial void ConnectionStateChanged(
@@ -181,8 +181,8 @@ public partial class Remote
             EventId = (int)Event.StaleConnectionState,
             Level = LogLevel.Warning,
             Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
-                "Connection state has changed since LastConnectionState was cached. " +
-                "Recommend calling GetConnectionState to update. " +
+                "Connection state has changed since last cached. " +
+                "Recommend calling Refresh to update. " +
                 "{Payload}[{ExecutionPath}]"
         )]
         public static partial void StaleConnectionState(

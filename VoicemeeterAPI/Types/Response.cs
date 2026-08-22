@@ -13,11 +13,7 @@ public enum LoginResponse
     /// <summary>
     ///   from VoicemeeterAPI
     /// </summary>
-    LoggedOut = 2,
-    /// <summary>
-    ///   from VoicemeeterAPI
-    /// </summary>
-    Unknown = 3
+    LoggedOut = 2
 }
 
 public enum RunResponse
