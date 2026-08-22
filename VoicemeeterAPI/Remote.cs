@@ -93,9 +93,7 @@ public sealed partial class Remote : IRemote
 
         using var scope = remote.BeginCallScope();
 
-        remote.MethodStart();
-
-        remote.InternalLogin(e);
+        remote.MethodStart(methodName: nameof(Login_i), executionPath: e);
 
         (var previous, var current) = remote.Login_i(e);
 
@@ -107,13 +105,30 @@ public sealed partial class Remote : IRemote
     public static Remote NewSession(ILogger<Remote>? logger = null)
         => NewSession(new Wrapper(), logger);
 
+    internal static Remote FromWrapper(IWrapper wrapper, ILogger<Remote>? logger = null)
+    {
+        var e = nameof(FromWrapper);
+
+        var remote = new Remote(wrapper, logger);
+
+        using var scope = remote.BeginCallScope();
+
+        remote.MethodStart(methodName: nameof(RefreshConnectionState_i), executionPath: e);
+
+        (var previous, var current) = remote.RefreshConnectionState_i(e);
+
+        remote.OnConnectionStateChanged(previous, current);
+
+        return remote;
+    }
+
     /// <summary>
     ///   Initializes a new instance of the <see cref="Remote"/> class with a provided <see cref="RemoteApiWrapper"/>.
     /// </summary>
     /// <param name="apiWrapper"></param>
     /// <param name="logger"></param>
-    public static Remote FromAtgRemoteApiWrapper(RemoteApiWrapper apiWrapper, ILogger<Remote>? logger = null)
-        => new(new Wrapper(apiWrapper), logger);
+    public static Remote FromWrapper(RemoteApiWrapper apiWrapper, ILogger<Remote>? logger = null)
+        => FromWrapper(new Wrapper(apiWrapper), logger);
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="Remote"/> class with a new <see cref="RemoteApiWrapper"/> using the specified installation directory.
@@ -146,7 +161,7 @@ public sealed partial class Remote : IRemote
 
                 if (this.connectionState.LoginStatus.IsLoggedIn())
                 {
-                    this.InternalLogout(e);
+                    this.MethodStart(methodName: nameof(Logout_i), executionPath: e);
 
                     this.Logout_i(e);
                 }

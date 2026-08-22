@@ -11,9 +11,6 @@ internal enum Event
     RemoteMethodStart = 1100,
     RemoteWrapperCall = 1101,
 
-    RemoteInternalLogin = 1110,
-    RemoteInternalLogout = 1111,
-
     WaitForRunningStart = 1120,
     YieldForEngineSettle = 1121,
 

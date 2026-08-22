@@ -27,11 +27,12 @@ public partial class Remote
     private void MethodStart(
         App? app = null,
         Kind? kind = null,
-        [CallerMemberName] string methodName = ""
+        [CallerMemberName] string methodName = "",
+        [CallerMemberName] string executionPath = ""
     )
     {
         var payload = LogArgs.New(this.logger, LogLevel.Information, app: app, kind: kind);
-        Log.RemoteMethodStart(this.logger, methodName, payload);
+        Log.RemoteMethodStart(this.logger, methodName, payload, executionPath);
     }
 
     private void WrapperCall(
@@ -47,16 +48,6 @@ public partial class Remote
         var payload = LogArgs.New(this.logger, level, param: param, app: app);
         Log.RemoteWrapperCall(this.logger, level, methodName, wrapperMethodName, payload, executionPath);
     }
-
-    private void InternalLogin(
-        string executionPath,
-        [CallerMemberName] string methodName = ""
-    ) => Log.RemoteInternalLogin(this.logger, methodName, executionPath);
-
-    private void InternalLogout(
-        string executionPath,
-        [CallerMemberName] string methodName = ""
-    ) => Log.RemoteInternalLogout(this.logger, methodName, executionPath);
 
     private void WaitForRunningStart(
         string targetDescription,
