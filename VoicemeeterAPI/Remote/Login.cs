@@ -24,6 +24,8 @@ public partial class Remote
         return states;
     }
 
+    #region Login
+
     /// <inheritdoc/>
     public ConnectionState Login()
     {
@@ -44,6 +46,53 @@ public partial class Remote
 
         return currentState;
     }
+
+    #endregion
+
+    #region LoginAsync
+
+    internal async Task<(ConnectionState previousState, ConnectionState currentState)> LoginAsync_i(string executionPath, CancellationToken cancellationToken)
+    {
+        var e = Utilities.BuildPath(executionPath);
+
+        (var previousState, var intermediateState) = this.Login_i(e);
+
+        if (intermediateState.ConnectedToVoicemeeter)
+        {
+            await this.WaitForEngineSettle(e, cancellationToken);
+        }
+
+        if (intermediateState.ConnectedToMacroButtons)
+        {
+            await this.WaitForButtonsSettle(e, cancellationToken);
+        }
+
+        (_, var currentState) = this.RefreshConnectionState_i(e);
+
+        return (previousState, currentState);
+    }
+
+    public async Task<ConnectionState> LoginAsync(CancellationToken cancellationToken = default)
+    {
+        var e = nameof(this.LoginAsync);
+
+        using var scope = this.BeginCallScope();
+
+        this.MethodStart();
+
+        ConnectionState previousState;
+        ConnectionState currentState;
+        using (await this.stateLock.EnterScopeAsync(cancellationToken))
+        {
+            (previousState, currentState) = await this.LoginAsync_i(e, cancellationToken);
+        }
+
+        this.OnConnectionStateChanged(previousState, currentState);
+
+        return currentState;
+    }
+
+    #endregion
 
     #endregion
 
@@ -229,26 +278,26 @@ public partial class Remote
     private async Task<Result<RunResponse, App>> WaitForEngine(string executionPath, CancellationToken cancellationToken)
     {
         var e = Utilities.BuildPath(executionPath);
-        var target = "Voicemeeter";
+        var target = Wrapper.VmName;
 
         this.WaitForRunningStart(target, e);
 
-            VmVersion version;
-            do
-            {
+        VmVersion version;
+        do
+        {
             await Task.Delay(100, cancellationToken);
 
-                version = this.GetVersion_i(e);
-            }
-            while (!version.IsValid());
+            version = this.GetVersion_i(e);
+        }
+        while (!version.IsValid());
 
-        await this.WaitForSettle(target, this.ParamsDirty_i, e, cancellationToken);
+        await this.WaitForEngineSettle(e, cancellationToken);
 
-            (var app, var state) = this.GetVoicemeeterState_i(e);
+        (var app, var state) = this.GetVoicemeeterState_i(e);
 
-            this.WaitForRunningDetected(target, e, state, version, app);
+        this.WaitForRunningDetected(target, e, state, version, app);
 
-            return (state, app, true);
+        return (state, app, true);
     }
 
     private async Task<Result<RunResponse, App>> WaitForRunning(App app, string executionPath, CancellationToken cancellationToken)
@@ -260,18 +309,18 @@ public partial class Remote
 
         await this.wrapper.WaitForApplicationInputIdle(app, cancellationToken);
 
-            if (app is App.MacroButtons
-                && this.connectionState.ConnectedToVoicemeeter)
-            {
-            await this.WaitForSettle(target, this.ButtonsDirty_i, e, cancellationToken);
-            }
-
-            var state = this.GetAppState_i(app, e);
-
-            this.WaitForRunningDetected(target, e, state, app: app);
-
-            return (state, app, true);
+        if (app is App.MacroButtons
+            && this.connectionState.ConnectedToVoicemeeter)
+        {
+            await this.WaitForButtonsSettle(e, cancellationToken);
         }
+
+        var state = this.GetAppState_i(app, e);
+
+        this.WaitForRunningDetected(target, e, state, app: app);
+
+        return (state, app, true);
+    }
 
     private async Task WaitForSettle(string target, Func<string, Result<Response, bool>> dirtyMethod, string executionPath, CancellationToken cancellationToken)
     {
@@ -287,6 +336,12 @@ public partial class Remote
         }
         while (dirty.IsFailure || dirty);
     }
+
+    private async Task WaitForEngineSettle(string executionPath, CancellationToken cancellationToken)
+        => await this.WaitForSettle(Wrapper.VmName, this.ParamsDirty_i, executionPath, cancellationToken);
+
+    private async Task WaitForButtonsSettle(string executionPath, CancellationToken cancellationToken)
+        => await this.WaitForSettle(nameof(App.MacroButtons), this.ButtonsDirty_i, executionPath, cancellationToken);
 
     #endregion
 }

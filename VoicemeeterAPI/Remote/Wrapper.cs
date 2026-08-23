@@ -18,7 +18,8 @@ public partial class Remote
     /// </remarks>
     private sealed partial class Wrapper : IWrapper
     {
-        private const string VmrName = "VoicemeeterRemote";
+        public const string VmrName = "VoicemeeterRemote";
+        public const string VmName = "Voicemeeter";
 
         private readonly RemoteApiWrapper remoteApiWrapper;
         private readonly Dictionary<App, ProcessWrapper> apps = [];

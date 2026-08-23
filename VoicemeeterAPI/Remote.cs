@@ -105,6 +105,26 @@ public sealed partial class Remote : IRemote
     public static Remote NewSession(ILogger<Remote>? logger = null)
         => NewSession(new Wrapper(), logger);
 
+    internal static async Task<Remote> NewSessionAsync(IWrapper wrapper, CancellationToken cancellationToken, ILogger<Remote>? logger = null)
+    {
+        var e = nameof(NewSessionAsync);
+
+        var remote = new Remote(wrapper, logger);
+
+        using var scope = remote.BeginCallScope();
+
+        remote.MethodStart(methodName: nameof(LoginAsync_i), executionPath: e);
+
+        (var previous, var current) = await remote.LoginAsync_i(e, cancellationToken);
+
+        remote.OnConnectionStateChanged(previous, current);
+
+        return remote;
+    }
+
+    public static async Task<Remote> NewSessionAsync(ILogger<Remote>? logger = null, CancellationToken cancellationToken = default)
+        => await NewSessionAsync(new Wrapper(), cancellationToken, logger);
+
     internal static Remote FromWrapper(IWrapper wrapper, ILogger<Remote>? logger = null)
     {
         var e = nameof(FromWrapper);

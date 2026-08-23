@@ -38,7 +38,7 @@ internal static class StringBuilderExt
 
 internal static class SemaphoreExt
 {
-    public static async Task<Scope> EnterScopeAsync(this SemaphoreSlim semaphore, CancellationToken cancellationToken = default)
+    public static async Task<Scope> EnterScopeAsync(this SemaphoreSlim semaphore, CancellationToken cancellationToken)
     {
         await semaphore.WaitAsync(cancellationToken);
         return new Scope(semaphore);
