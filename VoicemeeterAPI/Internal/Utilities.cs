@@ -10,6 +10,8 @@ internal static class Utilities
     public static bool InByte<T>(T value) where T : struct
         => typeof(T) is var t && Unsafe.SizeOf<T>() switch
         {
+            1 => true,
+
             _ when t == typeof(float) => Unsafe.As<T, float>(ref value) is var f
                 && f is >= 0f and <= 255f && f % 1 == 0,
 
@@ -19,7 +21,6 @@ internal static class Utilities
             _ when t == typeof(decimal) => Unsafe.As<T, decimal>(ref value) is var m
                 && m is >= 0m and <= 255m && m % 1 == 0,
 
-            1 => Unsafe.As<T, sbyte>(ref value) >= 0,
             2 => Unsafe.As<T, ushort>(ref value) <= 0xFF,
             4 => Unsafe.As<T, uint>(ref value) <= 0xFF,
             8 => Unsafe.As<T, ulong>(ref value) <= 0xFF,
