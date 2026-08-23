@@ -167,21 +167,6 @@ public partial class Remote
             string executionPath
         );
 
-        [LoggerMessage(
-            EventId = (int)Event.RemoteOperationTimeout,
-            Level = LogLevel.Warning,
-            Message = "[VoicemeeterAPI.Remote.{MethodName}] " +
-                "Operation timed out. " +
-                "{Payload}[{ExecutionPath}]"
-        )]
-        public static partial void RemoteOperationTimeout(
-            ILogger logger,
-            OperationCanceledException ex,
-            string methodName,
-            LogArgs payload,
-            string executionPath
-        );
-
         #endregion
 
         #region Dev Error

@@ -66,15 +66,12 @@ public partial class Remote
 
             public async Task WaitForInputIdle(CancellationToken cancellationToken)
             {
-                using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                cts.CancelAfter(TimeSpan.FromSeconds(15));
-
                 Process? process;
                 RunResponse state;
                 var idle = false;
                 do
                 {
-                    await Task.Delay(100, cts.Token);
+                    await Task.Delay(100, cancellationToken);
 
                     process = this.GetProcess();
                     state = GetState(process);
@@ -101,9 +98,6 @@ public partial class Remote
                     return state;
                 }
 
-                using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                cts.CancelAfter(TimeSpan.FromSeconds(15));
-
                 var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
                 void OnExited(object? sender, EventArgs e)
@@ -119,7 +113,7 @@ public partial class Remote
                         return this.GetState();
                     }
 
-                    using var registration = cts.Token.Register(() => tcs.TrySetCanceled());
+                    using var registration = cancellationToken.Register(() => tcs.TrySetCanceled());
 
                     return await tcs.Task
                         ? this.GetState()

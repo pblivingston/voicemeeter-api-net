@@ -233,44 +233,22 @@ public partial class Remote
 
         this.WaitForRunningStart(target, e);
 
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        cts.CancelAfter(TimeSpan.FromSeconds(15));
-
-        try
-        {
             VmVersion version;
             do
             {
-                await Task.Delay(100, cts.Token);
+            await Task.Delay(100, cancellationToken);
 
                 version = this.GetVersion_i(e);
             }
             while (!version.IsValid());
 
-            this.YieldForEngineSettle(target, e);
-            Result<Response, bool> pDirty;
-            Result<Response, bool> bDirty;
-            do
-            {
-                await Task.Delay(50, cts.Token);
-
-                pDirty = this.ParamsDirty_i(e);
-                bDirty = this.ButtonsDirty_i(e);
-            }
-            while (pDirty.IsFailure || pDirty
-                || bDirty.IsFailure || bDirty);
+        await this.WaitForSettle(target, this.ParamsDirty_i, e, cancellationToken);
 
             (var app, var state) = this.GetVoicemeeterState_i(e);
 
             this.WaitForRunningDetected(target, e, state, version, app);
 
             return (state, app, true);
-        }
-        catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
-        {
-            this.OperationTimeout(ex, e);
-            return RunResponse.Timeout;
-        }
     }
 
     private async Task<Result<RunResponse, App>> WaitForRunning(App app, string executionPath, CancellationToken cancellationToken)
@@ -280,25 +258,12 @@ public partial class Remote
 
         this.WaitForRunningStart(target, e, app: app);
 
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        cts.CancelAfter(TimeSpan.FromSeconds(15));
-
-        try
-        {
-            await this.wrapper.WaitForApplicationInputIdle(app, cts.Token);
+        await this.wrapper.WaitForApplicationInputIdle(app, cancellationToken);
 
             if (app is App.MacroButtons
                 && this.connectionState.ConnectedToVoicemeeter)
             {
-                this.YieldForEngineSettle(target, e);
-                Result<Response, bool> dirty;
-                do
-                {
-                    await Task.Delay(50, cts.Token);
-
-                    dirty = this.ButtonsDirty_i(e);
-                }
-                while (dirty.IsFailure || dirty);
+            await this.WaitForSettle(target, this.ButtonsDirty_i, e, cancellationToken);
             }
 
             var state = this.GetAppState_i(app, e);
@@ -307,11 +272,20 @@ public partial class Remote
 
             return (state, app, true);
         }
-        catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+
+    private async Task WaitForSettle(string target, Func<string, Result<Response, bool>> dirtyMethod, string executionPath, CancellationToken cancellationToken)
+    {
+        var e = Utilities.BuildPath(executionPath);
+
+        this.YieldForEngineSettle(target, e);
+        Result<Response, bool> dirty;
+        do
         {
-            this.OperationTimeout(ex, e, app: app);
-            return (RunResponse.Timeout, app, false);
+            await Task.Delay(50, cancellationToken);
+
+            dirty = dirtyMethod(e);
         }
+        while (dirty.IsFailure || dirty);
     }
 
     #endregion

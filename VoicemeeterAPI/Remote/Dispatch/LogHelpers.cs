@@ -85,21 +85,6 @@ public partial class Remote
 
     #endregion
 
-    #region Warning
-
-    private void OperationTimeout(
-        OperationCanceledException ex,
-        string executionPath,
-        App? app = null,
-        [CallerMemberName] string methodName = ""
-    )
-    {
-        var payload = LogArgs.New(this.logger, LogLevel.Warning, app: app);
-        Log.RemoteOperationTimeout(this.logger, ex, methodName, payload, executionPath);
-    }
-
-    #endregion
-
     #region Dev Error
 
     private ArgumentException CannotConvertToType<T>(
