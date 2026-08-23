@@ -62,11 +62,6 @@ public partial class Remote
             await this.WaitForEngineSettle(e, cancellationToken);
         }
 
-        if (intermediateState.ConnectedToMacroButtons)
-        {
-            await this.WaitForButtonsSettle(e, cancellationToken);
-        }
-
         (_, var currentState) = this.RefreshConnectionState_i(e);
 
         return (previousState, currentState);
@@ -322,26 +317,38 @@ public partial class Remote
         return (state, app, true);
     }
 
-    private async Task WaitForSettle(string target, Func<string, Result<Response, bool>> dirtyMethod, string executionPath, CancellationToken cancellationToken)
+    private async Task WaitForEngineSettle(string executionPath, CancellationToken cancellationToken)
     {
         var e = Utilities.BuildPath(executionPath);
 
-        this.YieldForEngineSettle(target, e);
+        this.YieldForEngineSettle(Wrapper.VmName, e);
+        Result<Response, bool> pDirty;
+        Result<Response, bool> bDirty;
+        do
+        {
+            await Task.Delay(50, cancellationToken);
+
+            pDirty = this.ParamsDirty_i(e);
+            bDirty = this.ButtonsDirty_i(e);
+        }
+        while (pDirty.IsFailure || pDirty
+            || bDirty.IsFailure || bDirty);
+    }
+
+    private async Task WaitForButtonsSettle(string executionPath, CancellationToken cancellationToken)
+    {
+        var e = Utilities.BuildPath(executionPath);
+
+        this.YieldForEngineSettle(nameof(App.MacroButtons), e);
         Result<Response, bool> dirty;
         do
         {
             await Task.Delay(50, cancellationToken);
 
-            dirty = dirtyMethod(e);
+            dirty = this.ButtonsDirty_i(e);
         }
         while (dirty.IsFailure || dirty);
     }
-
-    private async Task WaitForEngineSettle(string executionPath, CancellationToken cancellationToken)
-        => await this.WaitForSettle(Wrapper.VmName, this.ParamsDirty_i, executionPath, cancellationToken);
-
-    private async Task WaitForButtonsSettle(string executionPath, CancellationToken cancellationToken)
-        => await this.WaitForSettle(nameof(App.MacroButtons), this.ButtonsDirty_i, executionPath, cancellationToken);
 
     #endregion
 }

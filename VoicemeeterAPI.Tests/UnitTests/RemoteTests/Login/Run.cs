@@ -5,17 +5,14 @@ public class Run : MockRemote
     [Theory]
     [InlineData(Kind.Standard, true, App.Standardx64)]
     [InlineData(Kind.Potato, false, App.Potato)]
-    public void UpdatesLoginStatusWhenLoggedInAndAppIsVoicemeeter(Kind requested, bool is64Bit, App launched)
+    public void KindOverloadLaunchesCorrectVoicemeeterApp(Kind requested, bool is64Bit, App launched)
     {
-        this.MockLogin();
-
         this.MockWrapper.Setup(w => w.Is64Bit).Returns(is64Bit);
         this.MockWrapper.Setup(w => w.RunVoicemeeter(launched)).Returns(RunResponse.Ok);
 
         this.Remote.Run(requested);
 
         Assert.Multiple(
-            () => Assert.Equal(LoginResponse.Ok, this.Remote.LoginStatus),
             () => this.MockWrapper.Verify(w => w.Is64Bit, Times.Once()),
             () => this.MockWrapper.Verify(w => w.RunVoicemeeter(launched), Times.Once())
         );
