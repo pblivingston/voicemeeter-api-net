@@ -16,22 +16,17 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public int Packed { get; } = packed;
 
     // Parts
-    private int V1 => (this.Packed >> 24) & 0xFF;
-    private int V2 => (this.Packed >> 16) & 0xFF;
-    private int V3 => (this.Packed >> 8) & 0xFF;
-    private int V4 => this.Packed & 0xFF;
+    /// <inheritdoc/>
+    public int Kind => (this.Packed >> 24) & 0xFF;
+    /// <inheritdoc/>
+    public int Major => (this.Packed >> 16) & 0xFF;
+    /// <inheritdoc/>
+    public int Minor => (this.Packed >> 8) & 0xFF;
+    /// <inheritdoc/>
+    public int Patch => this.Packed & 0xFF;
 
     /// <inheritdoc/>
-    public int Kind => this.V1;
-    /// <inheritdoc/>
-    public int Major => this.V2;
-    /// <inheritdoc/>
-    public int Minor => this.V3;
-    /// <inheritdoc/>
-    public int Patch => this.V4;
-
-    /// <inheritdoc/>
-    public Kind K => (Kind)this.V1;
+    public Kind K => (Kind)this.Kind;
     /// <inheritdoc/>
     public SemVersion Semantic => new(this.Packed & SemVersion.MaxValidPacked);
 
@@ -60,25 +55,25 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     /// <inheritdoc cref="IVersion.Deconstruct{T}(out T, out int, out int, out int)"/>
     public void Deconstruct(out int kind, out int maj, out int min, out int pat)
     {
-        kind = this.V1;
-        maj = this.V2;
-        min = this.V3;
-        pat = this.V4;
+        kind = this.Kind;
+        maj = this.Major;
+        min = this.Minor;
+        pat = this.Patch;
     }
 
     /// <inheritdoc cref="IVersion.Deconstruct{T}(out T, out int, out int, out int)"/>
     public void Deconstruct(out Kind k, out int maj, out int min, out int pat)
     {
         k = this.K;
-        maj = this.V2;
-        min = this.V3;
-        pat = this.V4;
+        maj = this.Major;
+        min = this.Minor;
+        pat = this.Patch;
     }
 
     /// <inheritdoc cref="IVersion.Deconstruct{T}(out T, out SemVersion)"/>
     public void Deconstruct(out int kind, out SemVersion sem)
     {
-        kind = this.V1;
+        kind = this.Kind;
         sem = this.Semantic;
     }
 
@@ -97,9 +92,9 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     void IVersion.Deconstruct<T>(out T kind, out int maj, out int min, out int pat)
     {
         kind = this.GetKind<T>();
-        maj = this.V2;
-        min = this.V3;
-        pat = this.V4;
+        maj = this.Major;
+        min = this.Minor;
+        pat = this.Patch;
     }
 
     /// <inheritdoc/>
@@ -115,7 +110,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 
         return t switch
         {
-            _ when t == typeof(int) => (T)(object)this.V1,
+            _ when t == typeof(int) => (T)(object)this.Kind,
             _ when t == typeof(Kind) => (T)(object)this.K,
             _ => throw SupportedTypes.CreateArgumentException<T>(nameof(T), SupportedTypes.KindTypes)
         };
@@ -212,7 +207,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     #region String Representation
 
     public override string ToString()
-        => $"{this.V1}.{this.V2}.{this.V3}.{this.V4}";
+        => $"{this.Kind}.{this.Major}.{this.Minor}.{this.Patch}";
 
     public static VmVersion Parse(string s)
     {

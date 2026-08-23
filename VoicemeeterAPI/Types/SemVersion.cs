@@ -16,22 +16,19 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     public int Packed { get; } = packed;
 
     // Parts
-    private int V1 => (this.Packed >> 24) & 0xFF;
-    private int V2 => (this.Packed >> 16) & 0xFF;
-    private int V3 => (this.Packed >> 8) & 0xFF;
-    private int V4 => this.Packed & 0xFF;
+    /// <inheritdoc/>
+    int IVersion.Kind => this.Kind;
+    /// <inheritdoc cref="IVersion.Kind"/>
+    private int Kind => (this.Packed >> 24) & 0xFF;
+    /// <inheritdoc/>
+    public int Major => (this.Packed >> 16) & 0xFF;
+    /// <inheritdoc/>
+    public int Minor => (this.Packed >> 8) & 0xFF;
+    /// <inheritdoc/>
+    public int Patch => this.Packed & 0xFF;
 
     /// <inheritdoc/>
-    int IVersion.Kind => this.V1;
-    /// <inheritdoc/>
-    public int Major => this.V2;
-    /// <inheritdoc/>
-    public int Minor => this.V3;
-    /// <inheritdoc/>
-    public int Patch => this.V4;
-
-    /// <inheritdoc/>
-    Kind IVersion.K => (Kind)this.V1;
+    Kind IVersion.K => (Kind)this.Kind;
     /// <inheritdoc/>
     SemVersion IVersion.Semantic => this;
 
@@ -52,9 +49,9 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     /// <inheritdoc/>
     public void Deconstruct(out int maj, out int min, out int pat)
     {
-        maj = this.V2;
-        min = this.V3;
-        pat = this.V4;
+        maj = this.Major;
+        min = this.Minor;
+        pat = this.Patch;
     }
 
     /// <inheritdoc/>
@@ -77,7 +74,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
 
         return t switch
         {
-            _ when t == typeof(int) => (T)(object)this.V1,
+            _ when t == typeof(int) => (T)(object)this.Kind,
             _ when t == typeof(Kind) => (T)(object)((IVersion)this).K,
             _ => throw SupportedTypes.CreateArgumentException<T>(nameof(T), SupportedTypes.KindTypes)
         };
@@ -118,7 +115,7 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
     #region String Representation
 
     public override string ToString()
-        => $"{this.V2}.{this.V3}.{this.V4}";
+        => $"{this.Major}.{this.Minor}.{this.Patch}";
 
     public static SemVersion Parse(string s)
     {
