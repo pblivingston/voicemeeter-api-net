@@ -3,67 +3,81 @@ namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;
 public class IsParamsDirty : MockRemote
 {
     [Fact]
-    public void ReturnsFalseWhenResponseIsOk()
+    public void ReturnsFailureWhenVoicemeeterHasShutDownExternally()
     {
-        var kind = (int)Kind.Potato;
-        var version = 0x0301_0202;
+        var vmState = RunResponse.Hidden;
+        var vmApp = App.Potato;
+        var vmVersion = VmVersion.MaxValid;
+        var buttonsState = RunResponse.Hidden;
+        var response = Response.NoServer;
+        var expected = Result.Failure<Response, bool>(response);
 
-        this.MockLogin(kind, version);
+        this.MockLogin(vmState, vmApp, vmVersion, buttonsState);
 
-        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Ok);
+        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(response);
 
         var result = this.Remote.IsParamsDirty();
 
         Assert.Multiple(
-            () => Assert.False(result),
+            () => Assert.Equal(expected, result),
             () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Once())
         );
     }
 
     [Fact]
-    public void ReturnsTrueWhenResponseIsDirty()
+    public void ThrowsInvalidOperationExceptionWhenVoicemeeterNotRunning()
     {
-        var kind = (int)Kind.Potato;
-        var version = 0x0301_0202;
+        var buttonsState = RunResponse.Ok;
 
-        this.MockLogin(kind, version);
+        this.MockLogin(buttonsState);
 
-        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Dirty);
+        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.NoServer);
+    }
 
-        var result = this.Remote.IsParamsDirty();
+    [Fact]
+    public void ThrowsRemoteExceptionWhenAmbiguousError()
+    {
+        var vmState = RunResponse.Ok;
+        var vmApp = App.Standardx64;
+        var vmVersion = VmVersion.MinValid;
+        var buttonsState = RunResponse.Hidden;
+        var response = Response.Error;
+
+        this.MockLogin(vmState, vmApp, vmVersion, buttonsState);
+
+        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(response);
+
+        var ex = Assert.Throws<RemoteException>(() => this.Remote.IsParamsDirty());
 
         Assert.Multiple(
-            () => Assert.True(result),
+            () => Assert.Equal(response, ex.Response),
             () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Once())
         );
     }
 
     [Fact]
-    public void ThrowsExceptionRemoteWhenUnexpectedResponse()
+    public void ThrowsInvalidOperationExceptionWhenNotLoggedIn()
     {
-        var kind = (int)Kind.Potato;
-        var version = 0x0301_0202;
-
-        this.MockLogin(kind, version);
-
         this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Error);
 
-        var ex = Assert.Throws<RemoteException<Response>>(() => this.Remote.IsParamsDirty());
-
         Assert.Multiple(
-            () => Assert.Equal(Response.Error, ex.Response),
+            () => Assert.Throws<InvalidOperationException>(() => this.Remote.IsParamsDirty()),
             () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Once())
         );
     }
 
-    [Fact]
-    public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
+    [Theory]
+    [InlineData(Response.StructureMismatch)]
+    [InlineData(Response.UnknownParameter)]
+    public void ThrowsUnhandledResponseExceptionWhenUnhandledResponse(Response response)
     {
-        this.Remote.Dispose();
+        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(response);
+
+        var ex = Assert.Throws<UnhandledResponseException>(() => this.Remote.IsParamsDirty());
 
         Assert.Multiple(
-            () => Assert.Throws<ObjectDisposedException>(() => this.Remote.IsParamsDirty()),
-            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Never())
+            () => Assert.Equal(response, ex.Response),
+            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Once())
         );
     }
 }

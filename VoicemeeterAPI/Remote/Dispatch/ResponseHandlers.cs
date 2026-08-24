@@ -13,7 +13,7 @@ public partial class Remote
     private const string AmbiguousMessage = "VoicemeeterRemote operation could not be completed for an unknown reason.";
 
     /// <summary>
-    ///   Can raise <see cref="ParamsDirty"/> or <see cref="ButtonsDirty"/> - must be outside lock scope!
+    ///
     /// </summary>
     /// <param name="response"></param>
     /// <param name="executionPath"></param>
@@ -25,17 +25,11 @@ public partial class Remote
         [CallerMemberName] string methodName = ""
     )
     {
-        var pDirty = methodName is nameof(this.ParamsDirty_i);
         var payload = LogArgs.Empty;
 
         switch (response)
         {
-            case Response.Dirty when pDirty:
-                this.OnParamsDirty();
-                return (response, true, true);
-
             case Response.Dirty:
-                this.OnButtonsDirty();
                 return (response, true, true);
 
             case Response.Ok:

@@ -10,11 +10,9 @@ public partial class Remote
     /// <inheritdoc cref="IRemote.IsParamsDirty()"/>
     internal Result<Response, bool> ParamsDirty_i(string executionPath)
     {
-        Response response;
-        using (this.pDirtyLock.EnterScope())
-        {
-            response = this.wrapper.IsParametersDirty();
-        }
+        using var lk = this.pDirtyLock.EnterScope();
+
+        var response = this.wrapper.IsParametersDirty();
 
         return this.HandleDirtyResponse(response, Utilities.BuildPath(executionPath));
     }
@@ -24,7 +22,11 @@ public partial class Remote
     {
         using var scope = this.BeginCallScope();
 
-        return this.ParamsDirty_i(nameof(this.IsParamsDirty));
+        var result = this.ParamsDirty_i(nameof(this.IsParamsDirty));
+
+        this.OnParamsDirty(result);
+
+        return result;
     }
 
     #endregion

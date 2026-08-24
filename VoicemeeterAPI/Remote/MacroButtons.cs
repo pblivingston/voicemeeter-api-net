@@ -10,11 +10,9 @@ public partial class Remote
     /// <inheritdoc cref="IRemote.IsButtonsDirty()"/>
     internal Result<Response, bool> ButtonsDirty_i(string executionPath)
     {
-        Response response;
-        using (this.bDirtyLock.EnterScope())
-        {
-            response = this.wrapper.MacroButtonIsDirty();
-        }
+        using var lk = this.bDirtyLock.EnterScope();
+
+        var response = this.wrapper.MacroButtonIsDirty();
 
         return this.HandleDirtyResponse(response, Utilities.BuildPath(executionPath));
     }
@@ -24,7 +22,11 @@ public partial class Remote
     {
         using var scope = this.BeginCallScope();
 
-        return this.ButtonsDirty_i(nameof(this.IsButtonsDirty));
+        var result = this.ButtonsDirty_i(nameof(this.IsButtonsDirty));
+
+        this.OnButtonsDirty(result);
+
+        return result;
     }
 
     #endregion

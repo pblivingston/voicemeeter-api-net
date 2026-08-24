@@ -15,23 +15,19 @@ public partial class Remote
         this.ConnectionStateChanged?.Invoke(this, new(previousState, currentState));
     }
 
-    private void OnParamsDirty()
+    private void OnParamsDirty(Result<Response, bool> dirty)
+        => this.RaiseIfDirty(this.ParamsDirty, dirty);
+
+    private void OnButtonsDirty(Result<Response, bool> dirty)
+        => this.RaiseIfDirty(this.ButtonsDirty, dirty);
+
+    private void RaiseIfDirty(EventHandler? handler, Result<Response, bool> dirty)
     {
-        if (this.IsDisposed)
+        if (this.IsDisposed || dirty.IsFailure || !dirty)
         {
             return;
         }
 
-        this.ParamsDirty?.Invoke(this, EventArgs.Empty);
-    }
-
-    private void OnButtonsDirty()
-    {
-        if (this.IsDisposed)
-        {
-            return;
-        }
-
-        this.ButtonsDirty?.Invoke(this, EventArgs.Empty);
+        handler?.Invoke(this, EventArgs.Empty);
     }
 }

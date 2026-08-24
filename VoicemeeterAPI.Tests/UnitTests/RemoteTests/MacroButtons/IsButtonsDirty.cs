@@ -3,67 +3,81 @@ namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.MacroButtons;
 public class IsButtonsDirty : MockRemote
 {
     [Fact]
-    public void ReturnsFalseWhenResponseIsOk()
+    public void ReturnsFailureWhenVoicemeeterHasShutDownExternally()
     {
-        var kind = (int)Kind.Potato;
-        var version = 0x0301_0202;
+        var vmState = RunResponse.Hidden;
+        var vmApp = App.Potato;
+        var vmVersion = VmVersion.MaxValid;
+        var buttonsState = RunResponse.Hidden;
+        var response = Response.NoServer;
+        var expected = Result.Failure<Response, bool>(response);
 
-        this.MockLogin(kind, version);
+        this.MockLogin(vmState, vmApp, vmVersion, buttonsState);
 
-        this.MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Ok);
+        this.MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(response);
 
         var result = this.Remote.IsButtonsDirty();
 
         Assert.Multiple(
-            () => Assert.False(result),
+            () => Assert.Equal(expected, result),
             () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Once())
         );
     }
 
     [Fact]
-    public void ReturnsTrueWhenResponseIsDirty()
+    public void ThrowsInvalidOperationExceptionWhenVoicemeeterNotRunning()
     {
-        var kind = (int)Kind.Potato;
-        var version = 0x0301_0202;
+        var buttonsState = RunResponse.Ok;
 
-        this.MockLogin(kind, version);
+        this.MockLogin(buttonsState);
 
-        this.MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Dirty);
+        this.MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.NoServer);
+    }
 
-        var result = this.Remote.IsButtonsDirty();
+    [Fact]
+    public void ThrowsRemoteExceptionWhenAmbiguousError()
+    {
+        var vmState = RunResponse.Ok;
+        var vmApp = App.Standardx64;
+        var vmVersion = VmVersion.MinValid;
+        var buttonsState = RunResponse.Hidden;
+        var response = Response.Error;
+
+        this.MockLogin(vmState, vmApp, vmVersion, buttonsState);
+
+        this.MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(response);
+
+        var ex = Assert.Throws<RemoteException>(() => this.Remote.IsButtonsDirty());
 
         Assert.Multiple(
-            () => Assert.True(result),
+            () => Assert.Equal(response, ex.Response),
             () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Once())
         );
     }
 
     [Fact]
-    public void ThrowsExceptionRemoteWhenUnexpectedResponse()
+    public void ThrowsInvalidOperationExceptionWhenNotLoggedIn()
     {
-        var kind = (int)Kind.Potato;
-        var version = 0x0301_0202;
-
-        this.MockLogin(kind, version);
-
         this.MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Error);
 
-        var ex = Assert.Throws<RemoteException<Response>>(() => this.Remote.IsButtonsDirty());
-
         Assert.Multiple(
-            () => Assert.Equal(Response.Error, ex.Response),
+            () => Assert.Throws<InvalidOperationException>(() => this.Remote.IsButtonsDirty()),
             () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Once())
         );
     }
 
-    [Fact]
-    public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
+    [Theory]
+    [InlineData(Response.StructureMismatch)]
+    [InlineData(Response.UnknownParameter)]
+    public void ThrowsUnhandledResponseExceptionWhenUnhandledResponse(Response response)
     {
-        this.Remote.Dispose();
+        this.MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(response);
+
+        var ex = Assert.Throws<UnhandledResponseException>(() => this.Remote.IsButtonsDirty());
 
         Assert.Multiple(
-            () => Assert.Throws<ObjectDisposedException>(() => this.Remote.IsButtonsDirty()),
-            () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Never())
+            () => Assert.Equal(response, ex.Response),
+            () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Once())
         );
     }
 }
