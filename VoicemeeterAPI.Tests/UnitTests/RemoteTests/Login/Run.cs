@@ -48,7 +48,6 @@ public class Run : MockRemote
 
     [Theory]
     [InlineData(RunResponse.AlreadyShutDown)]
-    [InlineData(RunResponse.Timeout)]
     [InlineData(RunResponse.Error)]
     [InlineData(RunResponse.Hidden)]
     [InlineData(RunResponse.NotRunning)]

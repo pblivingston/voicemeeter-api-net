@@ -19,9 +19,12 @@ public partial class Remote
         ///   NotRunning<br/>
         ///   NotResponding<br/>
         ///   NotInstalled<br/>
+        ///   UnknownApp<br/>
         /// </returns>
         public RunResponse GetApplicationState(App app)
-            => this.apps[app].GetState();
+            => app.IsValid()
+            ? this.apps[app].GetState()
+            : RunResponse.UnknownApp;
 
         /// <summary>
         ///   Gets the current Voicemeeter application and its state.
@@ -43,24 +46,23 @@ public partial class Remote
         /// <param name="app"></param>
         /// <param name="force"></param>
         /// <returns>
-        ///   Error<br/>
         ///   Last App State<br/>
+        ///   UnknownApp<br/>
+        ///   Error<br/>
         /// </returns>
         /// <remarks>
         ///   If app has tray mode enabled, force will be required to shut it down.
         /// </remarks>
         public RunResponse CloseApplication(App app, bool force = false)
-            => this.apps[app].Close(force);
+            => app.IsValid()
+            ? this.apps[app].Close(force)
+            : RunResponse.UnknownApp;
 
         /// <summary>
         ///   Waits for the application to enter an idle state.
         /// </summary>
         /// <param name="app"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns>
-        ///   Error<br/>
-        ///   App State<br/>
-        /// </returns>
         public async Task WaitForApplicationInputIdle(App app, CancellationToken cancellationToken)
             => await this.apps[app].WaitForInputIdle(cancellationToken);
 

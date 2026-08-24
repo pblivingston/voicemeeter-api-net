@@ -50,7 +50,6 @@ public partial class Remote
             case RunResponse.NotRunning:
             case RunResponse.Hidden:
             case RunResponse.Error:
-            case RunResponse.Timeout:
             case RunResponse.AlreadyShutDown:
             default:
                 payload = LogArgs.New(this.logger, LogLevel.Critical, app: app);
@@ -102,7 +101,6 @@ public partial class Remote
                 throw ex2;
 
             case RunResponse.Error:
-            case RunResponse.Timeout:
             case RunResponse.AlreadyShutDown:
             default:
                 payload = LogArgs.New(this.logger, LogLevel.Critical, app: app);
@@ -115,10 +113,8 @@ public partial class Remote
     /// <summary>
     ///   Accesses <see cref="connectionState"/> - must be within <see cref="stateLock"/> scope!
     /// </summary>
-    /// <param name="response"></param>
-    /// <param name="app"></param>
+    /// <param name="result"></param>
     /// <param name="executionPath"></param>
-    /// <param name="paramName"></param>
     /// <param name="methodName"></param>
     /// <returns></returns>
     private (App, RunResponse) HandleVmStateResponse(
@@ -141,14 +137,8 @@ public partial class Remote
                 return result;
 
             case RunResponse.NotInstalled:
-                payload = LogArgs.New(this.logger, LogLevel.Error, app: app);
-                var ex1 = new AppNotInstalledException(app);
-                Log.AppCriticalState(this.logger, ex1, methodName, payload, executionPath);
-                throw ex1;
-
             case RunResponse.UnknownApp:
             case RunResponse.Error:
-            case RunResponse.Timeout:
             case RunResponse.AlreadyShutDown:
             default:
                 payload = LogArgs.New(this.logger, LogLevel.Critical, app: app);

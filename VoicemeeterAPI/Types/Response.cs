@@ -21,11 +21,7 @@ public enum RunResponse
     /// <summary>
     ///   from VoicemeeterAPI
     /// </summary>
-    AlreadyShutDown = -103,
-    /// <summary>
-    ///   from VoicemeeterAPI
-    /// </summary>
-    Timeout = -102,
+    AlreadyShutDown = -102,
     /// <summary>
     ///   from VoicemeeterAPI
     /// </summary>
