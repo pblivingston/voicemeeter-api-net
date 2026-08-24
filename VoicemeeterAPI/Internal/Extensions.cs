@@ -1,7 +1,7 @@
 // Copyright (c) 2026 PBLivingston
 // SPDX-License-Identifier: MPL-2.0
 
-namespace PBLivingston.VoicemeeterAPI;
+namespace PBLivingston.VoicemeeterAPI.Internal;
 
 #if NET6_0_OR_GREATER
 using System.Globalization;
