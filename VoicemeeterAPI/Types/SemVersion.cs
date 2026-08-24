@@ -166,14 +166,17 @@ public readonly struct SemVersion(int packed) : IVersion<SemVersion>
 
     public bool Equals(SemVersion other)
         => this.Packed == other.Packed;
+
     public override bool Equals(object? obj)
         => obj is SemVersion sem
         && this.Equals(sem);
+
     public override int GetHashCode()
         => this.Packed;
 
     public int CompareTo(SemVersion other)
         => this.Packed.CompareTo(other.Packed);
+
     int IComparable.CompareTo(object? obj)
         => obj is SemVersion sem
             ? this.CompareTo(sem)

@@ -269,14 +269,17 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     #region Equality and Ordering
     public bool Equals(VmVersion other)
         => this.Packed == other.Packed;
+
     public override bool Equals(object? obj)
         => obj is VmVersion vm
         && this.Equals(vm);
+
     public override int GetHashCode()
         => this.Packed;
 
     public int CompareTo(VmVersion other)
         => this.Packed.CompareTo(other.Packed);
+
     int IComparable.CompareTo(object? obj)
         => obj is VmVersion vm
             ? this.CompareTo(vm)

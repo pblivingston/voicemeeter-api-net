@@ -146,9 +146,11 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
 
     public bool Equals(ConnectionState other)
         => this.packed == other.packed;
+
     public override bool Equals(object? obj)
         => obj is ConnectionState other
         && this.Equals(other);
+
     public override int GetHashCode()
         => this.packed;
 
