@@ -214,7 +214,7 @@ public partial class Remote
         ConnectionState currentState;
         using (await this.stateLock.EnterScopeAsync(cancellationToken))
         {
-            if (app.IsVoicemeeter() && !this.connectionState.LoginStatus.IsLoggedIn())
+            if (app.IsVoicemeeter() && !this.connectionState.LoggedIn)
             {
                 throw this.CannotWaitForEngine(app, e);
             }

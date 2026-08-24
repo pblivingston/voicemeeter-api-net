@@ -41,7 +41,7 @@ public partial class Remote
             case Response.Ok:
                 return (response, false, true);
 
-            case Response.Error when !this.ConnectionState.LoginStatus.IsLoggedIn():
+            case Response.Error when !this.ConnectionState.LoggedIn:
                 var ex1a = new InvalidOperationException(NotLoggedInMessage);
                 Log.RemoteContractViolation(this.logger, ex1a, methodName, "Not logged in.", payload, executionPath);
                 throw ex1a;
@@ -98,7 +98,7 @@ public partial class Remote
                 Log.RemoteMethodSuccess(this.logger, LogLevel.Trace, methodName, payload, executionPath);
                 return (response, value, true);
 
-            case Response.Error when !this.ConnectionState.LoginStatus.IsLoggedIn():
+            case Response.Error when !this.ConnectionState.LoggedIn:
                 payload = LogArgs.New(this.logger, LogLevel.Error, param: param, value: value);
                 var ex1a = new InvalidOperationException(NotLoggedInMessage);
                 Log.RemoteContractViolation(this.logger, ex1a, methodName, "Not logged in.", payload, executionPath);

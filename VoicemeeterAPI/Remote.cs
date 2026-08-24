@@ -179,7 +179,7 @@ public sealed partial class Remote : IRemote
             {
                 using var lk = this.stateLock.EnterScope();
 
-                if (this.connectionState.LoginStatus.IsLoggedIn())
+                if (this.connectionState.LoggedIn)
                 {
                     this.MethodStart(methodName: nameof(Logout_i), executionPath: e);
 

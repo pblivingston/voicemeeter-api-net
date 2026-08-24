@@ -72,19 +72,18 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
     public RunResponse MacroButtonsState => (RunResponse)(this.packed & 0x3);
 
     /// <summary>
-    ///   Simplifies <see cref="LoginStatus"/> checks.
+    ///   `true` if logged in to VoicemeeterRemote.
     /// </summary>
-    /// <remarks>
+    public bool LoggedIn => this.LoginStatus.IsLoggedIn();
+
+    /// <summary>
     ///   `true` if logged in to VoicemeeterRemote and Voicemeeter is running.
-    /// </remarks>
+    /// </summary>
     public bool ConnectedToVoicemeeter => this.LoginStatus == LoginResponse.Ok;
 
     /// <summary>
-    ///   Simplifies MacroButtons checks.
-    /// </summary>
-    /// <remarks>
     ///   `true` if MacroButtons is responding and reachable via Voicemeeter.
-    /// </remarks>
+    /// </summary>
     public bool ConnectedToMacroButtons => this.ConnectedToVoicemeeter && this.MacroButtonsState.IsResponding();
 
     public ConnectionState()
