@@ -267,6 +267,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     #endregion
 
     #region Equality and Ordering
+
     public bool Equals(VmVersion other)
         => this.Packed == other.Packed;
 
