@@ -25,13 +25,14 @@ public class IsParamsDirty : MockRemote
     }
 
     [Fact]
-    public void ThrowsInvalidOperationExceptionWhenVoicemeeterNotRunning()
+    public void ThrowsInvalidOperationExceptionWhenNotLoggedIn()
     {
-        var buttonsState = RunResponse.Ok;
+        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Error);
 
-        this.MockLogin(buttonsState);
-
-        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.NoServer);
+        Assert.Multiple(
+            () => Assert.Throws<InvalidOperationException>(() => this.Remote.IsParamsDirty()),
+            () => this.MockWrapper.Verify(w => w.IsParametersDirty(), Times.Once())
+        );
     }
 
     [Fact]
@@ -56,9 +57,13 @@ public class IsParamsDirty : MockRemote
     }
 
     [Fact]
-    public void ThrowsInvalidOperationExceptionWhenNotLoggedIn()
+    public void ThrowsInvalidOperationExceptionWhenVoicemeeterNotRunning()
     {
-        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.Error);
+        var buttonsState = RunResponse.Ok;
+
+        this.MockLogin(buttonsState);
+
+        this.MockWrapper.Setup(w => w.IsParametersDirty()).Returns(Response.NoServer);
 
         Assert.Multiple(
             () => Assert.Throws<InvalidOperationException>(() => this.Remote.IsParamsDirty()),

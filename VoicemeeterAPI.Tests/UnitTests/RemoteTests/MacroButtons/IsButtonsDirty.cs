@@ -25,13 +25,14 @@ public class IsButtonsDirty : MockRemote
     }
 
     [Fact]
-    public void ThrowsInvalidOperationExceptionWhenVoicemeeterNotRunning()
+    public void ThrowsInvalidOperationExceptionWhenNotLoggedIn()
     {
-        var buttonsState = RunResponse.Ok;
+        this.MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Error);
 
-        this.MockLogin(buttonsState);
-
-        this.MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.NoServer);
+        Assert.Multiple(
+            () => Assert.Throws<InvalidOperationException>(() => this.Remote.IsButtonsDirty()),
+            () => this.MockWrapper.Verify(w => w.MacroButtonIsDirty(), Times.Once())
+        );
     }
 
     [Fact]
@@ -56,9 +57,13 @@ public class IsButtonsDirty : MockRemote
     }
 
     [Fact]
-    public void ThrowsInvalidOperationExceptionWhenNotLoggedIn()
+    public void ThrowsInvalidOperationExceptionWhenVoicemeeterNotRunning()
     {
-        this.MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.Error);
+        var buttonsState = RunResponse.Ok;
+
+        this.MockLogin(buttonsState);
+
+        this.MockWrapper.Setup(w => w.MacroButtonIsDirty()).Returns(Response.NoServer);
 
         Assert.Multiple(
             () => Assert.Throws<InvalidOperationException>(() => this.Remote.IsButtonsDirty()),
