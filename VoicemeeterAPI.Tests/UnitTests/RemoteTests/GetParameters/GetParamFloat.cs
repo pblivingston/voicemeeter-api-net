@@ -3,152 +3,105 @@ namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.RemoteTests.GetParameters;
 public class GetParamFloat : MockRemote
 {
     [Fact]
-    public void ReturnsValueWhenResponseOk()
+    public void ReturnsFailureWhenVoicemeeterHasShutDownExternally()
     {
-        var kind = (int)Kind.Potato;
-        var version = 0x0301_0202;
+        var vmState = RunResponse.Hidden;
+        var vmApp = App.Potato;
+        var vmVersion = VmVersion.MaxValid;
+        var buttonsState = RunResponse.Hidden;
+        var response = Response.NoServer;
         var param = "Mock.Param";
-        var value = 0.75f;
+        var expected = Result.Failure<Response, float>(response);
 
-        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((Response.Ok, value));
+        this.MockLogin(vmState, vmApp, vmVersion, buttonsState);
 
-        this.MockLogin(kind, version);
+        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((response, default));
 
         var result = this.Remote.GetParamFloat(param);
 
         Assert.Multiple(
-            () => Assert.Equal(value, result),
-            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Once())
-        );
-    }
-
-    [Theory]
-    [InlineData(Response.Error)]
-    [InlineData(Response.UnknownParameter)]
-    [InlineData(Response.StructureMismatch)]
-    public void ThrowsExceptionGetParamWhenResponseNotOk(Response response)
-    {
-        var kind = (int)Kind.Potato;
-        var version = 0x0301_0202;
-        var param = "Mock.Param";
-        var value = 0.75f;
-
-        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((response, value));
-
-        this.MockLogin(kind, version);
-
-        var ex = Assert.Throws<GetParamException<float>>(() => this.Remote.GetParamFloat(param));
-
-        Assert.Multiple(
-            () => Assert.Equal(response, ex.Response),
-            () => Assert.Equal(param, ex.VmParam),
-            () => Assert.Equal(value, ex.ReturnedValue),
-            () => Assert.Equal(typeof(float), ex.ExpectedType),
+            () => Assert.Equal(expected, result),
             () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Once())
         );
     }
 
     [Fact]
-    public void ThrowsExceptionObjectDisposedWhenRemoteDisposed()
+    public void ThrowsInvalidOperationExceptionWhenNotLoggedIn()
     {
         var param = "Mock.Param";
 
-        this.Remote.Dispose();
+        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((Response.Error, default));
 
         Assert.Multiple(
-            () => Assert.Throws<ObjectDisposedException>(() => this.Remote.GetParamFloat(param)),
-            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Never())
+            () => Assert.Throws<InvalidOperationException>(() => this.Remote.GetParamFloat(param)),
+            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Once())
         );
     }
 
-    [Theory]
-    [InlineData(0.0f, 0)]
-    [InlineData(42.0f, 42)]
-    [InlineData(100.0f, 100)]
-    public void IntReturnsValueWhenValueWholeNumberNotNegative(float value, int expected)
+    [Fact]
+    public void ThrowsRemoteExceptionWhenAmbiguousError()
     {
-        var kind = (int)Kind.Potato;
-        var version = 0x0301_0202;
-        var param = "Mock.IntParam";
+        var vmState = RunResponse.Ok;
+        var vmApp = App.Standardx64;
+        var vmVersion = VmVersion.MinValid;
+        var buttonsState = RunResponse.Hidden;
+        var response = Response.Error;
+        var param = "Mock.Param";
 
-        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((Response.Ok, value));
+        this.MockLogin(vmState, vmApp, vmVersion, buttonsState);
 
-        this.MockLogin(kind, version);
+        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((response, default));
 
-        var result = this.Remote.GetParamInt(param);
+        var ex = Assert.Throws<RemoteException>(() => this.Remote.GetParamFloat(param));
 
         Assert.Multiple(
-            () => Assert.Equal(expected, result),
+            () => Assert.Equal(response, ex.Response),
+            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Once())
+        );
+    }
+
+    [Fact]
+    public void ThrowsInvalidOperationExceptionWhenVoicemeeterNotRunning()
+    {
+        var buttonsState = RunResponse.Ok;
+        var param = "Mock.Param";
+
+        this.MockLogin(buttonsState);
+
+        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((Response.NoServer, default));
+
+        Assert.Multiple(
+            () => Assert.Throws<InvalidOperationException>(() => this.Remote.GetParamFloat(param)),
+            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Once())
+        );
+    }
+
+    [Fact]
+    public void ThrowsArgumentExceptionWhenUnknownParameter()
+    {
+        var param = "Mock.Param";
+
+        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((Response.UnknownParameter, default));
+
+        Assert.Multiple(
+            () => Assert.Throws<ArgumentException>(() => this.Remote.GetParamFloat(param)),
             () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Once())
         );
     }
 
     [Theory]
-    [InlineData(42.5f)]
-    [InlineData(-42.0f)]
-    public void IntThrowsExceptionGetParamWhenValueNotWholeNumberNegative(float value)
+    [InlineData(Response.StructureMismatch)]
+    [InlineData(Response.Dirty)]
+    public void ThrowsUnhandledResponseExceptionWhenUnhandledResponse(Response response)
     {
-        var kind = (int)Kind.Potato;
-        var version = 0x0301_0202;
-        var param = "Mock.IntParam";
+        var param = "Mock.Param";
 
-        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((Response.Ok, value));
+        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((response, default));
 
-        this.MockLogin(kind, version);
-
-        var ex = Assert.Throws<GetParamException<float>>(() => this.Remote.GetParamInt(param));
+        var ex = Assert.Throws<UnhandledResponseException>(() => this.Remote.GetParamFloat(param));
 
         Assert.Multiple(
-            () => Assert.Equal(Response.TypeMismatch, ex.Response),
-            () => Assert.Equal(param, ex.VmParam),
-            () => Assert.Equal(value, ex.ReturnedValue),
-            () => Assert.Equal(typeof(int), ex.ExpectedType),
-            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Once())
-        );
-    }
-
-    [Theory]
-    [InlineData(0.0f, false)]
-    [InlineData(1.0f, true)]
-    public void BoolReturnsValueWhenValueZeroOrOne(float value, bool expected)
-    {
-        var kind = (int)Kind.Potato;
-        var version = 0x0301_0202;
-        var param = "Mock.BoolParam";
-
-        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((Response.Ok, value));
-
-        this.MockLogin(kind, version);
-
-        var result = this.Remote.GetParamBool(param);
-
-        Assert.Multiple(
-            () => Assert.Equal(expected, result),
-            () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Once())
-        );
-    }
-
-    [Theory]
-    [InlineData(-1.0f)]
-    [InlineData(2.0f)]
-    [InlineData(0.5f)]
-    public void BoolThrowsExceptionGetParamWhenValueNotZeroOrOne(float value)
-    {
-        var kind = (int)Kind.Potato;
-        var version = 0x0301_0202;
-        var param = "Mock.BoolParam";
-
-        this.MockWrapper.Setup(w => w.GetParameter_Float(param)).Returns((Response.Ok, value));
-
-        this.MockLogin(kind, version);
-
-        var ex = Assert.Throws<GetParamException<float>>(() => this.Remote.GetParamBool(param));
-
-        Assert.Multiple(
-            () => Assert.Equal(Response.TypeMismatch, ex.Response),
-            () => Assert.Equal(param, ex.VmParam),
-            () => Assert.Equal(value, ex.ReturnedValue),
-            () => Assert.Equal(typeof(bool), ex.ExpectedType),
+            () => Assert.Equal(response, ex.Response),
             () => this.MockWrapper.Verify(w => w.GetParameter_Float(param), Times.Once())
         );
     }
