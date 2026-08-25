@@ -30,10 +30,10 @@ public partial class Remote
         switch (response)
         {
             case Response.Dirty:
-                return (response, true, true);
+                return (response, true);
 
             case Response.Ok:
-                return (response, false, true);
+                return (response, false);
 
             case Response.Error when !this.ConnectionState.LoggedIn:
                 var ex1a = new InvalidOperationException(NotLoggedInMessage);
@@ -90,7 +90,7 @@ public partial class Remote
             case Response.Ok:
                 payload = LogArgs.New(this.logger, LogLevel.Trace, param: param, value: value);
                 Log.RemoteMethodSuccess(this.logger, LogLevel.Trace, methodName, payload, executionPath);
-                return (response, value, true);
+                return (response, value);
 
             case Response.Error when !this.ConnectionState.LoggedIn:
                 payload = LogArgs.New(this.logger, LogLevel.Error, param: param, value: value);
@@ -99,14 +99,6 @@ public partial class Remote
                 throw ex1a;
 
             case Response.Error:
-            // I'm not sure what structure mismatch (-5) actually indicates as I haven't seen it yet.
-            // I've currently only interacted with the dll through existing wrappers, so it may be fully accounted for already.
-            // Calling VBVMR_GetParameterFloat with a string parameter returns -1: Response.Error and
-            // VoicemeeterRemote is perfectly happy to write float values to the string buffer, so calling VBVMR_GetParameterStringA
-            // or VBVMR_GetParameterStringW with "Bus[2].Gain", "Strip[3].Mute", etc simply returns a string representation of the value.
-            // Possibly returned when the pointer passed to receive the value doesn't match the expected type,
-            // which shouldn't be encountered here unless the underlying wrapper or the dll itself has changed or is broken.
-            case Response.StructureMismatch:
                 payload = LogArgs.New(this.logger, LogLevel.Error, param: param, value: value);
                 var ex1b = new RemoteException(AmbiguousMessage, response, this.ConnectionState);
                 Log.RemoteMethodError(this.logger, ex1b, methodName, payload, executionPath);
@@ -130,6 +122,14 @@ public partial class Remote
                 throw ex3;
 
             case Response.Dirty:
+            // I'm not sure what structure mismatch (-5) actually indicates as I haven't seen it yet.
+            // I've currently only interacted with the dll through existing wrappers, so it may be fully accounted for already.
+            // Calling VBVMR_GetParameterFloat with a string parameter returns -1: Response.Error and
+            // VoicemeeterRemote is perfectly happy to write float values to the string buffer, so calling VBVMR_GetParameterStringA
+            // or VBVMR_GetParameterStringW with "Bus[2].Gain", "Strip[3].Mute", etc simply returns a string representation of the value.
+            // Possibly returned when the pointer passed to receive the value doesn't match the expected type,
+            // which shouldn't be encountered here unless the underlying wrapper or the dll itself has changed or is broken.
+            case Response.StructureMismatch:
             default:
                 payload = LogArgs.New(this.logger, LogLevel.Critical, param: param, value: value);
                 var ex = new UnhandledResponseException(response, this.ConnectionState);
