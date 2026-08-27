@@ -6,12 +6,12 @@ public class Login : MockRemote
     [InlineData(LoginResponse.Ok, RunResponse.Ok, App.Standard, 0x0102_0304, RunResponse.NotResponding)]
     [InlineData(LoginResponse.Ok, RunResponse.Hidden, App.Potatox64, 0x0304_0506, RunResponse.NotRunning)]
     [InlineData(LoginResponse.VoicemeeterNotRunning, RunResponse.NotRunning, App.None, 0, RunResponse.Hidden)]
-    [InlineData(LoginResponse.VoicemeeterNotRunning, RunResponse.NotResponding, App.Banana, 0x0203_0405, RunResponse.Ok)]
+    [InlineData(LoginResponse.VoicemeeterNotRunning, RunResponse.NotResponding, App.Banana, 0, RunResponse.Ok)]
     public void UpdatesConnectionStateWhenAllConditionsMet(LoginResponse loginStatus, RunResponse vmState, App vmApp, int vmPacked, RunResponse buttonsState)
     {
         var vmVersion = (VmVersion)vmPacked;
         var expectedState = new ConnectionState(loginStatus, vmState, vmApp, vmVersion, buttonsState);
-        var response = vmApp is App.None
+        var response = vmVersion == default
             ? Response.NoServer
             : Response.Ok;
 

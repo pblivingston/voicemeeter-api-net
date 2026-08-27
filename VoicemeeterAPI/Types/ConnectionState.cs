@@ -64,7 +64,9 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
     /// <summary>
     ///   The running Voicemeeter version.
     /// </summary>
-    public VmVersion VoicemeeterVersion => (VmVersion)((this.packed >> 2) & 0x3FFFFFF);
+    public VmVersion VoicemeeterVersion => vmState is RunResponse.NotResponding
+        ? default
+        : (VmVersion)((this.packed >> 2) & 0x3FFFFFF);
 
     /// <summary>
     ///   The state of the MacroButtons application.
@@ -104,9 +106,10 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
             throw new ArgumentException($"LoginStatus '{loginStatus}' does not match VoicemeeterState '{vmState}'.");
         }
 
-        if (vmApp.ToKind() != vmVersion.K)
+        if (!((vmState is RunResponse.NotResponding && vmVersion == default)
+            || (vmApp.ToKind() == vmVersion.K)))
         {
-            throw new ArgumentException($"Voicemeeter app '{vmApp}' does not match Voicemeeter version '{vmVersion}'.");
+            throw new ArgumentException($"Voicemeeter app '{vmApp}' and state '{vmState}' do not match Voicemeeter version '{vmVersion}'.");
         }
 
         return unchecked(
@@ -123,7 +126,9 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
             // 0: 32 bit app
             // 1: 64 bit app
             ((vmApp < App.Standardx64 ? 0 : 1) << 28) |
-            ((int)vmVersion << 2) |
+            (vmState is RunResponse.NotResponding
+                ? ((int)vmApp.ToKind() << 26)
+                : ((int)vmVersion << 2)) |
             ((int)buttonsState)
         );
     }

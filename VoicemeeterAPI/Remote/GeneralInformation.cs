@@ -181,18 +181,18 @@ public partial class Remote
         App vmApp;
         VmVersion vmVersion;
         RunResponse mbState;
-        if (loginStatus >= LoginResponse.LoggedOut)
+        if (loginStatus.IsLoggedIn())
+        {
+            (vmApp, vmState) = this.GetVoicemeeterState_i(e);
+            vmVersion = this.GetVersion_i(e);
+            mbState = this.GetAppState_i(App.MacroButtons, e);
+        }
+        else
         {
             vmApp = previousState.VoicemeeterApp;
             vmState = previousState.VoicemeeterState;
             vmVersion = previousState.VoicemeeterVersion;
             mbState = previousState.MacroButtonsState;
-        }
-        else
-        {
-            (vmApp, vmState) = this.GetVoicemeeterState_i(e);
-            vmVersion = this.GetVersion_i(e);
-            mbState = this.GetAppState_i(App.MacroButtons, e);
         }
 
         var currentState = this.HandleConnectionState(loginStatus, vmState, vmApp, vmVersion, mbState, e);

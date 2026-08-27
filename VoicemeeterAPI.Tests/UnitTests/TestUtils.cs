@@ -129,7 +129,7 @@ public abstract class MockRemote : IDisposable
     /// </remarks>
     private void MockLogin_p(LoginResponse loginStatus, RunResponse vmState, App vmApp, VmVersion vmVersion, RunResponse buttonsState)
     {
-        var response = vmApp is App.None
+        var response = vmVersion == default
             ? Response.NoServer
             : Response.Ok;
 
