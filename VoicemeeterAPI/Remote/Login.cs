@@ -292,7 +292,7 @@ public partial class Remote
 
         this.WaitForRunningDetected(target, e, state, version, app);
 
-        return (state, app, true);
+        return (state, app);
     }
 
     private async Task<Result<RunResponse, App>> WaitForRunning(App app, string executionPath, CancellationToken cancellationToken)
@@ -314,7 +314,7 @@ public partial class Remote
 
         this.WaitForRunningDetected(target, e, state, app: app);
 
-        return (state, app, true);
+        return (state, app);
     }
 
     private async Task WaitForEngineSettle(string executionPath, CancellationToken cancellationToken)
