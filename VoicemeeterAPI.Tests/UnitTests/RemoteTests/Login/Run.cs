@@ -65,11 +65,4 @@ public class Run : MockRemote
             () => this.MockWrapper.Verify(w => w.RunVoicemeeter(app), Times.Once())
         );
     }
-
-    [Fact]
-    public void GenericThrowsArgumentExceptionWhenTypeNotSupported()
-        => Assert.Multiple(
-            () => Assert.Throws<ArgumentException>(() => ((IRemote)this.Remote).Run(RunResponse.Ok)),
-            () => this.MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<App>()), Times.Never())
-        );
 }

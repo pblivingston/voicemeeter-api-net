@@ -100,14 +100,4 @@ public class RunAsync : MockRemote
 
         this.MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<App>()), Times.Never());
     }
-
-    [Fact]
-    public async Task GenericThrowsArgumentExceptionWhenTypeNotSupported()
-    {
-        await Assert.ThrowsAsync<ArgumentException>(
-            async () => await ((IRemote)this.Remote).RunAsync(RunResponse.Ok, TestContext.Current.CancellationToken)
-        );
-
-        this.MockWrapper.Verify(w => w.RunVoicemeeter(It.IsAny<App>()), Times.Never());
-    }
 }

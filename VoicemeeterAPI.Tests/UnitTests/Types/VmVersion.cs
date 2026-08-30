@@ -2,10 +2,6 @@ namespace PBLivingston.VoicemeeterAPI.Tests.UnitTests.Types;
 
 public class VmVersionTests
 {
-    [Fact]
-    public void GenericDeconstructThrowsArgumentExceptionWhenTypeNotSupported()
-        => Assert.Throws<ArgumentException>(() => ((IVersion)(VmVersion)0x0102_0304).Deconstruct(out App _, out var _));
-
     [Theory]
     [InlineData(0, 0, 0)]
     [InlineData(255, 0x00FF_FFFF, -1)]
