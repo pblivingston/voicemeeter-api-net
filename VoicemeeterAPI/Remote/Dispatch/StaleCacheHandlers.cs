@@ -184,7 +184,7 @@ public partial class Remote
     /// <returns>
     ///   Previously cached state
     /// </returns>
-    private void HandleStaleCache(
+    private void UpdateStaleCache(
         ConnectionState currentState,
         string executionPath,
         [CallerMemberName] string methodName = ""

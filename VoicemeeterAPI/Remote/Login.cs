@@ -7,6 +7,7 @@ public partial class Remote
 {
     #region Login
 
+    /// <inheritdoc cref="IRemote.Login()"/>
     internal (ConnectionState previousState, ConnectionState currentState) Login_i(string executionPath)
     {
         var e = Utilities.BuildPath(executionPath);
@@ -51,6 +52,7 @@ public partial class Remote
 
     #region LoginAsync
 
+    /// <inheritdoc cref="IRemote.LoginAsync(CancellationToken)"/>
     internal async Task<(ConnectionState previousState, ConnectionState currentState)> LoginAsync_i(string executionPath, CancellationToken cancellationToken)
     {
         var e = Utilities.BuildPath(executionPath);
@@ -67,6 +69,7 @@ public partial class Remote
         return (previousState, currentState);
     }
 
+    /// <inheritdoc/>
     public async Task<ConnectionState> LoginAsync(CancellationToken cancellationToken = default)
     {
         var e = nameof(this.LoginAsync);

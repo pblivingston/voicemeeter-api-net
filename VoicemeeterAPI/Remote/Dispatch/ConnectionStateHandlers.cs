@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 public partial class Remote
 {
-    private ConnectionState HandleConnectionState(
+    private ConnectionState CreateConnectionState(
         LoginResponse login,
         RunResponse vmState,
         App vmApp,

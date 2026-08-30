@@ -60,6 +60,8 @@ public interface IRemote : IDisposable
     /// <inheritdoc cref="IRemote" path="/example"/>
     public ConnectionState Login();
 
+    public Task<ConnectionState> LoginAsync(CancellationToken cancellationToken = default);
+
     /// <summary>
     ///   Closes communication pipe with VoicemeeterRemote.
     /// </summary>

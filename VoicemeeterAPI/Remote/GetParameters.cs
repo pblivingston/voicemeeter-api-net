@@ -76,6 +76,7 @@ public partial class Remote
         return (result.Response, value);
     }
 
+    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
     public Result<Response, int> GetParamInt(string param)
     {
         using var scope = this.BeginCallScope();
@@ -106,6 +107,7 @@ public partial class Remote
         return (result.Response, v == 1);
     }
 
+    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
     public Result<Response, bool> GetParamBool(string param)
     {
         using var scope = this.BeginCallScope();

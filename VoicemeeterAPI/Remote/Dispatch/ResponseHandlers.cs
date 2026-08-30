@@ -9,7 +9,9 @@ using Microsoft.Extensions.Logging;
 public partial class Remote
 {
     private const string NotLoggedInMessage = "Operation cannot be performed while not logged in to VoicemeeterRemote.";
+    private const string NotLoggedInReason = "Not logged in.";
     private const string NotConnectedMessage = "Operation cannot be performed while Voicemeeter is not running.";
+    private const string NotConnectedReason = "Voicemeeter is not running.";
     private const string AmbiguousMessage = "VoicemeeterRemote operation could not be completed for an unknown reason.";
 
     /// <summary>
@@ -37,7 +39,7 @@ public partial class Remote
 
             case Response.Error when !this.ConnectionState.LoggedIn:
                 var ex1a = new InvalidOperationException(NotLoggedInMessage);
-                Log.RemoteContractViolation(this.logger, ex1a, methodName, "Not logged in.", payload, executionPath);
+                Log.RemoteContractViolation(this.logger, ex1a, methodName, NotLoggedInReason, payload, executionPath);
                 throw ex1a;
 
             case Response.Error:
@@ -47,11 +49,11 @@ public partial class Remote
 
             case Response.NoServer when !this.ConnectionState.ConnectedToVoicemeeter:
                 var ex2a = new InvalidOperationException(NotConnectedMessage);
-                Log.RemoteContractViolation(this.logger, ex2a, methodName, "Voicemeeter is not running.", payload, executionPath);
+                Log.RemoteContractViolation(this.logger, ex2a, methodName, NotConnectedReason, payload, executionPath);
                 throw ex2a;
 
             case Response.NoServer:
-                Log.RemoteLostConnection(this.logger, methodName, "Voicemeeter", payload, executionPath);
+                Log.RemoteLostConnection(this.logger, methodName, Wrapper.VmName, payload, executionPath);
                 return response;
 
             case Response.UnknownParameter:
@@ -79,7 +81,7 @@ public partial class Remote
         string param,
         T value,
         string executionPath,
-        string paramName = "param",
+        [CallerArgumentExpression(nameof(param))] string paramName = "",
         [CallerMemberName] string methodName = ""
     )
     {
@@ -95,7 +97,7 @@ public partial class Remote
             case Response.Error when !this.ConnectionState.LoggedIn:
                 payload = LogArgs.New(this.logger, LogLevel.Error, param: param, value: value);
                 var ex1a = new InvalidOperationException(NotLoggedInMessage);
-                Log.RemoteContractViolation(this.logger, ex1a, methodName, "Not logged in.", payload, executionPath);
+                Log.RemoteContractViolation(this.logger, ex1a, methodName, NotLoggedInReason, payload, executionPath);
                 throw ex1a;
 
             case Response.Error:
@@ -107,12 +109,12 @@ public partial class Remote
             case Response.NoServer when !this.ConnectionState.ConnectedToVoicemeeter:
                 payload = LogArgs.New(this.logger, LogLevel.Error, param: param, value: value);
                 var ex2a = new InvalidOperationException(NotConnectedMessage);
-                Log.RemoteContractViolation(this.logger, ex2a, methodName, "Voicemeeter is not running.", payload, executionPath);
+                Log.RemoteContractViolation(this.logger, ex2a, methodName, NotConnectedReason, payload, executionPath);
                 throw ex2a;
 
             case Response.NoServer:
                 payload = LogArgs.New(this.logger, LogLevel.Warning, param: param, value: value);
-                Log.RemoteLostConnection(this.logger, methodName, "Voicemeeter", payload, executionPath);
+                Log.RemoteLostConnection(this.logger, methodName, Wrapper.VmName, payload, executionPath);
                 return response;
 
             case Response.UnknownParameter:
@@ -204,7 +206,7 @@ public partial class Remote
             case Response.Error:
                 payload = LogArgs.New(this.logger, LogLevel.Error, kind: kind);
                 var ex1 = new InvalidOperationException(NotLoggedInMessage);
-                Log.RemoteContractViolation(this.logger, ex1, methodName, "Not logged in.", payload, executionPath);
+                Log.RemoteContractViolation(this.logger, ex1, methodName, NotLoggedInReason, payload, executionPath);
                 throw ex1;
 
             case Response.NoServer:
@@ -250,7 +252,7 @@ public partial class Remote
             case Response.Error:
                 payload = LogArgs.New(this.logger, LogLevel.Error, version: version);
                 var ex1 = new InvalidOperationException(NotLoggedInMessage);
-                Log.RemoteContractViolation(this.logger, ex1, methodName, "Not logged in.", payload, executionPath);
+                Log.RemoteContractViolation(this.logger, ex1, methodName, NotLoggedInReason, payload, executionPath);
                 throw ex1;
 
             case Response.NoServer:

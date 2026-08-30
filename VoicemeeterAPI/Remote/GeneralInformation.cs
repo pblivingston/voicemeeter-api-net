@@ -195,8 +195,8 @@ public partial class Remote
             mbState = previousState.MacroButtonsState;
         }
 
-        var currentState = this.HandleConnectionState(loginStatus, vmState, vmApp, vmVersion, mbState, e);
-        this.HandleStaleCache(currentState, e);
+        var currentState = this.CreateConnectionState(loginStatus, vmState, vmApp, vmVersion, mbState, e);
+        this.UpdateStaleCache(currentState, e);
 
         return (previousState, currentState);
     }

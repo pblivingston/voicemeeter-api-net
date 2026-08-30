@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 
 public partial class Remote
 {
+    private static string UnknownAppMessage(App app) => $"'{app}' is not a valid VB-Audio application.";
+
     /// <summary>
     ///   Accesses <see cref="connectionState"/> - must be within <see cref="stateLock"/> scope!
     /// </summary>
@@ -21,7 +23,7 @@ public partial class Remote
         RunResponse response,
         App app,
         string executionPath,
-        string paramName = "app",
+        [CallerArgumentExpression(nameof(app))] string paramName = "",
         [CallerMemberName] string methodName = ""
     )
     {
@@ -42,7 +44,7 @@ public partial class Remote
 
             case RunResponse.UnknownApp:
                 payload = LogArgs.New(this.logger, LogLevel.Error, app: app);
-                var ex2 = new ArgumentException($"'{app}' is not a valid VB-Audio application.", paramName);
+                var ex2 = new ArgumentException(UnknownAppMessage(app), paramName);
                 Log.RemoteInvalidArgument(this.logger, ex2, methodName, payload, executionPath);
                 throw ex2;
 
@@ -72,7 +74,7 @@ public partial class Remote
         RunResponse response,
         App app,
         string executionPath,
-        string paramName = "app",
+        [CallerArgumentExpression(nameof(app))] string paramName = "",
         [CallerMemberName] string methodName = ""
     )
     {
@@ -96,7 +98,7 @@ public partial class Remote
 
             case RunResponse.UnknownApp:
                 payload = LogArgs.New(this.logger, LogLevel.Error, app: app);
-                var ex2 = new ArgumentException($"'{app}' is not a valid VB-Audio application.", paramName);
+                var ex2 = new ArgumentException(UnknownAppMessage(app), paramName);
                 Log.RemoteInvalidArgument(this.logger, ex2, methodName, payload, executionPath);
                 throw ex2;
 
