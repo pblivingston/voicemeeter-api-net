@@ -64,7 +64,7 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
     /// <summary>
     ///   The running Voicemeeter version.
     /// </summary>
-    public VmVersion VoicemeeterVersion => vmState is RunResponse.NotResponding
+    public VmVersion VoicemeeterVersion => this.VoicemeeterState is RunResponse.NotResponding
         ? default
         : (VmVersion)((this.packed >> 2) & 0x3FFFFFF);
 
