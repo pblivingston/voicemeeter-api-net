@@ -52,7 +52,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
 
     #region Deconstructors
 
-    /// <inheritdoc cref="IVersion.Deconstruct{T}(out T, out int, out int, out int)"/>
+    /// <inheritdoc/>
     public void Deconstruct(out int kind, out int maj, out int min, out int pat)
     {
         kind = this.Kind;
@@ -61,60 +61,32 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
         pat = this.Patch;
     }
 
-    /// <inheritdoc cref="IVersion.Deconstruct{T}(out T, out int, out int, out int)"/>
-    public void Deconstruct(out Kind k, out int maj, out int min, out int pat)
+    /// <inheritdoc/>
+    public void Deconstruct(out Kind kind, out int maj, out int min, out int pat)
     {
-        k = this.K;
+        kind = this.K;
         maj = this.Major;
         min = this.Minor;
         pat = this.Patch;
     }
 
-    /// <inheritdoc cref="IVersion.Deconstruct{T}(out T, out SemVersion)"/>
+    /// <inheritdoc/>
     public void Deconstruct(out int kind, out SemVersion sem)
     {
         kind = this.Kind;
         sem = this.Semantic;
     }
 
-    /// <inheritdoc cref="IVersion.Deconstruct{T}(out T, out SemVersion)"/>
-    public void Deconstruct(out Kind k, out SemVersion sem)
+    /// <inheritdoc/>
+    public void Deconstruct(out Kind kind, out SemVersion sem)
     {
-        k = this.K;
+        kind = this.K;
         sem = this.Semantic;
     }
 
     /// <inheritdoc/>
     void IVersion.Deconstruct(out int maj, out int min, out int pat)
         => this.Deconstruct(out int _, out maj, out min, out pat);
-
-    /// <inheritdoc/>
-    void IVersion.Deconstruct<T>(out T kind, out int maj, out int min, out int pat)
-    {
-        kind = this.GetKind<T>();
-        maj = this.Major;
-        min = this.Minor;
-        pat = this.Patch;
-    }
-
-    /// <inheritdoc/>
-    void IVersion.Deconstruct<T>(out T kind, out SemVersion sem)
-    {
-        kind = this.GetKind<T>();
-        sem = this.Semantic;
-    }
-
-    private T GetKind<T>()
-    {
-        var t = typeof(T);
-
-        return t switch
-        {
-            _ when t == typeof(int) => (T)(object)this.Kind,
-            _ when t == typeof(Kind) => (T)(object)this.K,
-            _ => throw SupportedTypes.CreateArgumentException<T>(nameof(T), SupportedTypes.KindTypes)
-        };
-    }
 
     #endregion
 

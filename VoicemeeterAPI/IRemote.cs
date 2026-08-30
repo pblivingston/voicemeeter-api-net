@@ -113,8 +113,9 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    public void Run<T>(T app)
-        where T : struct, Enum;
+    public void Run(App app);
+
+    public void Run(Kind kind);
 
     /// <summary>
     ///   Runs the specified <see cref="App"/> and waits for it to start. If the <see cref="App"/> is Voicemeeter, confirms it is reachable. Waits up to 15 seconds.
@@ -128,8 +129,9 @@ public interface IRemote : IDisposable
     ///   Throws if the <see cref="App"/> is already running but not responding, the API call returns an error, or waiting for <see cref="App"/> is cancelled or times out.
     /// </exception>
     /// <inheritdoc cref="Run{T}(T)"/>
-    public Task<Result<RunResponse, App>> RunAsync<T>(T app, CancellationToken cancellationToken = default)
-        where T : struct, Enum;
+    public Task<Result<RunResponse, App>> RunAsync(App app, CancellationToken cancellationToken = default);
+
+    public Task<Result<RunResponse, App>> RunAsync(Kind kind, CancellationToken cancellationToken = default);
 
     #endregion
 
@@ -269,8 +271,13 @@ public interface IRemote : IDisposable
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    public Result<Response, T> GetParam<T>(string param)
-        where T : notnull;
+    public Result<Response, float> GetParamFloat(string param);
+
+    public Result<Response, int> GetParamInt(string param);
+
+    public Result<Response, bool> GetParamBool(string param);
+
+    public Result<Response, string> GetParamString(string param);
 
     #endregion
 

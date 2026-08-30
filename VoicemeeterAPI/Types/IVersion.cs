@@ -62,8 +62,9 @@ public interface IVersion : IComparable
     /// <param name="sem"></param>
     /// <remarks>
     /// </remarks>
-    public void Deconstruct<T>(out T kind, out SemVersion sem)
-        where T : unmanaged;
+    public void Deconstruct(out int kind, out SemVersion sem);
+
+    public void Deconstruct(out Kind kind, out SemVersion sem);
 
     /// <inheritdoc cref="Deconstruct(out int, out int, out int)" path="/summary"/>
     /// <typeparam name="T">int, <see cref="Types.Kind"/></typeparam>
@@ -71,8 +72,9 @@ public interface IVersion : IComparable
     /// <param name="maj"></param>
     /// <param name="min"></param>
     /// <param name="pat"></param>
-    public void Deconstruct<T>(out T kind, out int maj, out int min, out int pat)
-        where T : unmanaged;
+    public void Deconstruct(out int kind, out int maj, out int min, out int pat);
+
+    public void Deconstruct(out Kind kind, out int maj, out int min, out int pat);
 
     public bool IsValid();
 }

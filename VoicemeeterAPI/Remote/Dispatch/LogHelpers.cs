@@ -102,18 +102,6 @@ public partial class Remote
         return ex;
     }
 
-    private ArgumentException TypeNotSupported<T>(
-        Type[] supportedTypes,
-        string executionPath,
-        string paramName = "T",
-        [CallerMemberName] string methodName = ""
-    )
-    {
-        var ex = SupportedTypes.CreateArgumentException<T>(paramName, supportedTypes);
-        Log.RemoteInvalidArgument(this.logger, ex, methodName, LogArgs.Empty, executionPath);
-        return ex;
-    }
-
     private InvalidOperationException CannotWaitForEngine(
         App voicemeeterApp,
         string executionPath,

@@ -33,7 +33,7 @@ public partial class Remote
 
     #region Get Parameter Float
 
-    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
+    /// <inheritdoc cref="IRemote.GetParamFloat(string)"/>
     internal Result<Response, float> GetParamFloat_i(string param, string executionPath)
     {
         var e = Utilities.BuildPath(executionPath);
@@ -45,7 +45,7 @@ public partial class Remote
         return this.HandleGetParamResponse(response, param, value, e);
     }
 
-    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
+    /// <inheritdoc/>
     public Result<Response, float> GetParamFloat(string param)
     {
         using var scope = this.BeginCallScope();
@@ -53,7 +53,7 @@ public partial class Remote
         return this.GetParamFloat_i(param, nameof(this.GetParamFloat));
     }
 
-    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
+    /// <inheritdoc cref="IRemote.GetParamInt(string)"/>
     internal Result<Response, int> GetParamInt_i(string param, string executionPath)
     {
         var e = Utilities.BuildPath(executionPath);
@@ -76,7 +76,7 @@ public partial class Remote
         return (result.Response, value);
     }
 
-    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
+    /// <inheritdoc/>
     public Result<Response, int> GetParamInt(string param)
     {
         using var scope = this.BeginCallScope();
@@ -84,7 +84,7 @@ public partial class Remote
         return this.GetParamInt_i(param, nameof(this.GetParamInt));
     }
 
-    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
+    /// <inheritdoc cref="IRemote.GetParamBool(string)"/>
     internal Result<Response, bool> GetParamBool_i(string param, string executionPath)
     {
         var e = Utilities.BuildPath(executionPath);
@@ -107,7 +107,7 @@ public partial class Remote
         return (result.Response, v == 1);
     }
 
-    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
+    /// <inheritdoc/>
     public Result<Response, bool> GetParamBool(string param)
     {
         using var scope = this.BeginCallScope();
@@ -119,7 +119,7 @@ public partial class Remote
 
     #region Get Parameter String
 
-    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
+    /// <inheritdoc cref="IRemote.GetParamString(string)"/>
     internal Result<Response, string> GetParamString_i(string param, string executionPath)
     {
         var e = Utilities.BuildPath(executionPath);
@@ -131,7 +131,7 @@ public partial class Remote
         return this.HandleGetParamResponse(response, param, value, e);
     }
 
-    /// <inheritdoc cref="IRemote.GetParam{T}(string)"/>
+    /// <inheritdoc/>
     public Result<Response, string> GetParamString(string param)
     {
         using var scope = this.BeginCallScope();
@@ -140,35 +140,4 @@ public partial class Remote
     }
 
     #endregion
-
-    /// <inheritdoc/>
-    Result<Response, T> IRemote.GetParam<T>(string param)
-    {
-        var t = typeof(T);
-
-        return t switch
-        {
-            _ when t == typeof(float)
-                => this.GetParamFloat(param) is var r && r.IsSuccess
-                    ? (r.Response, (T)(object)r.Value)
-                    : r.Response,
-
-            _ when t == typeof(int)
-                => this.GetParamInt(param) is var r && r.IsSuccess
-                    ? (r.Response, (T)(object)r.Value)
-                    : r.Response,
-
-            _ when t == typeof(bool)
-                => this.GetParamBool(param) is var r && r.IsSuccess
-                    ? (r.Response, (T)(object)r.Value)
-                    : r.Response,
-
-            _ when t == typeof(string)
-                => this.GetParamString(param) is var r && r.IsSuccess
-                    ? (r.Response, (T)(object)r.Value)
-                    : r.Response,
-
-            _ => throw this.TypeNotSupported<T>(SupportedTypes.ParamTypes, nameof(IRemote.GetParam))
-        };
-    }
 }

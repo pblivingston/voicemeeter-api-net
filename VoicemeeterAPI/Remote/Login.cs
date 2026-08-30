@@ -145,7 +145,7 @@ public partial class Remote
 
     #region Run
 
-    /// <inheritdoc cref="IRemote.Run{T}(T)"/>
+    /// <inheritdoc cref="IRemote.Run(App)"/>
     internal void Run_i(App app, string executionPath)
     {
         var e = Utilities.BuildPath(executionPath);
@@ -165,7 +165,7 @@ public partial class Remote
         }
     }
 
-    /// <inheritdoc cref="IRemote.Run{T}(T)"/>
+    /// <inheritdoc/>
     public void Run(App app)
     {
         using var scope = this.BeginCallScope();
@@ -175,7 +175,7 @@ public partial class Remote
         this.Run_i(app, nameof(this.Run));
     }
 
-    /// <inheritdoc cref="IRemote.Run{T}(T)"/>
+    /// <inheritdoc/>
     public void Run(Kind kind)
     {
         using var scope = this.BeginCallScope();
@@ -185,29 +185,11 @@ public partial class Remote
         this.Run_i(kind.ToApp(this.wrapper.Is64Bit), nameof(this.Run));
     }
 
-    /// <inheritdoc/>
-    void IRemote.Run<T>(T app)
-    {
-        switch (app)
-        {
-            case App a:
-                this.Run(a);
-                break;
-
-            case Kind k:
-                this.Run(k);
-                break;
-
-            default:
-                throw this.TypeNotSupported<T>(SupportedTypes.RunTypes, nameof(IRemote.Run));
-        }
-    }
-
     #endregion
 
     #region RunAsync
 
-    /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
+    /// <inheritdoc cref="IRemote.RunAsync(App, CancellationToken)"/>
     internal async Task<Result<RunResponse, App>> RunAsync_i(App app, string executionPath, CancellationToken cancellationToken)
     {
         var e = Utilities.BuildPath(executionPath);
@@ -238,7 +220,7 @@ public partial class Remote
         return result;
     }
 
-    /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
+    /// <inheritdoc/>
     public async Task<Result<RunResponse, App>> RunAsync(App app, CancellationToken cancellationToken = default)
     {
         using var scope = this.BeginCallScope();
@@ -248,7 +230,7 @@ public partial class Remote
         return await this.RunAsync_i(app, nameof(this.RunAsync), cancellationToken);
     }
 
-    /// <inheritdoc cref="IRemote.RunAsync{T}(T, CancellationToken)"/>
+    /// <inheritdoc/>
     public async Task<Result<RunResponse, App>> RunAsync(Kind kind, CancellationToken cancellationToken = default)
     {
         using var scope = this.BeginCallScope();
@@ -257,15 +239,6 @@ public partial class Remote
 
         return await this.RunAsync_i(kind.ToApp(this.wrapper.Is64Bit), nameof(this.RunAsync), cancellationToken);
     }
-
-    /// <inheritdoc/>
-    async Task<Result<RunResponse, App>> IRemote.RunAsync<T>(T app, CancellationToken cancellationToken)
-        => app switch
-        {
-            App a => await this.RunAsync(a, cancellationToken),
-            Kind k => await this.RunAsync(k, cancellationToken),
-            _ => throw this.TypeNotSupported<T>(SupportedTypes.RunTypes, nameof(IRemote.RunAsync))
-        };
 
     #endregion
 
