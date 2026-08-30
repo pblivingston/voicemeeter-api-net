@@ -22,6 +22,8 @@ public class ConnectionStateEventArgs(ConnectionState previousState, ConnectionS
 public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vmState, App vmApp, VmVersion vmVersion, RunResponse buttonsState)
     : IEquatable<ConnectionState>
 {
+    public static ConnectionState Initial { get; } = new(LoginResponse.LoggedOut, RunResponse.NotRunning, App.None, default, RunResponse.NotRunning);
+
     /// <summary>
     ///   packed will be positive if logged in, negative if logged out.
     /// </summary>
@@ -87,10 +89,6 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
     ///   `true` if MacroButtons is responding and reachable via Voicemeeter.
     /// </summary>
     public bool ConnectedToMacroButtons => this.ConnectedToVoicemeeter && this.MacroButtonsState.IsResponding();
-
-    public ConnectionState()
-        : this(LoginResponse.LoggedOut, RunResponse.NotRunning, App.None, default, RunResponse.NotRunning)
-    { }
 
     public static int Pack(LoginResponse loginStatus, RunResponse vmState, App vmApp, VmVersion vmVersion, RunResponse buttonsState)
     {

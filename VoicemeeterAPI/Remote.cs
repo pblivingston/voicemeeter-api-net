@@ -45,7 +45,7 @@ public sealed partial class Remote : IRemote
     /// <inheritdoc/>
     public event EventHandler? ButtonsDirty;
 
-    private ConnectionState connectionState = new();
+    private ConnectionState connectionState = ConnectionState.Initial;
     /// <inheritdoc/>
     public ConnectionState ConnectionState
     {
