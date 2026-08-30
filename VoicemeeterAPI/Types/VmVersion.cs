@@ -148,11 +148,7 @@ public readonly struct VmVersion(int packed) : IVersion<VmVersion>
     public static int Pack(int kind, SemVersion sem)
     {
         Utilities.ThrowIfNotInByte(kind);
-
-        if (!(sem == default || sem.IsValid()))
-        {
-            throw new ArgumentOutOfRangeException(nameof(sem), sem, "Semantic version does not fit in three bytes.");
-        }
+        Utilities.ThrowIfNotInRange(sem, default, SemVersion.MaxValid);
 
         return (kind << 24) | sem.Packed;
     }
