@@ -7,16 +7,10 @@ public static class VersionUtils
 {
     public static int Pack(int kind, int maj, int min, int pat)
     {
-        ReadOnlySpan<(string, int)> parts = [
-            (nameof(kind), kind),
-            (nameof(maj), maj),
-            (nameof(min), min),
-            (nameof(pat), pat)
-        ];
-        foreach ((var paramName, var value) in parts)
-        {
-            Utilities.ThrowIfNotInByte(value, paramName);
-        }
+        Utilities.ThrowIfNotInByte(kind);
+        Utilities.ThrowIfNotInByte(maj);
+        Utilities.ThrowIfNotInByte(min);
+        Utilities.ThrowIfNotInByte(pat);
 
         return (kind << 24) | (maj << 16) | (min << 8) | pat;
     }
