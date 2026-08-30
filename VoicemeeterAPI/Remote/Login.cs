@@ -57,14 +57,14 @@ public partial class Remote
     {
         var e = Utilities.BuildPath(executionPath);
 
-        (var previousState, var intermediateState) = this.Login_i(e);
+        (var previousState, var currentState) = this.Login_i(e);
 
-        if (intermediateState.ConnectedToVoicemeeter)
+        if (currentState.ConnectedToVoicemeeter)
         {
             await this.WaitForEngineSettle(e, cancellationToken);
-        }
 
-        (_, var currentState) = this.RefreshConnectionState_i(e);
+            (_, currentState) = this.RefreshConnectionState_i(e);
+        }
 
         return (previousState, currentState);
     }
