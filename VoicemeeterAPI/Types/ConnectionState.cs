@@ -133,17 +133,16 @@ public readonly struct ConnectionState(LoginResponse loginStatus, RunResponse vm
 
     public override string ToString()
     {
-        var builder = new System.Text.StringBuilder();
+        Span<char> initialBuffer = stackalloc char[512];
+        using var writer = ValueSpanWriter.StartArgs(initialBuffer);
 
-        return builder
-            .Append("{ ")
-            .AddArg(nameof(this.LoginStatus), this.LoginStatus)
-            .AddArg(nameof(this.VoicemeeterState), this.VoicemeeterState)
-            .AddArg(nameof(this.VoicemeeterApp), this.VoicemeeterApp)
-            .AddArg(nameof(this.VoicemeeterVersion), this.VoicemeeterVersion)
-            .AddArg(nameof(this.MacroButtonsState), this.MacroButtonsState)
-            .Append('}')
-            .ToString();
+        writer.AddArg(this.LoginStatus);
+        writer.AddArg(this.VoicemeeterState);
+        writer.AddArg(this.VoicemeeterApp);
+        writer.AddArg(this.VoicemeeterVersion);
+        writer.AddArg(this.MacroButtonsState);
+
+        return writer.FinalizeArgs();
     }
 
     public bool Equals(ConnectionState other)

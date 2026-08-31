@@ -3,7 +3,6 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-using System.Text;
 using Microsoft.Extensions.Logging;
 
 public partial class Remote
@@ -34,7 +33,7 @@ public partial class Remote
         ) => logger.IsEnabled(level)
         ? new(previousState)
         {
-            CurrentState = currentState,
+            CurrentState = currentState
         }
         : Empty;
 
@@ -67,20 +66,19 @@ public partial class Remote
                 return string.Empty;
             }
 
-            var builder = new StringBuilder();
+            Span<char> initialBuffer = stackalloc char[512];
+            using var writer = ValueSpanWriter.StartArgs(initialBuffer);
 
-            return builder
-                .Append("{ ")
-                .AddNullableArg(nameof(this.CurrentState), this.CurrentState)
-                .AddNullableArg(nameof(this.CurrentLoginStatus), this.CurrentLoginStatus)
-                .AddNullableArg(nameof(this.CurrentVoicemeeterState), this.CurrentVoicemeeterState)
-                .AddNullableArg(nameof(this.CurrentVoicemeeterKind), this.CurrentVoicemeeterKind)
-                .AddNullableArg(nameof(this.CurrentVoicemeeterApp), this.CurrentVoicemeeterApp)
-                .AddNullableArg(nameof(this.CurrentVoicemeeterVersion), this.CurrentVoicemeeterVersion)
-                .AddNullableArg(nameof(this.CurrentMacroButtonsState), this.CurrentMacroButtonsState)
-                .AddNullableArg(nameof(this.PreviousState), this.PreviousState)
-                .Append("} ")
-                .ToString();
+            writer.AddNullableArg(this.CurrentState);
+            writer.AddNullableArg(this.CurrentLoginStatus);
+            writer.AddNullableArg(this.CurrentVoicemeeterState);
+            writer.AddNullableArg(this.CurrentVoicemeeterKind);
+            writer.AddNullableArg(this.CurrentVoicemeeterApp);
+            writer.AddNullableArg(this.CurrentVoicemeeterVersion);
+            writer.AddNullableArg(this.CurrentMacroButtonsState);
+            writer.AddNullableArg(this.PreviousState);
+
+            return writer.FinalizeArgs();
         }
     }
 }

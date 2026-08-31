@@ -3,7 +3,6 @@
 
 namespace PBLivingston.VoicemeeterAPI;
 
-using System.Text;
 using Microsoft.Extensions.Logging;
 
 public partial class Remote
@@ -72,20 +71,19 @@ public partial class Remote
                 return string.Empty;
             }
 
-            var builder = new StringBuilder();
+            Span<char> initialBuffer = stackalloc char[512];
+            using var writer = ValueSpanWriter.StartArgs(initialBuffer);
 
-            return builder
-                .Append("{ ")
-                .AddNullableArg(nameof(this.Param), this.Param)
-                .AddNullableArg(nameof(this.Value), this.Value)
-                .AddNullableArg(nameof(this.Kind), this.Kind)
-                .AddNullableArg(nameof(this.Version), this.Version)
-                .AddNullableArg(nameof(this.App), this.App)
-                .AddNullableArg(nameof(this.State), this.State)
-                .AddNullableArg(nameof(this.LoginResponse), this.LoginResponse)
-                .AddNullableArg(nameof(this.ConnectionState), this.ConnectionState)
-                .Append("} ")
-                .ToString();
+            writer.AddNullableArg(this.Param);
+            writer.AddNullableArg(this.Value);
+            writer.AddNullableArg(this.Kind);
+            writer.AddNullableArg(this.Version);
+            writer.AddNullableArg(this.App);
+            writer.AddNullableArg(this.State);
+            writer.AddNullableArg(this.LoginResponse);
+            writer.AddNullableArg(this.ConnectionState);
+
+            return writer.FinalizeArgs();
         }
     }
 }
