@@ -129,9 +129,9 @@ public interface IRemote : IDisposable
     ///   Throws if the <see cref="App"/> is already running but not responding, the API call returns an error, or waiting for <see cref="App"/> is cancelled or times out.
     /// </exception>
     /// <inheritdoc cref="Run{T}(T)"/>
-    public Task<Result<RunResponse, App>> RunAsync(App app, CancellationToken cancellationToken = default);
+    public Task<(App App, RunResponse State)> RunAsync(App app, CancellationToken cancellationToken = default);
 
-    public Task<Result<RunResponse, App>> RunAsync(Kind kind, CancellationToken cancellationToken = default);
+    public Task<(App App, RunResponse State)> RunAsync(Kind kind, CancellationToken cancellationToken = default);
 
     #endregion
 

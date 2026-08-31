@@ -190,11 +190,11 @@ public partial class Remote
     #region RunAsync
 
     /// <inheritdoc cref="IRemote.RunAsync(App, CancellationToken)"/>
-    internal async Task<Result<RunResponse, App>> RunAsync_i(App app, string executionPath, CancellationToken cancellationToken)
+    internal async Task<(App App, RunResponse State)> RunAsync_i(App app, string executionPath, CancellationToken cancellationToken)
     {
         var e = Utilities.BuildPath(executionPath);
 
-        Result<RunResponse, App> result;
+        (App, RunResponse) result;
         ConnectionState previousState;
         ConnectionState currentState;
         using (await this.stateLock.EnterScopeAsync(cancellationToken))
@@ -210,7 +210,7 @@ public partial class Remote
                     ? await this.WaitForEngine(e, cancellationToken)
                     : await this.WaitForRunning(app, e, cancellationToken);
 
-            (previousState, currentState) = result.IsSuccess && (app.IsVoicemeeter() || app is App.MacroButtons)
+            (previousState, currentState) = app.IsVoicemeeter() || app is App.MacroButtons
                 ? this.RefreshConnectionState_i(e)
                 : (default, default);
         }
@@ -221,7 +221,7 @@ public partial class Remote
     }
 
     /// <inheritdoc/>
-    public async Task<Result<RunResponse, App>> RunAsync(App app, CancellationToken cancellationToken = default)
+    public async Task<(App App, RunResponse State)> RunAsync(App app, CancellationToken cancellationToken = default)
     {
         using var scope = this.BeginCallScope();
 
@@ -231,7 +231,7 @@ public partial class Remote
     }
 
     /// <inheritdoc/>
-    public async Task<Result<RunResponse, App>> RunAsync(Kind kind, CancellationToken cancellationToken = default)
+    public async Task<(App App, RunResponse State)> RunAsync(Kind kind, CancellationToken cancellationToken = default)
     {
         using var scope = this.BeginCallScope();
 
@@ -246,7 +246,7 @@ public partial class Remote
 
     #region Helpers
 
-    private async Task<Result<RunResponse, App>> WaitForEngine(string executionPath, CancellationToken cancellationToken)
+    private async Task<(App App, RunResponse State)> WaitForEngine(string executionPath, CancellationToken cancellationToken)
     {
         var e = Utilities.BuildPath(executionPath);
         var target = Wrapper.VmName;
@@ -264,14 +264,14 @@ public partial class Remote
 
         await this.WaitForEngineSettle(e, cancellationToken);
 
-        (var app, var state) = this.GetVoicemeeterState_i(e);
+        var result = this.GetVoicemeeterState_i(e);
 
-        this.WaitForRunningDetected(target, e, state, version, app);
+        this.WaitForRunningDetected(target, e, result.State, version, result.App);
 
-        return (state, app);
+        return result;
     }
 
-    private async Task<Result<RunResponse, App>> WaitForRunning(App app, string executionPath, CancellationToken cancellationToken)
+    private async Task<(App App, RunResponse State)> WaitForRunning(App app, string executionPath, CancellationToken cancellationToken)
     {
         var e = Utilities.BuildPath(executionPath);
         var target = app.ToString();
@@ -290,7 +290,7 @@ public partial class Remote
 
         this.WaitForRunningDetected(target, e, state, app: app);
 
-        return (state, app);
+        return (app, state);
     }
 
     private async Task WaitForEngineSettle(string executionPath, CancellationToken cancellationToken)

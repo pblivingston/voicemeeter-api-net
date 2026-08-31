@@ -11,7 +11,7 @@ public class RunAsync : MockRemote
         var vmState = RunResponse.Ok;
         var vmVersion = (VmVersion)vmPacked;
         var buttonsState = RunResponse.NotRunning;
-        var expectedResult = Result.Success(vmState, launched);
+        var expectedResult = (launched, vmState);
         var expectedState = new ConnectionState(loginStatus, vmState, launched, vmVersion, buttonsState);
 
         this.MockLogin(buttonsState);
@@ -63,7 +63,7 @@ public class RunAsync : MockRemote
         var vmApp = App.Standard;
         var vmVersion = VmVersion.MinValid;
         var buttonsState = RunResponse.Ok;
-        var expectedResult = Result.Success(buttonsState, app);
+        var expectedResult = (app, buttonsState);
         var expectedState = new ConnectionState(loginStatus, vmState, vmApp, vmVersion, buttonsState);
 
         this.MockLogin(vmState, vmApp, vmVersion);
