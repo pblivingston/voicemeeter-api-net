@@ -140,7 +140,7 @@ public partial class Remote
     #region Get Voicemeeter State
 
     /// <inheritdoc cref="IRemote.GetVoicemeeterState()"/>
-    internal (App app, RunResponse state) GetVoicemeeterState_i(string executionPath)
+    internal (App App, RunResponse State) GetVoicemeeterState_i(string executionPath)
     {
         var e = Utilities.BuildPath(executionPath);
 
@@ -169,7 +169,7 @@ public partial class Remote
     #region Refresh Connection State
 
     /// <inheritdoc cref="IRemote.RefreshConnectionState()"/>
-    internal (ConnectionState previousState, ConnectionState currentState) RefreshConnectionState_i(string executionPath)
+    internal (ConnectionState PreviousState, ConnectionState CurrentState) RefreshConnectionState_i(string executionPath)
     {
         var e = Utilities.BuildPath(executionPath);
 

@@ -20,7 +20,7 @@ public partial class Remote
 
         var states = this.RefreshConnectionState_i(e);
 
-        this.HandleConnectionState(states.currentState, e);
+        this.HandleConnectionState(states.CurrentState, e);
 
         return states;
     }
