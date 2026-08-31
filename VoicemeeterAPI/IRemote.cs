@@ -36,128 +36,124 @@ public interface IRemote : IDisposable
     ///   Opens communication pipe with VoicemeeterRemote.
     /// </summary>
     /// <returns>
-    ///   Ok<br/>
-    ///   VoicemeeterNotRunning<br/>
+    ///   The current connection state.
     /// </returns>
-    /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="AccessDeniedException">
-    ///   Throws if login status is unknown.
-    /// </exception>
-    /// <exception cref="RemoteException{LoginResponse}">
-    ///   Throws if already logged in or the API call returns an error.
-    /// </exception>
     /// <remarks>
     ///   <para>Calls:</para>
     ///   <list type="bullet">
     ///     <item><description>
-    ///       A-tG: <see cref="RemoteApiWrapper.Login()"/>
+    ///       A-tG's wrapper: <see cref="RemoteApiWrapper.Login()"/>
     ///     </description></item>
     ///     <item><description>
-    ///       C API: long __stdcall VBVMR_Login(void);
+    ///       VoicemeeterRemote: long __stdcall VBVMR_Login(void);
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    /// <inheritdoc cref="IRemote" path="/example"/>
     public ConnectionState Login();
 
+    /// <summary>
+    ///   Opens communication pipe with VoicemeeterRemote.<br/>
+    ///   If Voicemeeter is running, clears dirty states.
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <inheritdoc cref="Login()"/>
     public Task<ConnectionState> LoginAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     ///   Closes communication pipe with VoicemeeterRemote.
     /// </summary>
-    /// <returns>
-    ///   LoggedOut<br/>
-    ///   Unknown<br/>
-    /// </returns>
-    /// <exception cref="ObjectDisposedException"></exception>
     /// <remarks>
     ///   <para>Calls:</para>
     ///   <list type="bullet">
     ///     <item><description>
-    ///       A-tG: <see cref="RemoteApiWrapper.Logout()"/>
+    ///       A-tG's wrapper: <see cref="RemoteApiWrapper.Logout()"/>
     ///     </description></item>
     ///     <item><description>
-    ///       C API: long __stdcall VBVMR_Logout(void);
+    ///       VoicemeeterRemote: long __stdcall VBVMR_Logout(void);
     ///     </description></item>
     ///   </list>
     /// </remarks>
-    /// <inheritdoc cref="IRemote" path="/example"/>
     public void Logout();
 
     /// <summary>
-    ///   Runs the specified <see cref="App"/>.
+    ///   Runs the specified application.
     /// </summary>
-    /// <typeparam name="T">int, <see cref="App"/>, <see cref="Kind"/>, or string</typeparam>
     /// <param name="app"></param>
-    /// <exception cref="TypeNotSupportedException"></exception>
-    /// <exception cref="CannotParseAsTypeException"></exception>
-    /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="AccessDeniedException">
-    ///   Throws if not logged in.
-    /// </exception>
-    /// <exception cref="RunException">
-    ///   Throws if the <see cref="App"/> is already running but not responding or the API call returns an error.
-    /// </exception>
     /// <remarks>
-    ///   <para>
-    ///     If the app is Voicemeeter (e.g. 3, <see cref="App.Bananax64"/>, <see cref="Kind.Potato"/>, "Standard", etc.),
-    ///     automatically adjusts for OS bitness where necessary.
-    ///   </para>
     ///   <para>Calls:</para>
     ///   <list type="bullet">
     ///     <item><description>
-    ///       A-tG: <see cref="RemoteApiWrapper.RunVoicemeeter(int)"/>
+    ///       A-tG's wrapper: <see cref="RemoteApiWrapper.RunVoicemeeter(int)"/>
     ///     </description></item>
     ///     <item><description>
-    ///       C API: long __stdcall VBVMR_RunVoicemeeter(long vType);
+    ///       VoicemeeterRemote: long __stdcall VBVMR_RunVoicemeeter(long vType);
     ///     </description></item>
     ///   </list>
     /// </remarks>
     public void Run(App app);
 
+    /// <summary>
+    ///   Runs the corresponding Voicemeeter application with respect to OS bitness.
+    /// </summary>
+    /// <param name="kind"></param>
+    /// <inheritdoc cref="Run(App)"/>
     public void Run(Kind kind);
 
     /// <summary>
-    ///   Runs the specified <see cref="App"/> and waits for it to start. If the <see cref="App"/> is Voicemeeter, confirms it is reachable. Waits up to 15 seconds.
+    ///   Runs the specified application and waits for it to start.
     /// </summary>
+    /// <param name="app"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>
-    ///   Ok<br/>
-    ///   Hidden<br/>
+    ///   The application launched or Voicemeeter application detected and its current state.
     /// </returns>
-    /// <exception cref="RunException">
-    ///   Throws if the <see cref="App"/> is already running but not responding, the API call returns an error, or waiting for <see cref="App"/> is cancelled or times out.
-    /// </exception>
-    /// <inheritdoc cref="Run{T}(T)"/>
+    /// <inheritdoc cref="Run(App)"/>
     public Task<(App App, RunResponse State)> RunAsync(App app, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    ///   Runs the corresponding Voicemeeter application with respect to OS bitness and waits for it to start.
+    /// </summary>
+    /// <param name="kind"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>
+    ///   The Voicemeeter application detected and its current state.
+    /// </returns>
+    /// <inheritdoc cref="Run(App)"/>
     public Task<(App App, RunResponse State)> RunAsync(Kind kind, CancellationToken cancellationToken = default);
 
     #endregion
 
     #region General Information
 
+    /// <summary>
+    ///   Determines the current login status.
+    /// </summary>
+    /// <returns></returns>
+    /// <remarks>
+    ///   <para>Calls:</para>
+    ///   <list type="bullet">
+    ///     <item><description>
+    ///       A-tG's wrapper: <see cref="RemoteApiWrapper.GetVoicemeeterType(out int)"/>
+    ///     </description></item>
+    ///     <item><description>
+    ///       VoicemeeterRemote: long __stdcall VBVMR_GetVoicemeeterType(long * pType);
+    ///     </description></item>
+    ///   </list>
+    /// </remarks>
     public LoginResponse GetLoginStatus();
 
     /// <summary>
     ///   Gets the currently running Voicemeeter kind.
     /// </summary>
     /// <returns></returns>
-    /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="AccessDeniedException">
-    ///   Throws if not logged in.
-    /// </exception>
-    /// <exception cref="GetInfoException">
-    ///   Throws if the API call returns an error or an invalid kind value.
-    /// </exception>
     /// <remarks>
     ///   <para>Calls:</para>
     ///   <list type="bullet">
     ///     <item><description>
-    ///       A-tG: <see cref="RemoteApiWrapper.GetVoicemeeterType(out int)"/>
+    ///       A-tG's wrapper: <see cref="RemoteApiWrapper.GetVoicemeeterType(out int)"/>
     ///     </description></item>
     ///     <item><description>
-    ///       C API: long __stdcall VBVMR_GetVoicemeeterType(long * pType);
+    ///       VoicemeeterRemote: long __stdcall VBVMR_GetVoicemeeterType(long * pType);
     ///     </description></item>
     ///   </list>
     /// </remarks>
@@ -167,47 +163,38 @@ public interface IRemote : IDisposable
     ///   Gets the currently running Voicemeeter version.
     /// </summary>
     /// <returns></returns>
-    /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="AccessDeniedException">
-    ///   Throws if not logged in.
-    /// </exception>
-    /// <exception cref="GetInfoException">
-    ///   Throws if the API call returns an error or an invalid version value.
-    /// </exception>
     /// <remarks>
     ///   <para>Calls:</para>
     ///   <list type="bullet">
     ///     <item><description>
-    ///       A-tG: <see cref="RemoteApiWrapper.GetVoicemeeterVersion(out int)"/>
+    ///       A-tG's wrapper: <see cref="RemoteApiWrapper.GetVoicemeeterVersion(out int)"/>
     ///     </description></item>
     ///     <item><description>
-    ///       C API: long __stdcall VBVMR_GetVoicemeeterVersion(long * pVersion);
+    ///       VoicemeeterRemote: long __stdcall VBVMR_GetVoicemeeterVersion(long * pVersion);
     ///     </description></item>
     ///   </list>
     /// </remarks>
     public VmVersion GetVersion();
 
     /// <summary>
-    ///   Gets the state of the requested <see cref="App"/>.
+    ///   Gets the state of the requested application.
     /// </summary>
     /// <param name="app"></param>
-    /// <returns>
-    ///   Ok<br/>
-    ///   Hidden<br/>
-    ///   NotRunning<br/>
-    ///   NotResponding<br/>
-    /// </returns>
-    /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="RemoteException{RunResponse}"></exception>
+    /// <returns></returns>
     public RunResponse GetAppState(App app);
 
+    /// <summary>
+    ///   Gets the currently running Voicemeeter application and its state.
+    /// </summary>
+    /// <returns></returns>
     public (App App, RunResponse State) GetVoicemeeterState();
 
     /// <summary>
-    ///   Updates <see cref="ConnectionState"/> and returns the current connection state.
+    ///   Updates <see cref="ConnectionState"/>.
     /// </summary>
-    /// <returns></returns>
-    /// <exception cref="ObjectDisposedException"></exception>
+    /// <returns>
+    ///   The current connection state.
+    /// </returns>
     public ConnectionState RefreshConnectionState();
 
     #endregion
@@ -218,21 +205,14 @@ public interface IRemote : IDisposable
     ///   Checks if parameters have changed.
     /// </summary>
     /// <returns></returns>
-    /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="AccessDeniedException">
-    ///   Throws if not logged in or Voicemeeter is not running.
-    /// </exception>
-    /// <exception cref="RemoteException{Response}">
-    ///   Throws if the API call returns an error.
-    /// </exception>
     /// <remarks>
     ///   <para>Calls:</para>
     ///   <list type="bullet">
     ///     <item><description>
-    ///       A-tG: <see cref="RemoteApiWrapper.IsParametersDirty()"/>
+    ///       A-tG's wrapper: <see cref="RemoteApiWrapper.IsParametersDirty()"/>
     ///     </description></item>
     ///     <item><description>
-    ///       C API: long __stdcall VBVMR_IsParametersDirty(void);
+    ///       VoicemeeterRemote: long __stdcall VBVMR_IsParametersDirty(void);
     ///     </description></item>
     ///   </list>
     /// </remarks>
@@ -241,42 +221,39 @@ public interface IRemote : IDisposable
     /// <summary>
     ///   Gets the requested Voicemeeter parameter.
     /// </summary>
-    /// <typeparam name="T">float, int, bool, or string</typeparam>
     /// <param name="param"></param>
     /// <returns></returns>
-    /// <exception cref="TypeNotSupportedException">
-    ///   Throws if the given value type is not supported.
-    /// </exception>
-    /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="AccessDeniedException">
-    ///   Throws if not logged in or Voicemeeter is not running.
-    /// </exception>
-    /// <exception cref="GetParamException{T}">
-    ///   Throws if the API call returns an error or the requested parameter does not return the requested type.
-    /// </exception>
     /// <remarks>
     ///   <para>Calls:</para>
     ///   <list type="bullet">
     ///     <item><description>
-    ///       A-tG float: <see cref="RemoteApiWrapper.GetParameter(string, out float)"/>
+    ///       A-tG's wrapper: <see cref="RemoteApiWrapper.GetParameter(string, out float)"/>
     ///     </description></item>
     ///     <item><description>
-    ///       A-tG string: <see cref="RemoteApiWrapper.GetParameter(string, out string)"/>
-    ///     </description></item>
-    ///     <item><description>
-    ///       C API float: long __stdcall VBVMR_GetParameterFloat(char * szParamName, float * pValue);
-    ///     </description></item>
-    ///     <item><description>
-    ///       C API string: long __stdcall VBVMR_GetParameterStringW(char * szParamName, unsigned short * wszString);
+    ///       VoicemeeterRemote: long __stdcall VBVMR_GetParameterFloat(char * szParamName, float * pValue);
     ///     </description></item>
     ///   </list>
     /// </remarks>
     public Result<Response, float> GetParamFloat(string param);
 
+    /// <inheritdoc cref="GetParamFloat(string)"/>
     public Result<Response, int> GetParamInt(string param);
 
+    /// <inheritdoc cref="GetParamFloat(string)"/>
     public Result<Response, bool> GetParamBool(string param);
 
+    /// <remarks>
+    ///   <para>Calls:</para>
+    ///   <list type="bullet">
+    ///     <item><description>
+    ///       A-tG's wrapper: <see cref="RemoteApiWrapper.GetParameter(string, out string)"/>
+    ///     </description></item>
+    ///     <item><description>
+    ///       VoicemeeterRemote: long __stdcall VBVMR_GetParameterStringW(char * szParamName, unsigned short * wszString);
+    ///     </description></item>
+    ///   </list>
+    /// </remarks>
+    /// <inheritdoc cref="GetParamFloat(string)"/>
     public Result<Response, string> GetParamString(string param);
 
     #endregion
@@ -287,21 +264,14 @@ public interface IRemote : IDisposable
     ///   Checks if any button status has changed.
     /// </summary>
     /// <returns></returns>
-    /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="AccessDeniedException">
-    ///   Throws if not logged in or Voicemeeter is not running.
-    /// </exception>
-    /// <exception cref="RemoteException{Response}">
-    ///   Throws if the API call returns an error.
-    /// </exception>
     /// <remarks>
     ///   <para>Calls:</para>
     ///   <list type="bullet">
     ///     <item><description>
-    ///       A-tG: <see cref="RemoteApiWrapper.MacroButtonIsDirty()"/>
+    ///       A-tG's wrapper: <see cref="RemoteApiWrapper.MacroButtonIsDirty()"/>
     ///     </description></item>
     ///     <item><description>
-    ///       C API: long __stdcall VBVMR_MacroButton_IsDirty(void);
+    ///       VoicemeeterRemote: long __stdcall VBVMR_MacroButton_IsDirty(void);
     ///     </description></item>
     ///   </list>
     /// </remarks>
