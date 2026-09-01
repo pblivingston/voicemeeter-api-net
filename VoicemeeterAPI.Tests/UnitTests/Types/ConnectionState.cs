@@ -27,31 +27,31 @@ public class ConnectionStateTests
     [Fact]
     public void PackThrowsArgumentOutOfRangeExceptionWhenLoginStatusOutOfRange()
         => Assert.Throws<ArgumentOutOfRangeException>(
-            () => ConnectionState.Pack(LoginResponse.NoClient, RunResponse.NotRunning, App.None, default, RunResponse.NotRunning)
+            () => new ConnectionState(LoginResponse.NoClient, RunResponse.NotRunning, App.None, default, RunResponse.NotRunning)
         );
 
     [Fact]
     public void PackThrowsArgumentOutOfRangeExceptionWhenVoicemeeterStateOutOfRange()
         => Assert.Throws<ArgumentOutOfRangeException>(
-            () => ConnectionState.Pack(LoginResponse.LoggedOut, RunResponse.NotInstalled, App.None, default, RunResponse.NotRunning)
+            () => new ConnectionState(LoginResponse.LoggedOut, RunResponse.NotInstalled, App.None, default, RunResponse.NotRunning)
         );
 
     [Fact]
     public void PackThrowsArgumentOutOfRangeExceptionWhenVoicemeeterAppOutOfRange()
         => Assert.Throws<ArgumentOutOfRangeException>(
-            () => ConnectionState.Pack(LoginResponse.Ok, RunResponse.Ok, App.MacroButtons, VmVersion.MaxValid, RunResponse.NotRunning)
+            () => new ConnectionState(LoginResponse.Ok, RunResponse.Ok, App.MacroButtons, VmVersion.MaxValid, RunResponse.NotRunning)
         );
 
     [Fact]
     public void PackThrowsArgumentOutOfRangeExceptionWhenVoicemeeterVersionOutOfRange()
         => Assert.Throws<ArgumentOutOfRangeException>(
-            () => ConnectionState.Pack(LoginResponse.Ok, RunResponse.Hidden, App.Potatox64, VmVersion.MaxValue, RunResponse.NotRunning)
+            () => new ConnectionState(LoginResponse.Ok, RunResponse.Hidden, App.Potatox64, VmVersion.MaxValue, RunResponse.NotRunning)
         );
 
     [Fact]
     public void PackThrowsArgumentOutOfRangeExceptionWhenButtonsStatusOutOfRange()
         => Assert.Throws<ArgumentOutOfRangeException>(
-            () => ConnectionState.Pack(LoginResponse.VoicemeeterNotRunning, RunResponse.NotRunning, App.None, default, RunResponse.NotInstalled)
+            () => new ConnectionState(LoginResponse.VoicemeeterNotRunning, RunResponse.NotRunning, App.None, default, RunResponse.NotInstalled)
         );
 
     [Theory]
@@ -60,11 +60,11 @@ public class ConnectionStateTests
     [InlineData(LoginResponse.VoicemeeterNotRunning, RunResponse.Ok, App.Standardx64, 0x0102_0304, RunResponse.NotResponding)]
     [InlineData(LoginResponse.VoicemeeterNotRunning, RunResponse.Hidden, App.Potato, 0x0304_0506, RunResponse.NotRunning)]
     public void PackThrowsArgumentExceptionWhenLoginStatusDoesNotMatchVoicemeeterState(LoginResponse loginStatus, RunResponse vmState, App vmApp, int vmVersion, RunResponse buttonsState)
-        => Assert.Throws<ArgumentException>(() => ConnectionState.Pack(loginStatus, vmState, vmApp, (VmVersion)vmVersion, buttonsState));
+        => Assert.Throws<ArgumentException>(() => new ConnectionState(loginStatus, vmState, vmApp, (VmVersion)vmVersion, buttonsState));
 
     [Theory]
     [InlineData(LoginResponse.Ok, RunResponse.Ok, App.Standard, 0x0203_0405, RunResponse.Hidden)]
     [InlineData(LoginResponse.Ok, RunResponse.Hidden, App.Bananax64, 0x0304_0506, RunResponse.NotRunning)]
     public void PackThrowsArgumentExceptionWhenVoicemeeterAppDoesNotMatchVoicemeeterVersion(LoginResponse loginStatus, RunResponse vmState, App vmApp, int vmVersion, RunResponse buttonsState)
-        => Assert.Throws<ArgumentException>(() => ConnectionState.Pack(loginStatus, vmState, vmApp, (VmVersion)vmVersion, buttonsState));
+        => Assert.Throws<ArgumentException>(() => new ConnectionState(loginStatus, vmState, vmApp, (VmVersion)vmVersion, buttonsState));
 }
