@@ -21,7 +21,7 @@ public class AppTests
     [InlineData(18, false)]
     [InlineData(28, false)]
     public void IsValidReturnsExpectedBool(int app, bool valid)
-        => Assert.Equal(valid, AppUtils.IsValid(app));
+        => Assert.Equal(valid, ((App)app).IsValid());
 
     [Theory]
     [InlineData(App.None, false)]
@@ -30,14 +30,4 @@ public class AppTests
     [InlineData(App.CABLEControlPanel, false)]
     public void IsVoicemeeterReturnsExpectedBool(App app, bool vm)
         => Assert.Equal(vm, app.IsVoicemeeter());
-
-    [Theory]
-    [InlineData(App.None, true, App.None)]
-    [InlineData(App.Standard, true, App.Standardx64)]
-    [InlineData(App.Banana, false, App.Banana)]
-    [InlineData(App.Bananax64, true, App.Bananax64)]
-    [InlineData(App.Potatox64, false, App.Potato)]
-    [InlineData(App.StreamerView, false, App.StreamerView)]
-    public void BitAdjustReturnsExpectedApp(App app, bool is64BitOS, App adjusted)
-        => Assert.Equal(adjusted, app.BitAdjust(is64BitOS));
 }

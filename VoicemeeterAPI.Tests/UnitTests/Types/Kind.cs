@@ -16,5 +16,5 @@ public class KindTests
     [InlineData(-1, false)]
     [InlineData(5, false)]
     public void IsValidReturnsExpectedBool(int kind, bool valid)
-        => Assert.Equal(valid, KindUtils.IsValid(kind));
+        => Assert.Equal(valid, ((Kind)kind).IsValid());
 }

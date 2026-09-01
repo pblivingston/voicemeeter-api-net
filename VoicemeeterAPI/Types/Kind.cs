@@ -4,7 +4,7 @@
 namespace PBLivingston.VoicemeeterAPI;
 
 /// <summary>
-///   Voicemeeter kinds returned by <see cref="Remote.GetKind()"/>.
+///   Voicemeeter kind
 /// </summary>
 public enum Kind
 {
@@ -17,28 +17,30 @@ public enum Kind
 
 public static class KindExt
 {
-    /// <inheritdoc cref="KindUtils.ToApp(Kind)"/>
-    public static App ToApp(this Kind kind, bool? is64Bit = null)
-        => KindUtils.ToApp(kind, is64Bit);
-
-    /// <inheritdoc cref="KindUtils.IsValid(Kind)"/>
-    public static bool IsValid(this Kind kind)
-        => KindUtils.IsValid(kind);
-}
-
-public static class KindUtils
-{
     /// <summary>
-    ///   Converts given Voicemeeter <see cref="Kind"/> to an OS-biased Voicemeeter <see cref="App"/>.
+    ///   Converts Voicemeeter kind to the corresponding Voicemeeter application.
     /// </summary>
     /// <param name="kind"></param>
-    /// <returns><see cref="App.Unknown"/> if not a valid Voicemeeter <see cref="Kind"/></returns>
-    public static App ToApp(Kind kind, bool? is64Bit = null)
-        => kind is < Kind.None or > Kind.Potato
-            ? App.Unknown
-            : ((App)kind).BitAdjust(is64Bit);
+    /// <param name="is64Bit">Defaults to OS bitness</param>
+    /// <returns><see cref="App.Unknown"/> if not a valid Voicemeeter kind</returns>
+    public static App ToApp(this Kind kind, bool? is64Bit = null)
+    {
+        if (kind is < Kind.None or > Kind.Potato)
+        {
+            return App.Unknown;
+        }
 
-    public static bool IsValid(Kind kind)
+        return is64Bit ?? Environment.Is64BitOperatingSystem
+            ? (App)kind + 3
+            : (App)kind;
+    }
+
+    /// <summary>
+    ///   True if kind is a defined <see cref="Kind"/> greater than <see cref="Kind.None"/>.
+    /// </summary>
+    /// <param name="kind"></param>
+    /// <returns></returns>
+    public static bool IsValid(this Kind kind)
     {
         if (kind <= Kind.None)
         {
@@ -51,7 +53,4 @@ public static class KindUtils
         return Enum.IsDefined(typeof(Kind), kind);
 #endif
     }
-
-    public static bool IsValid(int kind)
-        => IsValid((Kind)kind);
 }
