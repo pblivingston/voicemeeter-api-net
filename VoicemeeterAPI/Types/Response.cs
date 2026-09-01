@@ -112,7 +112,4 @@ public static class ResponseExt
 
     public static bool IsResponding(this RunResponse response)
         => response is RunResponse.Ok or RunResponse.Hidden;
-
-    public static bool IsRunning(this RunResponse response)
-        => response is RunResponse.Ok or RunResponse.Hidden or RunResponse.NotResponding;
 }

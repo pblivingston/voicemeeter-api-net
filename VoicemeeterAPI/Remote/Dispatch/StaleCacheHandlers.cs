@@ -90,7 +90,7 @@ public partial class Remote
         if ((app == previousState.VoicemeeterApp
                 && state == previousState.VoicemeeterState)
             || (app != previousState.VoicemeeterApp
-                && !(state.IsRunning() || app is App.None)))
+                && app is not App.None && state is RunResponse.NotRunning))
         {
             return;
         }
